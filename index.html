@@ -2,8 +2,21 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Secreto - Hitster</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hitster App</title>
+    
+    <!-- Configuración para que se comporte como App Móvil (PWA) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hitster App">
+    <meta name="theme-color" content="#0d0d11">
+    
+    <!-- Manifiesto de App en línea (Permite la instalación directa en Android y Chrome) -->
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Hitster%20App%22%2C%22short_name%22%3A%22Hitster%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d0d11%22%2C%22theme_color%22%3A%22%231db954%22%2C%22icons%22%3B%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F3050%2F3050181.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+
+    <!-- Librería del Escáner QR de código abierto -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
     <style>
         :root {
             --bg-color: #0d0d11;
@@ -24,7 +37,8 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .container {
@@ -32,30 +46,50 @@
             max-width: 400px;
             text-align: center;
             background: var(--card-bg);
-            padding: 30px;
+            padding: 25px;
             border-radius: 24px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.05);
+            box-sizing: border-box;
         }
 
         h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            font-size: 1.6rem;
+            margin: 0 0 5px 0;
             letter-spacing: 1px;
         }
 
         .subtitle {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 30px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        /* --- VISTA ESCÁNER --- */
+        #scanner-view {
+            display: none;
+        }
+
+        #reader {
+            width: 100%;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px rgba(29, 185, 84, 0.2);
+        }
+
+        /* --- VISTA REPRODUCTOR --- */
+        #player-view {
+            display: none;
         }
 
         /* Animación del Vinilo */
         .vinyl-wrapper {
             position: relative;
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 35px auto;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 25px auto;
         }
 
         .vinyl {
@@ -68,11 +102,6 @@
             align-items: center;
             justify-content: center;
             animation: spin 4s linear infinite;
-            animation-play-state: paused;
-        }
-
-        .vinyl.playing {
-            animation-play-state: running;
         }
 
         .vinyl-center {
@@ -113,7 +142,7 @@
             padding-left: 20px;
             box-sizing: border-box;
             z-index: 10;
-            pointer-events: none; /* Permite que los clics pasen al reproductor de abajo si es necesario */
+            pointer-events: none;
         }
 
         .mask-text {
@@ -125,11 +154,25 @@
             animation: pulse 2.5s infinite;
         }
 
-        /* Estado sin canción */
-        .no-song {
-            color: var(--text-muted);
-            padding: 20px;
-            font-style: italic;
+        /* BOTÓN DE SIGUIENTE RONDA */
+        .btn {
+            background-color: var(--accent-color);
+            color: black;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 25px;
+            box-shadow: 0 5px 15px rgba(29, 185, 84, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 5px rgba(29, 185, 84, 0.2);
         }
 
         @keyframes spin {
@@ -145,53 +188,121 @@
 <body>
 
     <div class="container">
-        <h1>REPRODUCTOR SECRETO</h1>
-        <div class="subtitle">Juego Musical QR</div>
+        <h1>HITSTER APP</h1>
+        <div class="subtitle" id="game-status">Preparando cámara...</div>
 
-        <!-- Disco de Vinilo que girará si hay canción cargada -->
-        <div class="vinyl-wrapper">
-            <div class="vinyl" id="vinylDisk">
-                <div class="vinyl-center"></div>
-            </div>
+        <!-- VISTA DE ESCANEO -->
+        <div id="scanner-view">
+            <div id="reader"></div>
         </div>
 
-        <div id="playerArea">
-            <!-- El reproductor se cargará dinámicamente aquí -->
+        <!-- VISTA DEL REPRODUCTOR -->
+        <div id="player-view">
+            <div class="vinyl-wrapper">
+                <div class="vinyl">
+                    <div class="vinyl-center"></div>
+                </div>
+            </div>
+            
+            <div id="spotify-player-target">
+                <!-- Se inyecta el iframe aquí -->
+            </div>
+
+            <button class="btn" onclick="activarEscaneoNuevo()">📷 ESCANEAR SIGUIENTE</button>
         </div>
     </div>
 
     <script>
-        // Obtener el ID de la canción desde la URL (?id=ID_CANCION)
-        const urlParams = new URLSearchParams(window.location.search);
-        const songId = urlParams.get('id');
+        let html5QrCode;
+        const config = { fps: 12, qrbox: { width: 230, height: 230 } };
 
-        const playerArea = document.getElementById('playerArea');
-        const vinylDisk = document.getElementById('vinylDisk');
+        // Al iniciar la web
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const songId = urlParams.get('id');
 
-        if (songId) {
-            // Activamos el giro del vinilo
-            vinylDisk.classList.add('playing');
+            if (songId) {
+                // Si la abren directamente con una canción desde el escáner del sistema móvil
+                mostrarReproductor(songId);
+            } else {
+                // Si la abren vacía (como una app instalada), iniciar la cámara interna automáticamente
+                activarEscaneoNuevo();
+            }
+            
+            // Registrar mini service-worker para compatibilidad PWA de instalación
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+                `), { scope: './' });
+            }
+        });
 
-            // Creamos el reproductor de Spotify oficial incrustado (Compacto de 80px)
-            playerArea.innerHTML = `
+        function activarEscaneoNuevo() {
+            // Limpiar parámetro ID de la URL sin recargar la página para limpiar el historial
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            document.getElementById('player-view').style.display = 'none';
+            document.getElementById('scanner-view').style.display = 'block';
+            document.getElementById('game-status').innerText = 'Apunta a una carta';
+
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+
+            // Arrancar cámara trasera automáticamente
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config,
+                onQrSuccess,
+                onQrError
+            ).catch(err => {
+                document.getElementById('game-status').innerText = '⚠️ Error al abrir la cámara';
+                console.error("Error de cámara:", err);
+            });
+        }
+
+        function onQrSuccess(decodedText) {
+            try {
+                // El enlace escaneado será: https://monoconbeston.github.io/reproductor-hitster?id=...
+                const url = new URL(decodedText);
+                const songId = url.searchParams.get('id');
+
+                if (songId) {
+                    // Detener la cámara para ahorrar batería y cargar la canción
+                    html5QrCode.stop().then(() => {
+                        mostrarReproductor(songId);
+                    }).catch(err => {
+                        console.error("Error deteniendo cámara:", err);
+                        mostrarReproductor(songId); // Forzar carga
+                    });
+                } else {
+                    alert("El QR escaneado no contiene una canción válida del juego.");
+                }
+            } catch (e) {
+                alert("QR no válido. Asegúrate de escanear tus cartas oficiales.");
+            }
+        }
+
+        function onQrError(errorMessage) {
+            // Se ignora el escaneo de cuadros fallidos (ocurre continuamente mientras busca un QR)
+        }
+
+        function mostrarReproductor(songId) {
+            document.getElementById('scanner-view').style.display = 'none';
+            document.getElementById('player-view').style.display = 'block';
+            document.getElementById('game-status').innerText = '¡Adivina la fecha!';
+
+            document.getElementById('spotify-player-target').innerHTML = `
                 <div class="spotify-container">
                     <iframe class="spotify-iframe" 
                         src="https://open.spotify.com/embed/track/${songId}?utm_source=generator&theme=0" 
                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
                         loading="lazy">
                     </iframe>
-                    <!-- Esta máscara cubre la información reveladora -->
                     <div class="cover-mask">
-                        <span class="mask-text">🎵 ESCUCHA CON ATENCIÓN...</span>
+                        <span class="mask-text">🎵 Escuchando...</span>
                     </div>
-                </div>
-            `;
-        } else {
-            // Mensaje si abren la web sin escanear una carta
-            playerArea.innerHTML = `
-                <div class="no-song">
-                    <p>⚠️ No se detectó ninguna canción.</p>
-                    <p style="font-size: 0.8rem;">Escanea el código QR de una carta para empezar a jugar.</p>
                 </div>
             `;
         }
