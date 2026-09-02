@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mazo Digital - Hitster</title>
+    <title>Mazo Digital Pro - Hitster</title>
     
     <!-- Configuración PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,6 +16,7 @@
             --card-bg: #161622;
             --accent-color: #1db954; /* Verde Spotify */
             --accent-blue: #00bcd4;
+            --accent-purple: #bb86fc; /* Color de Desafíos */
             --text-color: #ffffff;
             --text-muted: #a0a0b0;
         }
@@ -64,7 +65,7 @@
 
         /* --- DISPLAY DE CARTA --- */
         .card-display {
-            min-height: 300px;
+            min-height: 310px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -76,12 +77,20 @@
             position: relative;
             margin-bottom: 20px;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
-        .card-display.active {
+        .card-display.active-song {
             border-style: solid;
             border-color: var(--accent-blue);
             box-shadow: 0 0 15px rgba(0, 188, 212, 0.15);
+        }
+
+        .card-display.active-challenge {
+            border-style: solid;
+            border-color: var(--accent-purple);
+            background: radial-gradient(circle, #241935 0%, #161022 100%);
+            box-shadow: 0 0 20px rgba(187, 134, 252, 0.25);
         }
 
         .qr-placeholder {
@@ -94,13 +103,40 @@
 
         /* QR Imagen */
         .qr-img {
-            width: 220px;
-            height: 220px;
+            width: 200px;
+            height: 200px;
             background: white;
             padding: 10px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+        }
+
+        /* --- CONTENEDOR DESAFÍO EN PANTALLA --- */
+        .challenge-box {
+            background-color: rgba(187, 134, 252, 0.1);
+            border: 1px solid rgba(187, 134, 252, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 12px 0 0 0;
+            width: 100%;
+            box-sizing: border-box;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .challenge-tag {
+            color: var(--accent-purple);
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+        }
+
+        .challenge-text {
+            font-size: 0.88rem;
+            line-height: 1.35;
+            color: #f1e9ff;
         }
 
         /* --- RESPUESTA SECRETA (HOST) --- */
@@ -142,6 +178,37 @@
             object-fit: cover;
             border: 1px solid rgba(255,255,255,0.1);
             margin-top: 8px;
+        }
+
+        /* --- DISEÑO DE CARTA DE DESAFÍO PURO --- */
+        .challenge-card-body {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .challenge-card-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .challenge-card-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent-purple);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .challenge-card-desc {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #ffffff;
+            background: rgba(255,255,255,0.04);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         /* --- BOTONES --- */
@@ -188,22 +255,44 @@
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>MAZO DIGITAL</h1>
+        <h1>MAZO DIGITAL PRO</h1>
         <div class="counter" id="deck-counter">Cargando baraja...</div>
 
         <!-- VISUALIZACIÓN DE LA CARTA ACTUAL -->
         <div class="card-display" id="card-canvas">
+            <!-- Marcador de posición inicial -->
             <div class="qr-placeholder" id="placeholder-text">
-                📱<br><br>Presiona "SACAR NUEVA CARTA"<br>para empezar el juego
+                🃏<br><br>Presiona "SACAR NUEVA CARTA"<br>para empezar el juego con desafíos
             </div>
-            <!-- Aquí se inyectará el QR dinámicamente -->
-            <div id="qr-container" style="display:none;">
+
+            <!-- Caja de Carta de Canción con QR -->
+            <div id="song-card-container" style="display:none; width: 100%;">
                 <img id="qr-img-element" class="qr-img" src="" alt="Código QR">
+                
+                <!-- Caja de Desafío/Trivia integrada con la canción -->
+                <div class="challenge-box" id="song-challenge-box" style="display:none;">
+                    <div class="challenge-tag">🔥 Desafío de la Carta</div>
+                    <div class="challenge-text" id="song-challenge-text">¿Imita al artista o adivina la trivia?</div>
+                </div>
+            </div>
+
+            <!-- Caja de Carta de Desafío Puro (Sin QR ni Spotify) -->
+            <div id="pure-challenge-container" style="display:none; width: 100%;">
+                <div class="challenge-card-body">
+                    <div class="challenge-card-icon" id="pure-challenge-icon">🎭</div>
+                    <div class="challenge-card-title" id="pure-challenge-title">¡DUELO!</div>
+                    <div class="challenge-card-desc" id="pure-challenge-desc">Descripción del desafío.</div>
+                </div>
             </div>
 
             <!-- Caja de respuesta oculta para el host -->
@@ -4396,71 +4485,153 @@
     "artist": "Glup!",
     "year": "1999",
     "image_url": "https://i.scdn.co/image/ab67616d00001e0234753255bf71b2734b7e38db"
+  },
+  {
+    "id": "5dFIFwwF4KSyYxmNh02npO",
+    "name": "Viaje Infinito",
+    "artist": "Nicole",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025d4582d11a8d0c51567971c6"
   }
 ];
 
+        // Plantillas de desafíos que se integran con las canciones de forma aleatoria
+        const plantillasDesafios = [
+            "🎤 **¡Imitación Extrema!** Imita el tono de voz, gestos o pose más famosa de **{artist}** mientras suena el tema.",
+            "🧠 **Trivia del Artista:** ¿Quién en la mesa puede nombrar otra canción famosa de **{artist}**? Si nadie lo hace, el que sacó la carta gana 1 punto.",
+            "🤫 **Tarareo Silencioso:** Tararea la melodía de **{artist}** con la boca cerrada durante 10 segundos. Si tu equipo la adivina, ¡colocas gratis!",
+            "🎭 **Trivia del Intérprete:** ¿De qué país o nacionalidad es el artista **{artist}**? El Host verificará tu respuesta al revelar la carta.",
+            "🎶 **Sigue la Letra:** Cuando empiece la canción, ¡debes cantar la letra y seguir cantándola a capela durante 5 segundos cuando el Host pause la música!",
+            "💃 **Ronda de Baile:** ¡Debes inventar y bailar una coreografía exprés de 5 segundos que encaje perfecto con el estilo de **{artist}**!",
+            "🕒 **Adivinanza a Ciegas:** ¡Intenta colocar esta carta en tu línea de tiempo por el nombre del artista, **{artist}**, sin escuchar el audio! Si aciertas, vale por doble."
+        ];
+
+        // Cartas de Desafío Puro (15% de probabilidad de salir directamente)
+        const cartasDesafioPuro = [
+            {
+                icon: "💥",
+                title: "¡ROBO DE CARTA!",
+                desc: "Elige a un oponente. Si logras cantar o silbar un trozo de una canción que pertenezca al mismo año que su última carta, ¡se la robas y la sumas a tu tablero!"
+            },
+            {
+                icon: "⚔️",
+                title: "¡DUELO MUSICAL!",
+                desc: "Elige a un rival. El Host reproducirá una canción cualquiera en secreto y ustedes competirán. El primero en silbar y adivinar el nombre o artista se queda con la carta."
+            },
+            {
+                icon: "🃏",
+                title: "CARTA COMODÍN",
+                desc: "¡Estás de suerte! Puedes ubicar esta carta de Desafío directamente en tu línea de tiempo. Cuenta como un comodín válido para rellenar tus años vacíos."
+            },
+            {
+                icon: "🔄",
+                title: "EL REBOTE",
+                desc: "Quédate con esta carta. Cuando un rival intente colocar su próxima carta en su tablero, puedes usarla para 'rebotar' su turno: si adivinas tú el año, la carta es tuya."
+            },
+            {
+                icon: "👥",
+                title: "TRIVIA COLECTIVA",
+                desc: "Todos los jugadores (excepto tú) compiten. Quien adivine el año exacto de la siguiente canción primero ganará un punto de robo. ¡Rápido!"
+            }
+        ];
+
         let activeDeck = [];
         let playedHistory = [];
-        let currentTrack = null;
+        let currentItem = null; // Puede ser un track (canción) o un pure-challenge (desafío)
 
-        // Inicializar juego leyendo de localStorage para no perder la partida al refrescar sin querer
+        // Inicializar juego leyendo de localStorage para no perder la partida
         window.addEventListener('load', () => {
             cargarPartida();
             actualizarInterfaz();
-        });
+        }).catch(err => console.log(err));
 
         function guardarPartida() {
             localStorage.setItem('hitster_active_deck', JSON.stringify(activeDeck));
             localStorage.setItem('hitster_played_history', JSON.stringify(playedHistory));
-            localStorage.setItem('hitster_current_track', JSON.stringify(currentTrack));
+            localStorage.setItem('hitster_current_item', JSON.stringify(currentItem));
         }
 
         function cargarPartida() {
             const storedDeck = localStorage.getItem('hitster_active_deck');
             const storedHistory = localStorage.getItem('hitster_played_history');
-            const storedCurrent = localStorage.getItem('hitster_current_track');
+            const storedCurrent = localStorage.getItem('hitster_current_item');
 
             if (storedDeck && storedHistory) {
                 activeDeck = JSON.parse(storedDeck);
                 playedHistory = JSON.parse(storedHistory);
-                currentTrack = storedCurrent ? JSON.parse(storedCurrent) : null;
+                currentItem = storedCurrent ? JSON.parse(storedCurrent) : null;
             } else {
                 reiniciarMazo();
             }
         }
 
         function reiniciarMazo() {
-            // Copiar la lista base y barajarla (Algoritmo Fisher-Yates)
-            activeDeck = [...baseTracks];
-            for (let i = activeDeck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [activeDeck[i], activeDeck[j]] = [activeDeck[j], activeDeck[i]];
+            // Crear el mazo mezclando canciones con cartas de desafíos puros
+            let tempDeck = [];
+            
+            // 1. Agregar canciones
+            baseTracks.forEach(track => {
+                tempDeck.push({
+                    type: "song",
+                    data: track
+                });
+            });
+
+            // 2. Agregar cartas de desafío puro intercaladas (aprox. 15% del tamaño total)
+            const numChallengesToInject = Math.max(5, Math.floor(baseTracks.length * 0.15));
+            for (let i = 0; i < numChallengesToInject; i++) {
+                const randomPureChallenge = cartasDesafioPuro[Math.floor(Math.random() * cartasDesafioPuro.length)];
+                tempDeck.push({
+                    type: "challenge",
+                    data: randomPureChallenge
+                });
             }
+
+            // 3. Mezclar mazo usando Fisher-Yates
+            for (let i = tempDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tempDeck[i], tempDeck[j]] = [tempDeck[j], tempDeck[i]];
+            }
+
+            activeDeck = tempDeck;
             playedHistory = [];
-            currentTrack = null;
+            currentItem = null;
             guardarPartida();
             actualizarInterfaz();
         }
 
         function confirmarReinicio() {
-            if (confirm("¿Estás seguro de que quieres reiniciar el mazo? Se volverán a incluir todas las canciones de la lista.")) {
+            if (confirm("¿Estás seguro de que quieres reiniciar el mazo? Se volverán a mezclar todas las canciones y se añadirán nuevos desafíos.")) {
                 reiniciarMazo();
             }
         }
 
         function sacarCarta() {
             if (activeDeck.length === 0) {
-                alert("🎉 ¡Felicidades! Se han terminado todas las canciones del mazo digital. Haz clic en reiniciar para volver a jugar.");
+                alert("🎉 ¡Mazo terminado! Has jugado todas las canciones y desafíos. Presiona 'Reiniciar mazo' para comenzar otra partida.");
                 return;
             }
 
-            // Ocultar respuesta del anterior por seguridad
+            // Ocultar respuesta previa
             document.getElementById('answer-container').style.display = 'none';
             document.getElementById('btn-reveal').innerText = "👁️ VER RESPUESTA";
 
-            // Tomar la primera canción del mazo barajado
-            currentTrack = activeDeck.shift();
-            playedHistory.push(currentTrack);
+            // Sacar elemento del mazo
+            currentItem = activeDeck.shift();
+            playedHistory.push(currentItem);
+
+            // Si es canción, decidir si lleva un desafío dinámico (35% de probabilidad)
+            if (currentItem.type === "song") {
+                const runChallenge = Math.random() < 0.35;
+                if (runChallenge) {
+                    const randomTemplate = plantillasDesafios[Math.floor(Math.random() * plantillasDesafios.length)];
+                    // Reemplazar marcador de artista de manera segura
+                    const rawArtist = currentItem.data.artist;
+                    currentItem.challenge = randomTemplate.replace("{artist}", rawArtist);
+                } else {
+                    currentItem.challenge = null;
+                }
+            }
 
             guardarPartida();
             actualizarInterfaz();
@@ -4479,48 +4650,85 @@
             }
         }
 
+        function markdownToHtml(text) {
+            if (!text) return "";
+            // Reemplazo simple para simular negritas de Markdown **texto**
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+
         function actualizarInterfaz() {
-            const totalSongs = baseTracks.length;
+            const totalItems = baseTracks.length + Math.max(5, Math.floor(baseTracks.length * 0.15));
             const remaining = activeDeck.length;
             
-            document.getElementById('deck-counter').innerText = `CARTAS RESTANTES: ${remaining} / ${totalSongs}`;
+            document.getElementById('deck-counter').innerText = `CARTAS RESTANTES: ${remaining} / ${totalItems}`;
 
             const placeholder = document.getElementById('placeholder-text');
-            const qrContainer = document.getElementById('qr-container');
+            const songContainer = document.getElementById('song-card-container');
+            const pureChallengeContainer = document.getElementById('pure-challenge-container');
             const qrImg = document.getElementById('qr-img-element');
+            const songChallengeBox = document.getElementById('song-challenge-box');
+            const songChallengeText = document.getElementById('song-challenge-text');
+            
             const btnReveal = document.getElementById('btn-reveal');
             const cardCanvas = document.getElementById('card-canvas');
 
-            if (currentTrack) {
+            // Reset de clases
+            cardCanvas.classList.remove('active-song', 'active-challenge');
+
+            if (currentItem) {
                 placeholder.style.display = 'none';
-                qrContainer.style.display = 'block';
-                btnReveal.style.display = 'block';
-                cardCanvas.classList.add('active');
 
-                // Armar link del QR dinámicamente apuntando a tu reproductor
-                const targetUrl = `https://monoconbeston.github.io/reproductor-hitster/?id=${currentTrack.id}`;
-                
-                // Usamos la API pública de QR code para cargarlo directo en una etiqueta Image súper rápida
-                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(targetUrl)}`;
+                if (currentItem.type === "song") {
+                    // VISTA CANCIÓN
+                    songContainer.style.display = 'block';
+                    pureChallengeContainer.style.display = 'none';
+                    btnReveal.style.display = 'block';
+                    cardCanvas.classList.add('active-song');
 
-                // Cargar datos de respuesta oculta
-                document.getElementById('song-title').innerText = currentTrack.name;
-                document.getElementById('song-artist').innerText = currentTrack.artist;
-                document.getElementById('song-year').innerText = currentTrack.year;
-                
-                const coverImg = document.getElementById('song-cover');
-                if (currentTrack.image_url) {
-                    coverImg.src = currentTrack.image_url;
-                    coverImg.style.display = 'inline-block';
-                } else {
-                    coverImg.style.display = 'none';
+                    // Cargar QR
+                    const songId = currentItem.data.id;
+                    const targetUrl = `https://monoconbeston.github.io/reproductor-hitster/?id=${songId}`;
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(targetUrl)}`;
+
+                    // Mostrar desafío integrado si aplica
+                    if (currentItem.challenge) {
+                        songChallengeBox.style.display = 'block';
+                        songChallengeText.innerHTML = markdownToHtml(currentItem.challenge);
+                    } else {
+                        songChallengeBox.style.display = 'none';
+                    }
+
+                    // Cargar datos ocultos para el Host
+                    document.getElementById('song-title').innerText = currentItem.data.name;
+                    document.getElementById('song-artist').innerText = currentItem.data.artist;
+                    document.getElementById('song-year').innerText = currentItem.data.year;
+                    
+                    const coverImg = document.getElementById('song-cover');
+                    if (currentItem.data.image_url) {
+                        coverImg.src = currentItem.data.image_url;
+                        coverImg.style.display = 'inline-block';
+                    } else {
+                        coverImg.style.display = 'none';
+                    }
+
+                } else if (currentItem.type === "challenge") {
+                    // VISTA DESAFÍO PURO
+                    songContainer.style.display = 'none';
+                    pureChallengeContainer.style.display = 'block';
+                    btnReveal.style.display = 'none'; // No hay respuesta para ocultar en desafíos puros
+                    cardCanvas.classList.add('active-challenge');
+
+                    document.getElementById('pure-challenge-icon').innerText = currentItem.data.icon;
+                    document.getElementById('pure-challenge-title').innerText = currentItem.data.title;
+                    document.getElementById('pure-challenge-desc').innerText = currentItem.data.desc;
                 }
             } else {
+                // ESTADO INICIAL VACÍO
                 placeholder.style.display = 'block';
-                qrContainer.style.display = 'none';
+                songContainer.style.display = 'none';
+                pureChallengeContainer.style.display = 'none';
                 btnReveal.style.display = 'none';
                 document.getElementById('answer-container').style.display = 'none';
-                cardCanvas.classList.remove('active');
             }
         }
     </script>
