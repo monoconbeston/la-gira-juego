@@ -1,0 +1,4528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mazo Digital - Hitster</title>
+    
+    <!-- Configuración PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0d0d11">
+
+    <style>
+        :root {
+            --bg-color: #0d0d11;
+            --card-bg: #161622;
+            --accent-color: #1db954; /* Verde Spotify */
+            --accent-blue: #00bcd4;
+            --text-color: #ffffff;
+            --text-muted: #a0a0b0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 5px 0;
+            letter-spacing: 1px;
+            color: var(--text-color);
+        }
+
+        .counter {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        /* --- DISPLAY DE CARTA --- */
+        .card-display {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            background-color: rgba(0,0,0,0.2);
+            position: relative;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .card-display.active {
+            border-style: solid;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.15);
+        }
+
+        .qr-placeholder {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* QR Imagen */
+        .qr-img {
+            width: 220px;
+            height: 220px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+        }
+
+        /* --- RESPUESTA SECRETA (HOST) --- */
+        .answer-box {
+            display: none;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .answer-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+
+        .answer-artist {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .answer-year {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--accent-color);
+            margin: 5px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .answer-cover {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-top: 8px;
+        }
+
+        /* --- BOTONES --- */
+        .btn {
+            border: none;
+            padding: 14px 24px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-blue);
+            color: black;
+        }
+
+        .btn-secondary {
+            background-color: #2e2e3e;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .btn-danger {
+            background-color: #cf6679;
+            color: black;
+            font-size: 0.8rem;
+            padding: 8px 16px;
+            width: auto;
+            margin-top: 15px;
+            opacity: 0.7;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>MAZO DIGITAL</h1>
+        <div class="counter" id="deck-counter">Cargando baraja...</div>
+
+        <!-- VISUALIZACIÓN DE LA CARTA ACTUAL -->
+        <div class="card-display" id="card-canvas">
+            <div class="qr-placeholder" id="placeholder-text">
+                📱<br><br>Presiona "SACAR NUEVA CARTA"<br>para empezar el juego
+            </div>
+            <!-- Aquí se inyectará el QR dinámicamente -->
+            <div id="qr-container" style="display:none;">
+                <img id="qr-img-element" class="qr-img" src="" alt="Código QR">
+            </div>
+
+            <!-- Caja de respuesta oculta para el host -->
+            <div class="answer-box" id="answer-container">
+                <div class="answer-title" id="song-title">Nombre de la canción</div>
+                <div class="answer-artist" id="song-artist">Artista</div>
+                <img class="answer-cover" id="song-cover" src="" alt="Portada">
+                <div class="answer-year" id="song-year">1999</div>
+            </div>
+        </div>
+
+        <!-- CONTROLES -->
+        <button class="btn btn-primary" onclick="sacarCarta()" id="btn-draw">🃏 SACAR NUEVA CARTA</button>
+        <button class="btn btn-secondary" onclick="toggleRespuesta()" id="btn-reveal" style="display:none;">👁️ VER RESPUESTA</button>
+        
+        <button class="btn btn-danger" onclick="confirmarReinicio()">🔄 REINICIAR MAZO</button>
+    </div>
+
+    <script>
+        // Datos inyectados de las canciones desde Spotify
+        const baseTracks = [
+  {
+    "id": "7BVMtLpd7edHeOizt4RWz9",
+    "name": "Frágil",
+    "artist": "Yahritza Y Su Esencia, Grupo Frontera",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025d59e410830fffdf43aa0e65"
+  },
+  {
+    "id": "7bPp2NmpmyhLJ7zWazAXMu",
+    "name": "TULUM",
+    "artist": "Peso Pluma, Grupo Frontera",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022fb583ed96f8f35cbf2897ba"
+  },
+  {
+    "id": "5LsvrplQ7YCK4ROg4gym9a",
+    "name": "OJITOS ROJOS",
+    "artist": "Grupo Frontera, Ke Personajes",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027311ded249201b216bc9d152"
+  },
+  {
+    "id": "3tiJUOfAEqIrLFRQgGgdoY",
+    "name": "Un Finde | CROSSOVER #2",
+    "artist": "Big One, FMK, Ke Personajes",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fc9ce77ab8fcd9eadda3acd3"
+  },
+  {
+    "id": "0hvsOvo1zARlNnmHNhrxIF",
+    "name": "Adiós Amor / Oye Mujer",
+    "artist": "Ke Personajes",
+    "year": "2020",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02dfe4f77555a11624bb393a18"
+  },
+  {
+    "id": "0lREs0EdgrMQQKw00yx0Ct",
+    "name": "Una Noche en Medellín",
+    "artist": "Cris MJ",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02be60f176970cdde893632dd8"
+  },
+  {
+    "id": "1IHWl5LamUGEuP4ozKQSXZ",
+    "name": "Tití Me Preguntó",
+    "artist": "Bad Bunny",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
+  },
+  {
+    "id": "59D4DOkspUbWyMmbAPQkxZ",
+    "name": "VOY A LLeVARTE PA PR",
+    "artist": "Bad Bunny",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbd45c8d36e0e045ef640411"
+  },
+  {
+    "id": "1DxEbt6OSbrkRthk6pjZue",
+    "name": "MERCHO",
+    "artist": "LiL CaKe, Migrantes, Nico Valdi",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029f1f8adb00c71daa8a9cb22c"
+  },
+  {
+    "id": "6VAS7m73rDopQe7BdrFMpD",
+    "name": "Tiago PZK: Bzrp Music Sessions, Vol. 48/66",
+    "artist": "Bizarrap, Tiago PZK",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d875aa95ff0ba089869b61de"
+  },
+  {
+    "id": "5i9bTK3gXeVCvua3PH4nwv",
+    "name": "LA TERAPIA",
+    "artist": "Young Cister",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027ae685af0a6b3cb15e9a0e54"
+  },
+  {
+    "id": "6XbtvPmIpyCbjuT0e8cQtp",
+    "name": "Columbia",
+    "artist": "Quevedo",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02acbcd04fa4069f14741477ee"
+  },
+  {
+    "id": "1kqH58eGh2ZTOHwqBIB2tM",
+    "name": "Una Foto Remix (feat. Emilia)",
+    "artist": "Mesita, Nicki Nicole, Tiago PZK, Emilia",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e12bbceb3952d2a68e7ebdcd"
+  },
+  {
+    "id": "5QjmUqgpPQgXgg4606DqZF",
+    "name": "UWAIE",
+    "artist": "Kapo",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02acfbf7d95b4dd77f8e414859"
+  },
+  {
+    "id": "5pVJ3IlnpIorU44oXizzG5",
+    "name": "orióN",
+    "artist": "Boza, ELENA ROSE",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021a70b48975a09636c84ce17f"
+  },
+  {
+    "id": "6De0lHrwBfPfrhorm9q1Xl",
+    "name": "Me Rehúso",
+    "artist": "Danny Ocean",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a75bd33684083600569dd3bf"
+  },
+  {
+    "id": "6uiQ0DqbXTBc8tl0AUKZkR",
+    "name": "TU VAS SIN (fav)",
+    "artist": "Rels B",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020e409fad9527196e73e423ba"
+  },
+  {
+    "id": "72aGCwuSwD5Qb3tHvXBoX3",
+    "name": "Shiny",
+    "artist": "Easykid, Dysbit",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0243bb1b887f63c961473ff573"
+  },
+  {
+    "id": "7IyBvpCV5itnX98vKMramA",
+    "name": "SENDA BELLAKONA",
+    "artist": "SINAKA, flackoloyal",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02cc3fddd0067fa49788c6c843"
+  },
+  {
+    "id": "2KpDYs0MexRXVAqNoHhJwk",
+    "name": "ALO",
+    "artist": "Katteyes, SINAKA",
+    "year": "2026",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0222cab06b09938047a6966fed"
+  },
+  {
+    "id": "6J5kc12BW5HuP3d7C3vvx8",
+    "name": "EoO",
+    "artist": "Bad Bunny",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbd45c8d36e0e045ef640411"
+  },
+  {
+    "id": "3jAshemiRYWukWLtT3Ivrb",
+    "name": "SOLEAO",
+    "artist": "Myke Towers, Quevedo",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028048ac6179d25c2ccd6a98a3"
+  },
+  {
+    "id": "47EiUVwUp4C9fGccaPuUCS",
+    "name": "DÁKITI",
+    "artist": "Bad Bunny, JHAYCO",
+    "year": "2020",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0234c8199b0b3b3fb42b8a98a8"
+  },
+  {
+    "id": "3HqcNJdZ2seoGxhn0wVNDK",
+    "name": "PROVENZA",
+    "artist": "KAROL G",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0282de1ca074ae63cb18fce335"
+  },
+  {
+    "id": "2Fi6RtngvStwsjskvwabVT",
+    "name": "DUMBAI",
+    "artist": "CA7RIEL & Paco Amoroso",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fef5b866326e3451bde28ff2"
+  },
+  {
+    "id": "6LYg8Ks95O7GNNLfB6kh4j",
+    "name": "BRONCEADOR",
+    "artist": "Maluma",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020c72fbde832b9c50acffdb30"
+  },
+  {
+    "id": "2uPMsTEKx79gJ8rB3AcT0v",
+    "name": "Daddy Yankee: Bzrp Music Sessions, Vol. 0/66",
+    "artist": "Bizarrap, Daddy Yankee",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02256e4fd17616bfe624911861"
+  },
+  {
+    "id": "5TFD2bmFKGhoCRbX61nXY5",
+    "name": "NUEVAYoL",
+    "artist": "Bad Bunny",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbd45c8d36e0e045ef640411"
+  },
+  {
+    "id": "634CTghcuEDy2FXcTsLG5m",
+    "name": "una noche",
+    "artist": "Alleh, Yorghaki",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026abd0fcf50a20ac09a028c92"
+  },
+  {
+    "id": "2tTmW7RDtMQtBk7m2rYeSw",
+    "name": "Quevedo: Bzrp Music Sessions, Vol. 52/66",
+    "artist": "Bizarrap, Quevedo",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02946f1ea32cc7681e7a86e9ca"
+  },
+  {
+    "id": "1Hs1uUl8o2VtDp1DABFq0O",
+    "name": "Los del Espacio",
+    "artist": "LIT killah, Tiago PZK, Maria Becerra, Duki, Emilia, Rusherking, Big One, FMK",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028d2b4b4ff1b3954f115474f0"
+  },
+  {
+    "id": "3QbfCvCAOCrSGNcGjtOjYM",
+    "name": "capaz (merengueton)",
+    "artist": "Alleh, Yorghaki",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e686e94b5140cb98362235a6"
+  },
+  {
+    "id": "5fwSHlTEWpluwOM0Sxnh5k",
+    "name": "Pepas",
+    "artist": "Farruko",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023e3957dcca26c5f4ecf015ad"
+  },
+  {
+    "id": "2lTm559tuIvatlT1u0JYG2",
+    "name": "BAILE INoLVIDABLE",
+    "artist": "Bad Bunny",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbd45c8d36e0e045ef640411"
+  },
+  {
+    "id": "3sK8wGT43QFpWrvNQsrQya",
+    "name": "DtMF",
+    "artist": "Bad Bunny",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbd45c8d36e0e045ef640411"
+  },
+  {
+    "id": "5ww2BF9slyYgNOk37BlC4u",
+    "name": "La Bachata",
+    "artist": "Manuel Turizo",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ad950fec5ccfeef6cf5f54c5"
+  },
+  {
+    "id": "32hCeeK3ayPux4UauNPsgA",
+    "name": "ALV",
+    "artist": "Arcángel, Grupo Frontera",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025947e677a3370208d0ba491d"
+  },
+  {
+    "id": "6PDlkWmrq2ZKiUuFt2aQsH",
+    "name": "Loco",
+    "artist": "Justin Quiles, Chimbala, Zion & Lennox",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028f71c3bb4e6d1bc4ea36cce0"
+  },
+  {
+    "id": "2lCkncy6bIB0LTMT7kvrD1",
+    "name": "Azul",
+    "artist": "J Balvin",
+    "year": "2020",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0235692baca45542527d742d0d"
+  },
+  {
+    "id": "0UvZcEfpzVyx47QsRbjyBz",
+    "name": "El Apagón",
+    "artist": "Bad Bunny",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
+  },
+  {
+    "id": "7COfe3P7KgfwDwIRB8LIDw",
+    "name": "Mi Gente",
+    "artist": "J Balvin, Willy William",
+    "year": "2018",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02dda2b86297d3bfb519f8b785"
+  },
+  {
+    "id": "4wS0TnQzVkY9ML1BPKpOk1",
+    "name": "Piel",
+    "artist": "Tiago PZK, Ke Personajes",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028f2677907b5c1f12dde07007"
+  },
+  {
+    "id": "3E8xyYdIPpiH2wNEozE68I",
+    "name": "Pégate",
+    "artist": "Standly",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bdbea0e9183b50eaf9332cf6"
+  },
+  {
+    "id": "6hwGwCfCwHoSJQw7AYPEQu",
+    "name": "ANDO",
+    "artist": "Jere Klein, Gittobeatz",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b202099659d26bd5b144d02d"
+  },
+  {
+    "id": "1j1itFzuIbndSf6lW8L1Kx",
+    "name": "Dimelo Ma",
+    "artist": "Pailita, Marcianeke",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f44e101b3b2ba930ccf9494d"
+  },
+  {
+    "id": "0NO2zL0kw8sGGnaMvHKAZF",
+    "name": "Marisola - Remix",
+    "artist": "Cris MJ, Duki, Nicki Nicole, Standly, Stars Music Chile",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0284abc8c6cf1e122113f7ab8b"
+  },
+  {
+    "id": "5RqSsdzTNPX1uzkmlHCFvK",
+    "name": "QLONA",
+    "artist": "KAROL G, Peso Pluma",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d026bf9d7780f6a1267b4d03"
+  },
+  {
+    "id": "5Eax0qFko2dh7Rl2lYs3bx",
+    "name": "Efecto",
+    "artist": "Bad Bunny",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
+  },
+  {
+    "id": "1rEsfHhBFTuTPekF8M5O3f",
+    "name": "La Triple T",
+    "artist": "TINI",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020c5b7823a8b0ac6feb53fd11"
+  },
+  {
+    "id": "3lCbsHaN1wCxyDzcNN2x4N",
+    "name": "Si Me Tomo Una Cerveza",
+    "artist": "Migrantes, Alico",
+    "year": "2020",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025be19f8ad3ea24a4e4979dd1"
+  },
+  {
+    "id": "31i56LZnwE6uSu3exoHjtB",
+    "name": "Neverita",
+    "artist": "Bad Bunny",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
+  },
+  {
+    "id": "7ABLbnD53cQK00mhcaOUVG",
+    "name": "LALA",
+    "artist": "Myke Towers",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d646ace05ec913ac690a00c3"
+  },
+  {
+    "id": "4w8niZpiMy6qz1mntFA5uM",
+    "name": "Taki Taki (with Selena Gomez, Ozuna & Cardi B)",
+    "artist": "DJ Snake, Selena Gomez, Ozuna, Cardi B",
+    "year": "2018",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e105c410a7b390c61a58cbf8"
+  },
+  {
+    "id": "1iatbSLJGSR9wYz3knoCF2",
+    "name": "V16",
+    "artist": "Martinwhite, Erreflexx",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ba57bc12fe99d9d403180bf3"
+  },
+  {
+    "id": "3IAfUEeaXRX9s9UdKOJrFI",
+    "name": "Envolver",
+    "artist": "Anitta",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a311e21ac3313c4c60135fe4"
+  },
+  {
+    "id": "5Py45FF8phNy49BaehU3PC",
+    "name": "Algún Día Volverás",
+    "artist": "Santaferia",
+    "year": "2018",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02512f9815bc4c300ef7793ef0"
+  },
+  {
+    "id": "1MfqPCs3Y722VK6zkWZ98Z",
+    "name": "Pasarela",
+    "artist": "Ñejo & Dalmata",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a2cfa7ff9391b0b9d83fab1"
+  },
+  {
+    "id": "0OTNHGKcqQbk51bOYe462Y",
+    "name": "ULTRA SOLO",
+    "artist": "Polimá Westcoast, Pailita",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0288fda5b352ba4b8912abf168"
+  },
+  {
+    "id": "5ildQOEKmJuWGl2vRkFdYc",
+    "name": "DESPECHÁ",
+    "artist": "ROSALÍA",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02938660520f09a1bae2ed4699"
+  },
+  {
+    "id": "4kXxEhuatrvwrTQycA7s9B",
+    "name": "BIZCOCHITO",
+    "artist": "ROSALÍA",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ac8367a27c0eb7195dc3a58d"
+  },
+  {
+    "id": "2nwa6nS5lXnsvwX48RWkbS",
+    "name": "Que Te Vaya Bien",
+    "artist": "Santaferia, Grupo Zúmbale Primo",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021012ee9e2e819755f80e8a4f"
+  },
+  {
+    "id": "6mmPpaltUZK7xjNlBPQQ0p",
+    "name": "Desesperados",
+    "artist": "Rauw Alejandro, Chencho Corleone",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f793c0c53727d8c5c950f809"
+  },
+  {
+    "id": "4ojwGTehgBRAg52jbFgzJg",
+    "name": "Me Reclama",
+    "artist": "Mambo Kingz, DJ Luian, Luigi 21 Plus, Ozuna",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021e305237dcf442b57030c9d5"
+  },
+  {
+    "id": "505v13epFXodT9fVAJ6h8k",
+    "name": "AMARGURA",
+    "artist": "KAROL G",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0282de1ca074ae63cb18fce335"
+  },
+  {
+    "id": "1MB8kTH7VKvAMfL9SHgJmG",
+    "name": "Vagabundo",
+    "artist": "Sebastian Yatra, Manuel Turizo, Beéle",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022d6016751b8ea5e66e83cd04"
+  },
+  {
+    "id": "3AXw3pd7KHGSogprPSxrMh",
+    "name": "Tengo Un Plan - Remix",
+    "artist": "Key-Key, Ozuna",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02dad89c3af44b2b609f6820c1"
+  },
+  {
+    "id": "4sl3IoHskl2Kbdy27gZ4yn",
+    "name": "Una Foto",
+    "artist": "Mesita",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02494f7079a2a76c23f1d76bda"
+  },
+  {
+    "id": "2FqTbwiogEVvZnkarPf5BV",
+    "name": "HOLA PERDIDA REMIX",
+    "artist": "Luck Ra, Maluma, KHEA",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0249c49895f3d650e6dfd582c4"
+  },
+  {
+    "id": "6kPCcIAGoTeRrh8qrmKa90",
+    "name": "Piel",
+    "artist": "Tiago PZK, Ke Personajes",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028b830644fbb0d2ba66a722f5"
+  },
+  {
+    "id": "6XjDF6nds4DE2BBbagZol6",
+    "name": "Gata Only",
+    "artist": "FloyyMenor, Cris MJ",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c4583f3ad76630879a75450a"
+  },
+  {
+    "id": "2pR6bipXfJySBhje19SW02",
+    "name": "Marisola",
+    "artist": "Stars Music Chile, Cris MJ, Standly",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028b43f1312c1be458771e1f8f"
+  },
+  {
+    "id": "6WatFBLVB0x077xWeoVc2k",
+    "name": "Si Antes Te Hubiera Conocido",
+    "artist": "KAROL G",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02491678beaffcefac517a699e"
+  },
+  {
+    "id": "3OJDtCdYs8QJnui708tEU3",
+    "name": "Soltera",
+    "artist": "Shakira",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ab3c4257d46b6350454c2f4b"
+  },
+  {
+    "id": "6UNLWd8LUk9nNgmU6AcXct",
+    "name": "CHINGON",
+    "artist": "Martinwhite, NEMJ",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02813b9dc40323b04db8260988"
+  },
+  {
+    "id": "4dLLdfiniBhDP9dlJQIOi4",
+    "name": "Perdonarte, ¿Para Qué?",
+    "artist": "Los Ángeles Azules, Emilia",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f975282219ded7470e667000"
+  },
+  {
+    "id": "27uAea0qcUz3a7jKnAT7KG",
+    "name": "Algún Día Volveras",
+    "artist": "Santaferia",
+    "year": "2018",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024d3c4f3dcf1b24cb83d55375"
+  },
+  {
+    "id": "2gEhAH0eZwl3b8si4l3tZ1",
+    "name": "Serenata cruel",
+    "artist": "Villa Cariño",
+    "year": "2013",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02eccaa54e997c5aac026342ef"
+  },
+  {
+    "id": "7eYjn1bChNho1ELP0mbyeA",
+    "name": "Para dormir contigo otra vez",
+    "artist": "Villa Cariño",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbb1dd4159c5dad6649d976e"
+  },
+  {
+    "id": "1aQsmA0kB65bp19qG8WfxD",
+    "name": "Prisionera",
+    "artist": "Villa Cariño",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbb1dd4159c5dad6649d976e"
+  },
+  {
+    "id": "4fSIb4hdOQ151TILNsSEaF",
+    "name": "Todo De Ti",
+    "artist": "Rauw Alejandro",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c160ede886e4e54350c0cec9"
+  },
+  {
+    "id": "6Sq7ltF9Qa7SNFBsV5Cogx",
+    "name": "Me Porto Bonito",
+    "artist": "Bad Bunny, Chencho Corleone",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
+  },
+  {
+    "id": "51FvjPEGKq2zByeeEQ43V9",
+    "name": "El Merengue",
+    "artist": "Marshmello, Manuel Turizo",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bef51a8d2e9c2261a84cb680"
+  },
+  {
+    "id": "6ebo7CQn4ILLGvXRmXHhQz",
+    "name": "Miénteme",
+    "artist": "TINI, Maria Becerra",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020c5b7823a8b0ac6feb53fd11"
+  },
+  {
+    "id": "0UONsSefbs5YP6iluxq8Dq",
+    "name": "Amiga Ya Mató",
+    "artist": "Fran Maira",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ecd3e9d9b21ada204ca3a9b0"
+  },
+  {
+    "id": "0SqqAgdovOE24BzxIClpjw",
+    "name": "Yo Perreo Sola",
+    "artist": "Bad Bunny",
+    "year": "2020",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02548f7ec52da7313de0c5e4a0"
+  },
+  {
+    "id": "52yp1caEYyP1w9qFINypd1",
+    "name": "Como la Flor",
+    "artist": "Ke Personajes",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026f6ba2aada9068a086b56ca8"
+  },
+  {
+    "id": "0gzcET27nREY6aD8LJU9wD",
+    "name": "Noche Loca",
+    "artist": "Marama, Rombai",
+    "year": "2015",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025ef65e3a30d372a55b19dfa6"
+  },
+  {
+    "id": "3iXtNVICHTu2FEhh3bMWoV",
+    "name": "Bronceado - Remix",
+    "artist": "Marama, MYA, Robleis",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022f291ddfbe75870bf70d1b0e"
+  },
+  {
+    "id": "2qG5sZ7Si6sdK74qLxedYM",
+    "name": "Con Altura",
+    "artist": "ROSALÍA, J Balvin, El Guincho",
+    "year": "2019",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0265b0e3e1bd8b5fe2f602c1ea"
+  },
+  {
+    "id": "4QXdarIBu7JDxVTTF4FHWE",
+    "name": "LuisMi",
+    "artist": "Polimá Westcoast, Young Cister",
+    "year": "2019",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02372b3e55cdce6bf7216400aa"
+  },
+  {
+    "id": "0SoBfYjQHvL6cuWHtPUYnq",
+    "name": "Hoy",
+    "artist": "Valentino Merlo, The La Planta",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0281bccfaf5e0303cf48145e2e"
+  },
+  {
+    "id": "6rtVnWS23c2k09s0xO46ed",
+    "name": "Tírate un Paso / Tembleque / Soy una Gárgola / Toma Toma / Látigo",
+    "artist": "Los Wachiturros",
+    "year": "2014",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02db7f63eb9fb65ec8d3e1f7d3"
+  },
+  {
+    "id": "0Lahr7sUDdtYnX3n3KobR6",
+    "name": "PONTE LOKITA",
+    "artist": "Katteyes, Kidd Voodoo, Swift 047",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029dabed68d8c46d46a0c7890d"
+  },
+  {
+    "id": "0vfPiExVUcECwzpQ3vfV0R",
+    "name": "Tattoo",
+    "artist": "Grupo Zúmbale Primo",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02db1ebedddab9cbec71ec52e9"
+  },
+  {
+    "id": "4aEyI7nU1uCm4G0YpR7NvQ",
+    "name": "Celosa",
+    "artist": "Ke Personajes, J Balvin",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0251c0592b1a240ec9b23f6b97"
+  },
+  {
+    "id": "2mdrVnxEnPR6iFijakkxQS",
+    "name": "QLOO*",
+    "artist": "Young Cister, Kreamly",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0213189b29e3f97c1e7442508e"
+  },
+  {
+    "id": "6s9PpYbExKlHuJ8JMyep21",
+    "name": "Bing Bong",
+    "artist": "Yailin la Mas Viral, Puyalo Pantera",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0203ce40447298d4373551576f"
+  },
+  {
+    "id": "6JjPBQfI2Y8nIjnm65X6Pw",
+    "name": "X (feat. Maluma & Ozuna) - Remix",
+    "artist": "Nicky Jam, J Balvin, Maluma, Ozuna",
+    "year": "2018",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024b1734e4d48786063992ce04"
+  },
+  {
+    "id": "4bw8mcDUSRWfQo63ZTYRnU",
+    "name": "Según Quién",
+    "artist": "Maluma, Carín León",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023922dfdc676790220e0a7750"
+  },
+  {
+    "id": "1yoMvmasuxZfqHEipJhRbp",
+    "name": "Hawái",
+    "artist": "Maluma",
+    "year": "2020",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02079fb6c5ba37dc11d66ce1e2"
+  },
+  {
+    "id": "6mICuAdrwEjh6Y6lroV2Kg",
+    "name": "Chantaje (feat. Maluma)",
+    "artist": "Shakira, Maluma",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02eec120f35546507f59f05c41"
+  },
+  {
+    "id": "4NoOME4Dhf4xgxbHDT7VGe",
+    "name": "X SI VOLVEMOS",
+    "artist": "KAROL G, Romeo Santos",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0282de1ca074ae63cb18fce335"
+  },
+  {
+    "id": "1L02r0lMMpOyQhmJHJRo1P",
+    "name": "Te Amo Con Locura",
+    "artist": "Eyci and Cody",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b0f34575240482b9fe44be30"
+  },
+  {
+    "id": "2wuZ3kg5ChBjRKqBYfJ9H7",
+    "name": "EL ÚNICO",
+    "artist": "CA7RIEL & Paco Amoroso",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fef5b866326e3451bde28ff2"
+  },
+  {
+    "id": "6gV8ALkSHfJi7Bprabr1FC",
+    "name": "Inocente",
+    "artist": "Roze Oficial, Peipper",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0262fcd653e4b7ad78efa53806"
+  },
+  {
+    "id": "3k3NWokhRRkEPhCzPmV8TW",
+    "name": "Ojitos Lindos",
+    "artist": "Bad Bunny, Bomba Estéreo",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
+  },
+  {
+    "id": "4FHXsehfIbyPCJLP7fCnIF",
+    "name": "Ritmo",
+    "artist": "Raffa Fl",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c632710935419d8475d5c694"
+  },
+  {
+    "id": "2dgKoQxqv5qiM8zL33FOYf",
+    "name": "Callaita - Remix",
+    "artist": "Santiago Novello",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0247bb1dd4494df9da7e07b343"
+  },
+  {
+    "id": "7ltBkmWDyPxBM4Q8RzwaB1",
+    "name": "Columbia - Remix",
+    "artist": "AG Remix, Albert Gonzalez",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f743216902f4b52301d9921d"
+  },
+  {
+    "id": "2EFxmVoPR2kkCvy5dtNB7T",
+    "name": "Efecto - Remix",
+    "artist": "Emmi Dj, Maru Mix",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02269661e3e97456ff8bcf2bf6"
+  },
+  {
+    "id": "4mj0rWZkEupbbMer23YrBL",
+    "name": "CAFé CON RON",
+    "artist": "Mareels",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0232c09e0d1223de1b2c49e5e3"
+  },
+  {
+    "id": "3IwGp5x8qB7pCaf6PmT5u0",
+    "name": "Latido",
+    "artist": "Iglesias",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020abb40080ec2906b7f4a7089"
+  },
+  {
+    "id": "7lCjcdyl76iGPe42WvSK8e",
+    "name": "El Apagon - Remix",
+    "artist": "ELITE Djs",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0214f198f5cc4a9f1963c9d8bf"
+  },
+  {
+    "id": "6RJHr0qPLeEWvQ0F2i3sur",
+    "name": "Baile Inolvidable - Remix",
+    "artist": "Agus Maidana, Nico Manriquez",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02db3e8fd248a6f4014dd4612c"
+  },
+  {
+    "id": "1MPtRzIQNroAda6vKPk8pE",
+    "name": "Nuevayol (Tech House) - Remix",
+    "artist": "Dj Ezee",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02299e610b5ff838f2f2c341fa"
+  },
+  {
+    "id": "2DEZmgHKAvm41k4J3R2E9Y",
+    "name": "Safaera",
+    "artist": "Bad Bunny, Jowell & Randy, Ñengo Flow",
+    "year": "2020",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02548f7ec52da7313de0c5e4a0"
+  },
+  {
+    "id": "1HEwEN64NjgTaHmo7LfkX8",
+    "name": "no tiene sentido",
+    "artist": "Beéle",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022feb67a486bcf117e7fb15b0"
+  },
+  {
+    "id": "2ZyrAym0sRLwt4PhGotHuI",
+    "name": "LA VILLA",
+    "artist": "Ryan Castro, Kapo, Gangsta",
+    "year": "2025",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024f0b5d2c8e5f6b86fcd73ca9"
+  },
+  {
+    "id": "6YYmoV9YbBefsspGmqFHbs",
+    "name": "Una Vaina Loca",
+    "artist": "Fuego",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02574accbc3e8c702bb6ee68f0"
+  },
+  {
+    "id": "5SjaZNwy1DpttK1lLk1r3j",
+    "name": "SÁBADO",
+    "artist": "Myke Towers",
+    "year": "2023",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d646ace05ec913ac690a00c3"
+  },
+  {
+    "id": "5KDNFlHAdDJ84fhK27c35X",
+    "name": "Judith",
+    "artist": "A Perfect Circle",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022d73b494efcb99356f8c7b28"
+  },
+  {
+    "id": "4tvBoSWeIW0bjhKNre5mod",
+    "name": "Thunder Kiss '65",
+    "artist": "White Zombie",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02321b697c2c9474c0951ac58f"
+  },
+  {
+    "id": "7yUGMbFsUH5MuPNuq75MyP",
+    "name": "Slave",
+    "artist": "Silverchair",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f6e1df99ae6316a4badcce58"
+  },
+  {
+    "id": "2liwbAaiYRiJB2H286u1zS",
+    "name": "Check My Brain",
+    "artist": "Alice In Chains",
+    "year": "2009",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022aac6b7dae4a8813f5e28454"
+  },
+  {
+    "id": "6gZVQvQZOFpzIy3HblJ20F",
+    "name": "Man in the Box",
+    "artist": "Alice In Chains",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023cf83c82a8e976d7b51e2d00"
+  },
+  {
+    "id": "6QewNVIDKdSl8Y3ycuHIei",
+    "name": "Even Flow",
+    "artist": "Pearl Jam",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022d0e5ab5bd2e234fbcffa3e0"
+  },
+  {
+    "id": "0F2LiyHp9E0pAanpfnzHNp",
+    "name": "Cherub Rock - 2011 Remaster",
+    "artist": "The Smashing Pumpkins",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f00d9c29f0eb7691f908f23a"
+  },
+  {
+    "id": "2EYnvZoSEkwiC8ynBcjLyi",
+    "name": "Swallowed - Remastered",
+    "artist": "Bush",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02480f135db3f0c9dffa2b65c8"
+  },
+  {
+    "id": "02lTDOxHeXTHsdwXoz6lpC",
+    "name": "In the Meantime",
+    "artist": "Spacehog",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029511e3a2fc113eae0dd111dd"
+  },
+  {
+    "id": "4AkFvW4VdNDNmVXehylmrr",
+    "name": "Love Buzz",
+    "artist": "Nirvana",
+    "year": "1989",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0242b32e43479b6aa2cdf93c92"
+  },
+  {
+    "id": "1vEgrHo24l50BHDse4NoOu",
+    "name": "School",
+    "artist": "Nirvana",
+    "year": "1989",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0242b32e43479b6aa2cdf93c92"
+  },
+  {
+    "id": "1MQTmpYOZ6fcMQc56Hdo7T",
+    "name": "Sleep Now In the Fire",
+    "artist": "Rage Against The Machine",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023c2579a4f8cacd5b95b8fa68"
+  },
+  {
+    "id": "2rmoeBqloVIhg7Zb20n5Sq",
+    "name": "Give It Away",
+    "artist": "Red Hot Chili Peppers",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025590b4ee88187cb06a5b102d"
+  },
+  {
+    "id": "6qLEOZvf5gI7kWE63JE7p3",
+    "name": "Interstate Love Song - 2019 Remaster",
+    "artist": "Stone Temple Pilots",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fc90a8ed9924435d62235aa8"
+  },
+  {
+    "id": "62nQ8UZVqR2RMvkJHkcO2o",
+    "name": "Jeremy",
+    "artist": "Pearl Jam",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022d0e5ab5bd2e234fbcffa3e0"
+  },
+  {
+    "id": "6GtX0jaNL8IjVQfrDBx81z",
+    "name": "Bullet With Butterfly Wings - Remastered 2012",
+    "artist": "The Smashing Pumpkins",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02431ac6e6f393acf475730ec6"
+  },
+  {
+    "id": "4ReyTz0y3TGkX48wO3Llot",
+    "name": "Epic",
+    "artist": "Faith No More",
+    "year": "1989",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e081ef6de656ee714788ea0d"
+  },
+  {
+    "id": "6tsojOQ5wHaIjKqIryLZK6",
+    "name": "All My Life",
+    "artist": "Foo Fighters",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bfff163b0602156a983fa079"
+  },
+  {
+    "id": "6YIggUJW3ttAAPRdnki8RM",
+    "name": "Disarm - 2011 Remaster",
+    "artist": "The Smashing Pumpkins",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025274788f34fc7656d2856dfd"
+  },
+  {
+    "id": "1TEZWG1FdjzDdercCguTwj",
+    "name": "Nookie",
+    "artist": "Limp Bizkit",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023783782de74f61e36795bf9c"
+  },
+  {
+    "id": "0Puj4YlTm6xNzDDADXHMI9",
+    "name": "Sabotage",
+    "artist": "Beastie Boys",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02436a305db8bd85b820da3e5a"
+  },
+  {
+    "id": "5JJDu0Z5DKe7mR31MGksSg",
+    "name": "Come Out and Play",
+    "artist": "The Offspring",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020158cbde70672dd821972907"
+  },
+  {
+    "id": "1Dr1fXbc2IxaK1Mu8P8Khz",
+    "name": "When I Come Around",
+    "artist": "Green Day",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02db89b08034de626ebee6823d"
+  },
+  {
+    "id": "25pl7kV4OxafIc9wPAggYf",
+    "name": "So What'Cha Want",
+    "artist": "Beastie Boys",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0296c3a9e140c8ff0ab0d8a91e"
+  },
+  {
+    "id": "1FkoVC85Ds3mFoK0fVqEqP",
+    "name": "Self Esteem",
+    "artist": "The Offspring",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020158cbde70672dd821972907"
+  },
+  {
+    "id": "0pwObEOHolQZSldJ2q1wpy",
+    "name": "Stinkfist",
+    "artist": "TOOL",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0247daa44983fa6079910ed295"
+  },
+  {
+    "id": "2MuWTIM3b0YEAskbeeFE1i",
+    "name": "Master Of Puppets",
+    "artist": "Metallica",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02668e3aca3167e6e569a9aa20"
+  },
+  {
+    "id": "4tPHBRIPsB55nssjvKDbjj",
+    "name": "Disposable Heroes",
+    "artist": "Metallica",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02668e3aca3167e6e569a9aa20"
+  },
+  {
+    "id": "4gAV3sMEZn4lrfKPGARCqA",
+    "name": "Israel's Son",
+    "artist": "Silverchair",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0272c3447a562fc7be1c8e1255"
+  },
+  {
+    "id": "2OUR8g12h5qsGDs1v5lqvp",
+    "name": "Swerve City",
+    "artist": "Deftones",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0273652b7a0dc388dd1d044b69"
+  },
+  {
+    "id": "4UFQBhIOgANiBG44USIgsf",
+    "name": "Army Of Me",
+    "artist": "Björk",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0203b878ae26aeab059fd94bf0"
+  },
+  {
+    "id": "1lATXTBJDHwawvT1UfxWu3",
+    "name": "The Pot",
+    "artist": "TOOL",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02725e469500de9880a320d8cb"
+  },
+  {
+    "id": "6nJPHXRpKYv2yqtalEjKy5",
+    "name": "Got the Life",
+    "artist": "Korn",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024e492e787ed64de43c3a3a21"
+  },
+  {
+    "id": "0snQkGI5qnAmohLE7jTsTn",
+    "name": "Toxicity",
+    "artist": "System Of A Down",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0207bc7d2a745636c356b4d0aa"
+  },
+  {
+    "id": "7jDhsoXLKVsKi3fk3s4M4Z",
+    "name": "Sugar",
+    "artist": "System Of A Down",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027ee6a22e663bab03232fd5c1"
+  },
+  {
+    "id": "5cZqsjVs6MevCnAkasbEOX",
+    "name": "Break Stuff",
+    "artist": "Limp Bizkit",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023783782de74f61e36795bf9c"
+  },
+  {
+    "id": "6holGuk1jKHTdWyWBOZi8l",
+    "name": "My Generation",
+    "artist": "Limp Bizkit",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a31b146c7cf07705d912efe"
+  },
+  {
+    "id": "5wvYib82q05wiNjLElD8GJ",
+    "name": "Dig",
+    "artist": "Incubus",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0258f4ef37dc0cdb68f858808d"
+  },
+  {
+    "id": "0uLhNT7UIH3nZCCDZd3OBl",
+    "name": "Anna Molly",
+    "artist": "Incubus",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0258f4ef37dc0cdb68f858808d"
+  },
+  {
+    "id": "0tZ3mElWcr74OOhKEiNz1x",
+    "name": "Bulls On Parade",
+    "artist": "Rage Against The Machine",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02053f006079bce979e5fef1e1"
+  },
+  {
+    "id": "4OCzAGgyWsUKpdWufYywZm",
+    "name": "Cochise",
+    "artist": "Audioslave",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024d94e1251b7e8c5e247de39c"
+  },
+  {
+    "id": "59WN2psjkt1tyaxjspN8fp",
+    "name": "Killing In The Name",
+    "artist": "Rage Against The Machine",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0254ab617bc2d4974ab6ffbece"
+  },
+  {
+    "id": "7fcfNW0XxTWlwVlftzfDOR",
+    "name": "Walk",
+    "artist": "Pantera",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02347c0a40c1e3f0c890a6d9d6"
+  },
+  {
+    "id": "2aIB1CdRRG7YLBu9hNw9nR",
+    "name": "The Beautiful People",
+    "artist": "Marilyn Manson",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c61d3a663bd18fe8cd97c947"
+  },
+  {
+    "id": "6SyutgkQfLKfcsWvmh02k2",
+    "name": "Personal Jesus",
+    "artist": "Marilyn Manson",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023e2c4ed336c6b4ebb1a4bde9"
+  },
+  {
+    "id": "0EYOdF5FCkgOJJla8DI2Md",
+    "name": "B.Y.O.B.",
+    "artist": "System Of A Down",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c65f8d04502eeddbdd61fa71"
+  },
+  {
+    "id": "5qQxqHhrMzDdEFOtcAYNk2",
+    "name": "Digging the Grave",
+    "artist": "Faith No More",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027201b2b127bdd451472373ee"
+  },
+  {
+    "id": "2V4Bc2I962j7acQj1N0PiQ",
+    "name": "Celebrity Skin",
+    "artist": "Hole",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020649124c37ce988317263671"
+  },
+  {
+    "id": "5UWwZ5lm5PKu6eKsHAGxOk",
+    "name": "Everlong",
+    "artist": "Foo Fighters",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024bc9bcdbdc9ac34e37d8b6bb"
+  },
+  {
+    "id": "5AmJkJE6LvQvIUDe4yj4Pm",
+    "name": "Bailando Solo",
+    "artist": "Los Bunkers",
+    "year": "2013",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02213a1001f0ecedda19cc67ed"
+  },
+  {
+    "id": "0chYiddNUMKEj9nGMUVNoB",
+    "name": "Llueve Sobre La Ciudad",
+    "artist": "Los Bunkers",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026d48de5880e031310e8ba434"
+  },
+  {
+    "id": "6W1BLmVBxkqZwFQcORQLnv",
+    "name": "Tren Al Sur",
+    "artist": "Los Prisioneros",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
+  },
+  {
+    "id": "3NJRgHeqBfHW8EI7ZYpg0z",
+    "name": "Estrechez De Corazón",
+    "artist": "Los Prisioneros",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
+  },
+  {
+    "id": "3PGZF0gfjPtACwNBAost0C",
+    "name": "La Exiliada del Sur",
+    "artist": "Los Bunkers",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028b1621e8e25425a1e70f75f4"
+  },
+  {
+    "id": "6IPYhZMhD08rUM879z9to2",
+    "name": "Sobreviviendo",
+    "artist": "Illapu",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0209b0ced375c224b6f5a40849"
+  },
+  {
+    "id": "1RIfvWNqwnFRiVSm6348hC",
+    "name": "Volaras",
+    "artist": "Illapu",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020f6f2a5a415b19a5aed1726b"
+  },
+  {
+    "id": "6Lg1r56wubG76t2fOF9iNa",
+    "name": "Mira Niñita - 2020 Remasterizado",
+    "artist": "Los Jaivas",
+    "year": "1973",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02507886e5e490a8f1361c46fa"
+  },
+  {
+    "id": "6Lg1r56wubG76t2fOF9iNa",
+    "name": "Mira Niñita - 2020 Remasterizado",
+    "artist": "Los Jaivas",
+    "year": "1973",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02507886e5e490a8f1361c46fa"
+  },
+  {
+    "id": "0FRpkVdaghjib91eaXOA97",
+    "name": "Por Qué No Se Van",
+    "artist": "Los Prisioneros",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e3c716aaec57ac6b73cdd68f"
+  },
+  {
+    "id": "15T3otpUnJKin5njR8x0Tx",
+    "name": "El Baile De Los Que Sobran",
+    "artist": "Los Prisioneros",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e3c716aaec57ac6b73cdd68f"
+  },
+  {
+    "id": "6YbjZUR8F5ewBI1kHaIA1G",
+    "name": "Paramar",
+    "artist": "Los Prisioneros",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a8ff3f9fe5b57f2e0bfd9e05"
+  },
+  {
+    "id": "3tN9nucnARoyrX5WsKUrWz",
+    "name": "En un Largo Tour",
+    "artist": "Sol y Lluvia",
+    "year": "2013",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0243b930af2d2e87c1cd6046ae"
+  },
+  {
+    "id": "6AkRD0PiHw6DYKTUefJzAg",
+    "name": "Candombe Para José",
+    "artist": "Illapu",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027cb6ccda40ba677a6c5ac54f"
+  },
+  {
+    "id": "0igRRwt1nnRIAhFFkrOgkz",
+    "name": "Te Recuerdo Amanda",
+    "artist": "Victor Jara",
+    "year": "1969",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02cafb29f649dad86e197efcd0"
+  },
+  {
+    "id": "3KVOgVqm8Vom1J2SvgP9wP",
+    "name": "Quieren Dinero",
+    "artist": "Los Prisioneros",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0213f73e6ca935a991c146323d"
+  },
+  {
+    "id": "7zpNN01FLMP70EYGcxCCDY",
+    "name": "Un Amor Violento",
+    "artist": "Los Tres",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c90c7ca59a3055ba78ae5d89"
+  },
+  {
+    "id": "0fbP8sQu1rEgT6RakeidoS",
+    "name": "He Barrido el Sol",
+    "artist": "Los Tres",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c90c7ca59a3055ba78ae5d89"
+  },
+  {
+    "id": "5VEn738GxQ0CGF3c0zpu6p",
+    "name": "Arauco Tiene una Pena",
+    "artist": "Violeta Parra",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02616c9c21f4916b1bc1fed737"
+  },
+  {
+    "id": "7eDAcrYSFM2vNWrCefc9Sm",
+    "name": "Mambo de Machaguay",
+    "artist": "Los Jaivas",
+    "year": "1982",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0256c7b6d25ebfa1b6178584e4"
+  },
+  {
+    "id": "1J3YwZoLyuT0pPOtMbenOE",
+    "name": "Aconcagua",
+    "artist": "Los Jaivas",
+    "year": "1982",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0256c7b6d25ebfa1b6178584e4"
+  },
+  {
+    "id": "361zrhidWZOrmjFExUpfSy",
+    "name": "Takirari del Puerto",
+    "artist": "Los Jaivas",
+    "year": "1982",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0256c7b6d25ebfa1b6178584e4"
+  },
+  {
+    "id": "0aHps38kFw6Aqg9sJpD97d",
+    "name": "La Joya Del Pacífico",
+    "artist": "Joe Vasconcellos",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f74a14bd8f129fbb7abb3b8b"
+  },
+  {
+    "id": "3AMth1gnz9PbQnEfUVZbp2",
+    "name": "Pregon Para Iluminarse",
+    "artist": "Los Jaivas",
+    "year": "1975",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b5ac0738b808070a0786b001"
+  },
+  {
+    "id": "3hucW9oJIdJkxjaNxAc6wd",
+    "name": "Para Que Nunca Mas",
+    "artist": "Sol y Lluvia",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a3649c95c8840c78149d531f"
+  },
+  {
+    "id": "5E8fsTZfvnj7tuRvCnV4SV",
+    "name": "Todos Juntos - 2020 Remasterizado",
+    "artist": "Los Jaivas",
+    "year": "1973",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02507886e5e490a8f1361c46fa"
+  },
+  {
+    "id": "33nztJSpoZityjQp6rMT22",
+    "name": "El Derecho de Vivir en Paz",
+    "artist": "Victor Jara",
+    "year": "1971",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ed30ea3ea725626a55d19b1a"
+  },
+  {
+    "id": "6ftHPJyEHGqMaml3ZEwPm1",
+    "name": "Llueve Sobre La Ciudad",
+    "artist": "Los Bunkers",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0217cf04d6f54f52243c37bc51"
+  },
+  {
+    "id": "0VvwpKqD7cOYubrK030fGR",
+    "name": "La Voz de los '80",
+    "artist": "Los Prisioneros",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a8ff3f9fe5b57f2e0bfd9e05"
+  },
+  {
+    "id": "4kngkpQ3T9wUzZrdfQr0Wq",
+    "name": "Sexo",
+    "artist": "Los Prisioneros",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a8ff3f9fe5b57f2e0bfd9e05"
+  },
+  {
+    "id": "56Q1u9KJUMcun4UWv0b7ik",
+    "name": "Las Seis",
+    "artist": "Joe Vasconcellos",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021443f89117ffd83e8e3d4502"
+  },
+  {
+    "id": "1uY1pL5XU7UTx13mx2wXu8",
+    "name": "Huellas",
+    "artist": "Joe Vasconcellos",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021443f89117ffd83e8e3d4502"
+  },
+  {
+    "id": "5ycOBJyHjc40mNGB3Dim7Y",
+    "name": "Cuentame Una Historia Original",
+    "artist": "Los Prisioneros",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
+  },
+  {
+    "id": "2devOvQdt2r3lLOWu92O4x",
+    "name": "Amor Americano",
+    "artist": "Los Jaivas",
+    "year": "1981",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02614bdf1119b73ddaa9c6ba65"
+  },
+  {
+    "id": "6bEhhqg8vVNlnmj9CF6O0C",
+    "name": "La Funa",
+    "artist": "Joe Vasconcellos",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0253d14311075fb8c7a37b04ef"
+  },
+  {
+    "id": "7hakyU39FCG50HuiX7TV8B",
+    "name": "Conductor",
+    "artist": "Chico Trujillo",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ca1983c0b81f7011ffbc68ea"
+  },
+  {
+    "id": "4131I9Y7U9QTLI4mAhpUTQ",
+    "name": "Quien es la Que Viene Alli - Unplugged Version",
+    "artist": "Los Tres",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02baa83398c8be9f4929c2a72e"
+  },
+  {
+    "id": "1BniPUxcZHYSM2MOT5DdF6",
+    "name": "Ch Bah Puta La Güeá",
+    "artist": "Pettinellis",
+    "year": "2019",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02379fe0ff83e5d9b7ab5fdacf"
+  },
+  {
+    "id": "3E5wpa4PEgtP6iHVzpIYS9",
+    "name": "La Espada & la Pared",
+    "artist": "Los Tres",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0278310de37af0875569acc411"
+  },
+  {
+    "id": "2jffnrYEwzLz48kfVmQkXI",
+    "name": "Largo Tour",
+    "artist": "Chancho En Piedra",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026814bc232106b22ec7438c8f"
+  },
+  {
+    "id": "7oRwxVyXgH6vHsg5JB7ozx",
+    "name": "Siempre es viernes en mi corazón (feat. Ale Sergi & Juliana Gattas)",
+    "artist": "Alex Anwandter",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02767cb967c05ced7999b483ca"
+  },
+  {
+    "id": "0fIfA0NWLI9Yj1ZYOxTt8h",
+    "name": "No Sabes Que Desperdicio Tengo en el Alma",
+    "artist": "Los Tres",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ba47185873e6de36eff7ba9d"
+  },
+  {
+    "id": "4kdMRXEPC0f5zMvxhD7gNY",
+    "name": "El Tiempo En Las Bastillas",
+    "artist": "Difuntos Correa",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024015bc1deb15cc1cebc3c2d3"
+  },
+  {
+    "id": "2wtTMGEOHbZTCH4RB1ZMq2",
+    "name": "Nunca Quedas Mal Con Nadie",
+    "artist": "Los Prisioneros",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d49e25281048e9bedd82ec86"
+  },
+  {
+    "id": "0FauDhvAuanceOTIGQZAl4",
+    "name": "Locura Espacial",
+    "artist": "Chancho En Piedra",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028d2430c338f5d70a8ac1938e"
+  },
+  {
+    "id": "4isHeZRxdYw7IgGvl8OPwq",
+    "name": "Eligiendo Una Reina",
+    "artist": "Chancho En Piedra",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026314dfd5f48894c0ad9f1903"
+  },
+  {
+    "id": "7aeHztFLa7y9oRCmnJiS7U",
+    "name": "Volantín",
+    "artist": "Chancho En Piedra",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028d2430c338f5d70a8ac1938e"
+  },
+  {
+    "id": "0lnbIDYQKrD9VzNq3Ezyn2",
+    "name": "El Curanto",
+    "artist": "Chancho En Piedra",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026314dfd5f48894c0ad9f1903"
+  },
+  {
+    "id": "4IvYW5NRB5U8FE1nHTQkGn",
+    "name": "Dejando Libre el Amor",
+    "artist": "Chancho En Piedra",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02000bcf388f23e7a6e35c891a"
+  },
+  {
+    "id": "6mevK2IlIU5rmvkfqxCFWT",
+    "name": "Discojapi",
+    "artist": "Chancho En Piedra",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028d2430c338f5d70a8ac1938e"
+  },
+  {
+    "id": "7vgIGcKJDS0sJLajb9iV6U",
+    "name": "Asi Es La Vida",
+    "artist": "Glup!",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02574be213eecdcc5023dc42ae"
+  },
+  {
+    "id": "3bKvtihPA72hDEHBJnmHjh",
+    "name": "Puta Jefe",
+    "artist": "Glup!",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ffefaedb11672d48272b1989"
+  },
+  {
+    "id": "0SpADxMGryCt6r9rdlkdZ8",
+    "name": "Grado 3",
+    "artist": "Glup!",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02574be213eecdcc5023dc42ae"
+  },
+  {
+    "id": "1ysWzLwrIOmG33G5YFv0f0",
+    "name": "El Aval",
+    "artist": "Los Tres",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025751046ec855061a2f347960"
+  },
+  {
+    "id": "5927nKbonEX4UV9ehEZG7S",
+    "name": "Te Enojai por Todo",
+    "artist": "Sinergia",
+    "year": "2014",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024167762604be123d1838cd3f"
+  },
+  {
+    "id": "6W7c7B526zf3zAF3tptnyG",
+    "name": "Blues A Dos Mujeres",
+    "artist": "La Rue Morgue",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e99b57766652e3e5f54c0a42"
+  },
+  {
+    "id": "6fz4U560X7yuH8SUqF6MJm",
+    "name": "Por Costumbre - 2017 Remaster",
+    "artist": "Solar",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021499036f257d857f4af2510d"
+  },
+  {
+    "id": "2el13qIMOd8cripOqNohGB",
+    "name": "Mataz",
+    "artist": "Lucybell",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4114e0a24bc274ddbaf6bc0"
+  },
+  {
+    "id": "5EhButiJbrrRbO3qguSKkg",
+    "name": "Cuando Respiro En Tu Boca",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "2a5eCWoqUyDzadBT8eqb32",
+    "name": "Fe",
+    "artist": "Lucybell",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a7212fb1dfb585a8ef21d0a6"
+  },
+  {
+    "id": "5EhButiJbrrRbO3qguSKkg",
+    "name": "Cuando Respiro En Tu Boca",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "1ATlBCLlWAKUvfcFWciix0",
+    "name": "Lunas",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "1mUKIFqjCZPebAEGsQ15yo",
+    "name": "Angeles Siameses",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "6BhCYG1npuuuXnwCicz1sR",
+    "name": "Vete",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "4VzffTMgdAbB2ZVqrx4IBL",
+    "name": "Rodar",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "0euc5nPmz6KCIkR8i9G5qX",
+    "name": "Eclipse",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "5RSUakev7IY5LBwBvLdxRP",
+    "name": "Que No Me Vengan Con Paraisos",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "6ZKnnL2qpBTBQClzNpivgZ",
+    "name": "Sin Alas",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "732ZIHeosbnTDFXUa6kulE",
+    "name": "Desde Acá",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "2INJLOALCa1fIVyYkmybU8",
+    "name": "Tú",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "5zvQ8fr8KiFqeBnkib4vHG",
+    "name": "De Sudor Y Ternura",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "1k3uf1Qr8xtDWXoZnUXWWP",
+    "name": "Grito Otoñal",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "5RSUakev7IY5LBwBvLdxRP",
+    "name": "Que No Me Vengan Con Paraisos",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "5zvQ8fr8KiFqeBnkib4vHG",
+    "name": "De Sudor Y Ternura",
+    "artist": "Lucybell",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
+  },
+  {
+    "id": "3aCtwP2vHagbuBbshlUSri",
+    "name": "Mi Luz Crece",
+    "artist": "Lucybell",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4114e0a24bc274ddbaf6bc0"
+  },
+  {
+    "id": "7Iq4yqFDuqTvF22Gw8lAiQ",
+    "name": "Entre El Sol Y Dos Ojos",
+    "artist": "Lucybell",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4114e0a24bc274ddbaf6bc0"
+  },
+  {
+    "id": "3pDhN3qB33AOPhQEkUCaWt",
+    "name": "Limbo",
+    "artist": "Daddy Yankee",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0229866617908a958f41917d76"
+  },
+  {
+    "id": "6NdKkfo7o6IH1Op0jsBDjN",
+    "name": "Si No Le Contesto",
+    "artist": "Plan B",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022bf273f977582e8f890192fe"
+  },
+  {
+    "id": "3KZCP2StVGdWkOKyRZNWA4",
+    "name": "Es un Secreto",
+    "artist": "Plan B",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022bf273f977582e8f890192fe"
+  },
+  {
+    "id": "6URNgz911jj10KXTFtevcS",
+    "name": "Por Que Te Demoras?",
+    "artist": "Plan B",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022bf273f977582e8f890192fe"
+  },
+  {
+    "id": "3NVvbKNndun3sfDKJANhw4",
+    "name": "Marianela",
+    "artist": "Lirico En La Casa",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023afc04865216ba06fc80a862"
+  },
+  {
+    "id": "5uRd1tmUAvfFGSPR5266Xp",
+    "name": "Tu Cariñito",
+    "artist": "Luisito Ayala Y La Puerto Rican Power",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0259f19395707caa4ba17d07c7"
+  },
+  {
+    "id": "1LbGorB0xOfpiXQJFKB2Nd",
+    "name": "El Taxi",
+    "artist": "Pitbull, Osmani Garcia \\\"La Voz\\\"",
+    "year": "2015",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a1cc249569898d31407fcf7c"
+  },
+  {
+    "id": "5Y9fnynLlIvqtM710MHzfz",
+    "name": "Síguelo Bailando",
+    "artist": "Ozuna",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b0a875d7f1bfe4ec4aaffa48"
+  },
+  {
+    "id": "51XTKzrOz81B2ncZ2CEMOC",
+    "name": "Mueve Lo Que Dios Te Dio",
+    "artist": "joel music, Puch Flow",
+    "year": "2019",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026468e5fef4cf949c30a92e81"
+  },
+  {
+    "id": "3lfPuyvkKQsWFFAIhE73ww",
+    "name": "Jump",
+    "artist": "Rupee",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d9b658fe9f28611388fb415e"
+  },
+  {
+    "id": "64zcAZeIWHszCGKOSqAogH",
+    "name": "Te Felicito",
+    "artist": "Shakira, Rauw Alejandro",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029ce5d64fac62023f21f8f04a"
+  },
+  {
+    "id": "1DrDfpOx4P4LMxFhtOmeyD",
+    "name": "Fanatica Sensual",
+    "artist": "Plan B",
+    "year": "2014",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029ffb99a9a28c0adeb365c4c7"
+  },
+  {
+    "id": "0dgwWXkfcWyB2a2qTgEc0F",
+    "name": "Verano Azul",
+    "artist": "Juan Magán",
+    "year": "2009",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02faac6c9884c61a76a9da999c"
+  },
+  {
+    "id": "39KVUG2LifQa7dqQvzlgZG",
+    "name": "Tírate un Paso / Tembleque / Soy una Gárgola / Toma Toma / Látigo",
+    "artist": "Los Wachiturros",
+    "year": "2014",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ab11802c34d8e72653f6989a"
+  },
+  {
+    "id": "3lC4mM6NiSLttfYTv1HTNQ",
+    "name": "Bailan Rochas y Chetas",
+    "artist": "Nene Malo, Magenta",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b4001da146a21be6471ecd1d"
+  },
+  {
+    "id": "2aE0HrYHGbyXpgOnMY03Id",
+    "name": "FUE DIFICIL",
+    "artist": "Maria Jose Quintanilla",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020432c9a7cebef25cbf3f6f8a"
+  },
+  {
+    "id": "2jnZUvhw2LTvDI6YidRVcO",
+    "name": "Llamado de Emergencia",
+    "artist": "Daddy Yankee",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02522f64d160907ff8a7b61bc7"
+  },
+  {
+    "id": "5hpwyyJJ2JyozFVVRJsfLp",
+    "name": "Salgo Pa&apos; la Calle",
+    "artist": "Daddy Yankee, Randy Nota Loca",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02522f64d160907ff8a7b61bc7"
+  },
+  {
+    "id": "48NXpYRuvv9izul4oXhqS9",
+    "name": "Salió El Sol",
+    "artist": "Don Omar",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024cca40647f8b57382231a94e"
+  },
+  {
+    "id": "3YT1coaqAGWLRBIBJOu8AN",
+    "name": "En Su Nota",
+    "artist": "Don Omar, Mackie Ranks",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024cca40647f8b57382231a94e"
+  },
+  {
+    "id": "1Kgyx7NLtzsa3gWV1efGHu",
+    "name": "Sexy Movimiento",
+    "artist": "Wisin & Yandel",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025374e0160ead917b6e73b61f"
+  },
+  {
+    "id": "0tIpUUbOYIWqvI50Ksf7D5",
+    "name": "Donde Estan las Gatas",
+    "artist": "Alex Gargolas, Daddy Yankee, Nicky Jam",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e67cb23316fb372fb739209c"
+  },
+  {
+    "id": "6yLqoieklk9gwabLaUDJ4s",
+    "name": "Perdóname",
+    "artist": "La Factoria, Eddy Lover",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02abae402604678eb5a5dc74c9"
+  },
+  {
+    "id": "2Jz1X6ZB0gkkCVgmeVGVGp",
+    "name": "Na De Na",
+    "artist": "Angel Y Khriz, Gocho \\\"El Lápiz De Platino\\\", John Eric",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298cc17c2d48595067de30578"
+  },
+  {
+    "id": "2FNqnsX74ZlwduUAcnmzee",
+    "name": "Tu Príncipe",
+    "artist": "Daddy Yankee, Zion & Lennox",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026bdcdf82ecce36bff808a40c"
+  },
+  {
+    "id": "7fGODUqa0gtkb72oBVCgCD",
+    "name": "Ella Me Levanto",
+    "artist": "Daddy Yankee",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0223a0d80da059e0b729f42714"
+  },
+  {
+    "id": "6AiwkehpD4FKetcgLn8STi",
+    "name": "Siente El Boom",
+    "artist": "Tito \\\"El Bambino\\\", Randy Nota Loca",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02698c765025eca12d142043de"
+  },
+  {
+    "id": "6ksWMnPcHNyNoNf3y1BQCO",
+    "name": "Noche De Entierro",
+    "artist": "Daddy Yankee, Wisin & Yandel, Zion, Héctor \\\"El Father\\\", Tonny Tun Tun",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020bfe0ab73a052daddb29fa9b"
+  },
+  {
+    "id": "33a2zTGZocgU9XVDDILHM3",
+    "name": "La Despedida",
+    "artist": "Daddy Yankee",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d55d06f510870ea67dccbb2e"
+  },
+  {
+    "id": "6LsUo3PX3QeJmWBRcmaf5b",
+    "name": "Tocarte Toa",
+    "artist": "Big Yamo, Natya",
+    "year": "2013",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0231efc094729062d8452bd920"
+  },
+  {
+    "id": "7mL0vTeXzlUj2jsApatA83",
+    "name": "Agárrala - Remix",
+    "artist": "Trebol Clan",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027f97f0064ebdf54e126feb78"
+  },
+  {
+    "id": "5JLV62rg4jtnoElc4P9F6K",
+    "name": "Quiero Bailar",
+    "artist": "Ivy Queen",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022372ef8dbdcdd797de8956bb"
+  },
+  {
+    "id": "0e8DgtfJnWTBarF9YGMd0N",
+    "name": "Ven Bailalo - Reggaeton Mix",
+    "artist": "Angel Y Khriz",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0299aa528b887ebf67a1e5375d"
+  },
+  {
+    "id": "6G4U9avyBNEfP0fAIduev3",
+    "name": "Ella Y Yo - Featuring Don Omar",
+    "artist": "Aventura, Don Omar",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027ccd22cc18d53dd443c69d43"
+  },
+  {
+    "id": "7uUYUy2qLfev9ppNvFBHpX",
+    "name": "Pasarela",
+    "artist": "Daddy Yankee",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0229866617908a958f41917d76"
+  },
+  {
+    "id": "15wPtgg6jsyMLhIkjcSpl4",
+    "name": "Ahora Es",
+    "artist": "Wisin & Yandel",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025374e0160ead917b6e73b61f"
+  },
+  {
+    "id": "79zvVrn65ksbiGQxrtV4I5",
+    "name": "Guaya Guaya",
+    "artist": "Don Omar",
+    "year": "2015",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024c22257156b1234fc0169b1f"
+  },
+  {
+    "id": "4wmPBI7iEJ2urKoXjQQqFu",
+    "name": "La Vecinita",
+    "artist": "Don Omar, Vico C",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0221b6da7b0a299f454dc46e23"
+  },
+  {
+    "id": "6DxS2ZRl8G3EagHkovYXA2",
+    "name": "Zun Da Da",
+    "artist": "Zion",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4371bfd653207b5def22d80"
+  },
+  {
+    "id": "1kQqiC1rS1FiuVpeBKN0QN",
+    "name": "Rakata",
+    "artist": "Wisin & Yandel",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027715c409b824e68db51c7adf"
+  },
+  {
+    "id": "69Ej1xrGjOcHvIMtMKxK0G",
+    "name": "Dile",
+    "artist": "Don Omar",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b4070df60fced11f282548d0"
+  },
+  {
+    "id": "4kAtRwNRLMKuoCbxMSxUGI",
+    "name": "Noche De Sexo",
+    "artist": "Wisin & Yandel, Romeo Santos",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027715c409b824e68db51c7adf"
+  },
+  {
+    "id": "26QKsGW4hMuwiEE1ftUMHe",
+    "name": "Lo Que Pasó, Pasó",
+    "artist": "Daddy Yankee",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026bdcdf82ecce36bff808a40c"
+  },
+  {
+    "id": "2Dbq5moIguMsbRZa9SB7gD",
+    "name": "Permitame (feat. Yandel)",
+    "artist": "Tony Dize, Yandel",
+    "year": "2009",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0286f54c23950987a4bd0eba02"
+  },
+  {
+    "id": "2Eg6dOam7cAe5turf2bnCg",
+    "name": "En La Cama (feat. Daddy Yankee)",
+    "artist": "Nicky Jam, Daddy Yankee",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020212a2125f4d13d7b86f54af"
+  },
+  {
+    "id": "04uA3BJ1Rj8DBKkpKCABJx",
+    "name": "Mírala Bien",
+    "artist": "Wisin & Yandel",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027715c409b824e68db51c7adf"
+  },
+  {
+    "id": "0Xfo7PfltbOrAiBs0eSCTH",
+    "name": "¿Qué Tengo Que Hacer?",
+    "artist": "Daddy Yankee",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02522f64d160907ff8a7b61bc7"
+  },
+  {
+    "id": "5clFSlfkCRlhnH1cAQjSBi",
+    "name": "Sensacion Del Bloque",
+    "artist": "De La Ghetto, Randy",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0295efcedfc7f85ef8bc0a37b6"
+  },
+  {
+    "id": "1pLCpA1RN8avJxSD3ZCwhj",
+    "name": "Pa' Que La Pases Bien",
+    "artist": "Arcángel",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02294ea58a8ac4ae598c46d0b0"
+  },
+  {
+    "id": "5w9c2J52mkdntKOmRLeM2m",
+    "name": "Con Calma",
+    "artist": "Daddy Yankee, Snow",
+    "year": "2019",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02896ffcd42561c44fea2bae7b"
+  },
+  {
+    "id": "2oeyvFG0mFFDHUxhPVObNk",
+    "name": "Flow Natural",
+    "artist": "Tito \\\"El Bambino\\\", Beenie Man, Deevani",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02abebca5919b3af8e5b189ff9"
+  },
+  {
+    "id": "1ly10TNmCejjiwCM0K0vrN",
+    "name": "Pam Pam",
+    "artist": "Wisin & Yandel",
+    "year": "2013",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027cf6facd89c47445e6a4fcea"
+  },
+  {
+    "id": "1PZrHbJjt5t7dP9OGRxcD0",
+    "name": "Dale Don Dale",
+    "artist": "Don Omar",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b4070df60fced11f282548d0"
+  },
+  {
+    "id": "5oQDYIpN3ieXNHwXAr8TXf",
+    "name": "Na De Na",
+    "artist": "Angel Y Khriz, Gocho \\\"El Lápiz De Platino\\\", John Eric",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02243f0010b0927e78ccd9e8e2"
+  },
+  {
+    "id": "0qp29frhNoklK9WvxERqlS",
+    "name": "Tocarte Toa (feat. Natya)",
+    "artist": "Big Yamo, Natya",
+    "year": "2013",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028f5d0ed60bcdae9c8a2c56bb"
+  },
+  {
+    "id": "1DDhhUMJhjZEFelUMlqUot",
+    "name": "Hasta Abajo - Remix",
+    "artist": "Don Omar",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023b1bf977ba3750ec796193d0"
+  },
+  {
+    "id": "2a1o6ZejUi8U3wzzOtCOYw",
+    "name": "Danza Kuduro",
+    "artist": "Don Omar, Lucenzo",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024640a26eb27649006be29a94"
+  },
+  {
+    "id": "614NVFo5csQqRnryl4jXs2",
+    "name": "El Teléfono",
+    "artist": "Héctor \\\"El Father\\\", Wisin & Yandel",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d48062765f4871ca6a2917e1"
+  },
+  {
+    "id": "39FKtFw4GagJDW62hhHVuM",
+    "name": "Frikitona",
+    "artist": "Boy Wonder CF, Plan B",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e5afb354deaef85c02abe6d2"
+  },
+  {
+    "id": "4fJWoaQqGZwp3quw9OpLMe",
+    "name": "Pose",
+    "artist": "Daddy Yankee",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bcc30c5fa48fca3218c3ffa4"
+  },
+  {
+    "id": "774Vy9sPhpePjj0B7WHaG2",
+    "name": "Prrrum",
+    "artist": "Cosculluela",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022fe0dc7397290ffc42bd7b99"
+  },
+  {
+    "id": "5YzA563GXTuwQaRq24z1k5",
+    "name": "Como Antes (feat. Wisin)",
+    "artist": "Yandel, Wisin",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a6fa856d2b032f6a11fcc0dd"
+  },
+  {
+    "id": "3nDNXKBb5fRTuQXpeowWTT",
+    "name": "Algo Me Gusta De Ti",
+    "artist": "Wisin & Yandel",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026be6ef1173c9a2bb6705981c"
+  },
+  {
+    "id": "0tDSgSmZsbxCkdkfUPjg59",
+    "name": "5 Letras",
+    "artist": "Alexis y Fido",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0229d73e11d466d6dd8917173f"
+  },
+  {
+    "id": "4oROqjxNSBrVxrcSaW77Mc",
+    "name": "Perros Salvajes",
+    "artist": "Daddy Yankee",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0229866617908a958f41917d76"
+  },
+  {
+    "id": "0Rti0DO5ogLeC7AG5tFlhM",
+    "name": "Atrévete a Amar",
+    "artist": "Sol Azul",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020445690b301ab68b032b990b"
+  },
+  {
+    "id": "0lSktl6Mk5ZSYE0OKeL28i",
+    "name": "Toda la Noche",
+    "artist": "Supernova",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b3f2ab6b539c4abfc2da92e3"
+  },
+  {
+    "id": "2xQMk9GS11ZoBhwHZaGpe5",
+    "name": "Inocencia en Tus Ojos",
+    "artist": "Psycho",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020412f201bc884745ab9da11a"
+  },
+  {
+    "id": "2BF0SXM5QVhomkAI9wMTjv",
+    "name": "Esperando Nada",
+    "artist": "Nicole",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02016975e9f1ab068ca3de2f1a"
+  },
+  {
+    "id": "4C49HngAOVBtGurnFyA3dQ",
+    "name": "Atrevete a Aceptarlo",
+    "artist": "Stereo-3",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0238b9e729e5f7b4df73e01e9d"
+  },
+  {
+    "id": "74hvBIK6IDI9T9roVPAO5N",
+    "name": "Pocas Palabras",
+    "artist": "Supernova",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e7f06c0a81562c84419c3833"
+  },
+  {
+    "id": "50mppCpu6wJIOnYDLo9VlA",
+    "name": "Herida",
+    "artist": "Supernova",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e7f06c0a81562c84419c3833"
+  },
+  {
+    "id": "21s5A5DeCRdF2ENhGHBi9b",
+    "name": "Tu y Yo",
+    "artist": "Supernova",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b3f2ab6b539c4abfc2da92e3"
+  },
+  {
+    "id": "2lqmQNbNZUVwGu6M4d3Ggn",
+    "name": "Muérdete La Lengua",
+    "artist": "Francisca Valenzuela",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023a7c1e0b718a04b5230db2d2"
+  },
+  {
+    "id": "5jgoPPQ3w4FJMie9ADO4Z7",
+    "name": "Ven Ven Ven - Versión Karen Paola 2024",
+    "artist": "Karen Paola",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029040dbdf622bda992a1af404"
+  },
+  {
+    "id": "1Je1IMUlBXcx1Fz0WE7oPT",
+    "name": "Wannabe",
+    "artist": "Spice Girls",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0263facc42e4a35eb3aa182b59"
+  },
+  {
+    "id": "1di1BEgJYzPvXUuinsYJGP",
+    "name": "Everybody (Backstreet's Back) - Radio Edit",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "0phGofl3ppS5Itk1zM9eKa",
+    "name": "Ghostbusters - from the \\\"Ghostbusters\\\" Original Motion Picture Soundtrack",
+    "artist": "Ray Parker Jr.",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e043448727a1234eecde4139"
+  },
+  {
+    "id": "3S2R0EVwBSAVMd5UMgKTL0",
+    "name": "Thriller",
+    "artist": "Michael Jackson",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024121faee8df82c526cbab2be"
+  },
+  {
+    "id": "0yQAxyvJ5jhiNrr90hruHt",
+    "name": "Estocolmo - Radio Version",
+    "artist": "Mendez",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0232017695c3e5c5aeda9a3ec0"
+  },
+  {
+    "id": "3uLlpzZGQCMfhM0kmuI4qn",
+    "name": "Abarajame",
+    "artist": "Illya Kuryaki & The Valderramas",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a5623bcbb62bb9b62938446e"
+  },
+  {
+    "id": "4cZWyWTo7j9Jo4bpzVxaKy",
+    "name": "Jaguar House",
+    "artist": "Illya Kuryaki & The Valderramas",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a5623bcbb62bb9b62938446e"
+  },
+  {
+    "id": "4MpKmfuTYgsmXBmefQvttZ",
+    "name": "Sin Gamulan",
+    "artist": "Nicole",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02016975e9f1ab068ca3de2f1a"
+  },
+  {
+    "id": "7DtIZNAyNPZKXWerCrFWlY",
+    "name": "Debilidad",
+    "artist": "Saiko",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a5971bdf048c9aff7232200d"
+  },
+  {
+    "id": "42xGtxOrYmXIj4eamE0aEq",
+    "name": "No",
+    "artist": "Javiera Parra, Los Imposibles",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024dc20b2fc0955ed8b9543bc5"
+  },
+  {
+    "id": "13a4y2gmdbd3yzPTLv2bSS",
+    "name": "Noche",
+    "artist": "Nicole",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02372061a44f779f3e0f8dc6af"
+  },
+  {
+    "id": "6Vh0AR446sNuSH0Xl2B1kA",
+    "name": "Te Amo Tanto",
+    "artist": "Javiera Parra",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fa81d170660563e852accae2"
+  },
+  {
+    "id": "1MOz8heM3N6Qepr16NtKrt",
+    "name": "Cuando Miro En Tus Ojos",
+    "artist": "Saiko",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e24490bd218febb322ae9599"
+  },
+  {
+    "id": "6iYhB7uRQInL7N2OAvzjDZ",
+    "name": "Maldito Amor",
+    "artist": "Supernova",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b3f2ab6b539c4abfc2da92e3"
+  },
+  {
+    "id": "1dSWYkGqX9hv9xLdKYR2vk",
+    "name": "Dame Luz",
+    "artist": "Nicole",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02016975e9f1ab068ca3de2f1a"
+  },
+  {
+    "id": "375fFsG02nH7OmeJrhbUQ7",
+    "name": "Dulce",
+    "artist": "Francisca Valenzuela",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023a7c1e0b718a04b5230db2d2"
+  },
+  {
+    "id": "4zVIu1DEdAhNtPTnNUYqzU",
+    "name": "Sigues Dando Vueltas - Radio-Rue Version",
+    "artist": "La Rue Morgue",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e99b57766652e3e5f54c0a42"
+  },
+  {
+    "id": "1wDQYLCxPRyMbvamYJiFIU",
+    "name": "Peces",
+    "artist": "Francisca Valenzuela",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023a7c1e0b718a04b5230db2d2"
+  },
+  {
+    "id": "2DTQUOfYJAjdo7utgjnU4u",
+    "name": "Baker Street",
+    "artist": "Undercover",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0281f3f720305379713c1b3c9a"
+  },
+  {
+    "id": "6FkonFrR2Vyl8jdzhnkTvM",
+    "name": "Lady",
+    "artist": "Mendez",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025c9f8e7686f003d1018c0e97"
+  },
+  {
+    "id": "6vaMNTKuiIHcd6OAbud7gF",
+    "name": "Chiki-Chiki",
+    "artist": "Mendez",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02291282b4b3997ba440b20026"
+  },
+  {
+    "id": "7Eo3fkg16MzIgv9SxxSonH",
+    "name": "Llegó la Cripta",
+    "artist": "El Chombo, Aldo Ranks",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e45526dcea9c7d50bfd89ece"
+  },
+  {
+    "id": "4XTMj7kd8DHLl0r7ghmEAr",
+    "name": "Caraluna",
+    "artist": "Bacilos",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0266aa05271afcebabc190c0bb"
+  },
+  {
+    "id": "3UpS7kBnkVQYG13pDDFTC4",
+    "name": "As Long as You Love Me",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "2aNG1zFgAuHqYWhNbiIOF8",
+    "name": "All I Have to Give",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "5jZlPGOiYTcBjgVCXofrOz",
+    "name": "That's The Way I Like It",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "1GBr3WGJzV6lGycAS8SBbv",
+    "name": "10.000 Promises",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "5CMdasTE4CPRNSC9VSJrsz",
+    "name": "Like A Child",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "2L6Dh1e3Z8UsKsmoy74Jjx",
+    "name": "Hey Mr. DJ (Keep Playin' This Song)",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "493rl5ffrRvS5uPbRfwVFh",
+    "name": "Set Adrift on Memory Bliss",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "7iiPCPiyAcKTwFfElnQUB9",
+    "name": "That's What She Said",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "0SyPNRaOlEonBpX2ZbupNk",
+    "name": "If You Want It To Be Good Girl (Get Yourself a Bad Boy)",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "6h4JFamZhYCPtR6WkrFdv4",
+    "name": "If I Don't Have You",
+    "artist": "Backstreet Boys",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
+  },
+  {
+    "id": "3LNZSTiwQYL7BnTfHvIOII",
+    "name": "Una Cerveza",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "51n1ncCPculGdNwxRZCC9O",
+    "name": "Tú",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "5PBglLuGrJFWg7Z3mRqFYi",
+    "name": "Vete",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "5PqStBGWVYu02RJQSWuMUH",
+    "name": "Hazme Entender",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "0JBkchnMAPf4dhQQEXAl9H",
+    "name": "Tus Labios",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "4WToBp74uK9SGxR564RFdd",
+    "name": "Te Pido Perdón",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "78norjtnShQut2WZUw3W9s",
+    "name": "Tan Solo Un Minuto",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "0TRnVZShOcAONREL57LL1n",
+    "name": "Porque Te Vas",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "3CdIuqjoJuayYKdIj0autp",
+    "name": "Vengo A Gritar Que Te Amo",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "3omcI65X80XkY0MqtQmZ73",
+    "name": "Muero De Frío",
+    "artist": "Rafaga",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
+  },
+  {
+    "id": "20jvgYvnqySWnNCsHQZnXk",
+    "name": "El Taqui Taqui - Original Mix",
+    "artist": "Ilegales",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027ec1aa43dd1f6b93f4e83225"
+  },
+  {
+    "id": "2bsW096eoys2fLL8YZAkLn",
+    "name": "La Hora De Bailar",
+    "artist": "Sandy & Papo",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02969ae12f34107d04f8f366fa"
+  },
+  {
+    "id": "5gbzZ4E1q8kGhq9iGaiD2y",
+    "name": "Mueve Mueve - I Like to Move It",
+    "artist": "Sandy & Papo",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02969ae12f34107d04f8f366fa"
+  },
+  {
+    "id": "5lwfX0HEWjulISjPHGPC8S",
+    "name": "La Novela",
+    "artist": "Fulanito",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021fdb680c2dc31bf80e9c34e9"
+  },
+  {
+    "id": "37EJvPSMOhOs46HEyweZNW",
+    "name": "Fiesta Caliente",
+    "artist": "Ilegales",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0236c316f75be9da0e3491a667"
+  },
+  {
+    "id": "5kOGilliSITkadKUWECJW9",
+    "name": "Pumpin'",
+    "artist": "Proyecto Uno",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0278483e987bc7381520609df5"
+  },
+  {
+    "id": "0Iv0yudBc3fKHRGZXFdZ11",
+    "name": "Funkete",
+    "artist": "El General",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a908ed6eeeb286b8775a1724"
+  },
+  {
+    "id": "7eid6cOvaHokHpMVMOpvbm",
+    "name": "La Movida",
+    "artist": "Sandy & Papo",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020b225f8309af850a2aa205f1"
+  },
+  {
+    "id": "2z809doWJXQWxioqg6kczt",
+    "name": "Robi-Rob's Boriqua Anthem (feat. Trilogy) - Single Version",
+    "artist": "C & C Music Factory, Trilogy",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02db540ab9625506f1d7da064a"
+  },
+  {
+    "id": "3PTysj6y3uHdu5RYJLIEKd",
+    "name": "El Cepillo",
+    "artist": "Fulanito",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021fdb680c2dc31bf80e9c34e9"
+  },
+  {
+    "id": "5NuGimnwSMQwBKgCCy7wIn",
+    "name": "Como Un Trueno",
+    "artist": "Ilegales",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027ec1aa43dd1f6b93f4e83225"
+  },
+  {
+    "id": "7GYzgXNdlRTM1jwCwleNvU",
+    "name": "King Africa Megamix",
+    "artist": "King Africa",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021f6a4bf042bca388fcbaef75"
+  },
+  {
+    "id": "4jRxEVNituPZObHbCSBZL3",
+    "name": "Guallando",
+    "artist": "Fulanito",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021fdb680c2dc31bf80e9c34e9"
+  },
+  {
+    "id": "3dtGHZyEGmKSmQoAPcbvyb",
+    "name": "La Botella",
+    "artist": "Mach & Daddy",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b29dbcff141fa519629c8ace"
+  },
+  {
+    "id": "5t7nPRmoP6I9EqKjvBxc3M",
+    "name": "Taca Taca",
+    "artist": "Gaitanes",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028ca01d098091341d9a34f224"
+  },
+  {
+    "id": "5d8haSstbkl4k9S3G9vsTF",
+    "name": "Chillando Goma",
+    "artist": "Fulanito",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e4f80e30b25d2544a821dd17"
+  },
+  {
+    "id": "2oZLIxCH4U7a5uc307IFLp",
+    "name": "Muévelo",
+    "artist": "El General",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a908ed6eeeb286b8775a1724"
+  },
+  {
+    "id": "6PWqRlR90torP0xcVsQRai",
+    "name": "Canta",
+    "artist": "El Símbolo",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02678f6fc6d57acb29c6bb89cb"
+  },
+  {
+    "id": "0q185bbM0l7ccJa3ikgs78",
+    "name": "Chiquetere",
+    "artist": "Chiquetere Band",
+    "year": "2009",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a289308bda95d69e1e3de35c"
+  },
+  {
+    "id": "2GcjfckZexh9wRRjg9KtQG",
+    "name": "Tiburon",
+    "artist": "Proyecto Uno",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/aec62a21c5e51ca297a8a5884dea287527d7432a"
+  },
+  {
+    "id": "36SJ7ZFx8J1f1RsewmUwMX",
+    "name": "Magalenha",
+    "artist": "Sérgio Mendes",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b415fc6505fe00219d017df4"
+  },
+  {
+    "id": "6Q4foUefrAyCt8VxJFML56",
+    "name": "Olha A Explosão",
+    "artist": "MC Kevinho",
+    "year": "2016",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023452d31d2ef8ce06f151a028"
+  },
+  {
+    "id": "5PkTujqwUcpoiH20ysOjS3",
+    "name": "Pau Que Nasce Torto / Melo Do Tchan - Medley",
+    "artist": "É O Tchan",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020355514bc5f60fd3c89173b1"
+  },
+  {
+    "id": "2lgXNpeyyDEnI0AriGkXS0",
+    "name": "Danca da Manivela",
+    "artist": "Axe Bahia",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025552e8e70ab039d08e119cf4"
+  },
+  {
+    "id": "2FGyLxoky52oxL3a8Q3yqw",
+    "name": "Chora, Me Liga",
+    "artist": "João Bosco & Vinícius",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a0d7fe9205f01cfafc746449"
+  },
+  {
+    "id": "6d63QA85w4FXhlXYtz7nco",
+    "name": "Balada",
+    "artist": "Gusttavo Lima",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0208eafc9d012e1ffcac0f2c90"
+  },
+  {
+    "id": "4P1mfEe5CVBz5htKz8okjo",
+    "name": "Ilarié",
+    "artist": "Xuxa",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024f32e8e7d13904a5cd6692ba"
+  },
+  {
+    "id": "4vhva1ri3COQgLmlU1Zkv6",
+    "name": "Tapinha",
+    "artist": "Naldinho, bela",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023eaf03ca6ce33a69e39b3a4f"
+  },
+  {
+    "id": "6JuDmQSbNcq2isx27yO7iC",
+    "name": "Tchu Tchuca",
+    "artist": "Bonde do Tigrão",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023eaf03ca6ce33a69e39b3a4f"
+  },
+  {
+    "id": "107BCzLRTf3RETg9T7POg8",
+    "name": "Sacudindo a Jaca",
+    "artist": "Familia Abadá",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027f0ad8c7bec6baa713909504"
+  },
+  {
+    "id": "3wSpUP4TgZWDxAw5HOEmrB",
+    "name": "Ou Dá Ou Desce",
+    "artist": "Boquinha Da Garrafa",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020e2753e2662e020c8f961e29"
+  },
+  {
+    "id": "2yd5ZA1q3w6jdE03eVrGHU",
+    "name": "Ai Se Eu Te Pego - Ao Vivo",
+    "artist": "Michel Teló",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b0ecc2cd07a5512bf7625772"
+  },
+  {
+    "id": "2ALk5OuxXFHSR0fBgm0p0k",
+    "name": "Onda Onda",
+    "artist": "Axe Bahia",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027c0782e56139d4ec95ef5b9a"
+  },
+  {
+    "id": "5uKnqGzXgmzlctR3rz8Edt",
+    "name": "Dança da Mãozinha - Ao Vivo",
+    "artist": "Tchakabum",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0239834781cfd941b7fc577926"
+  },
+  {
+    "id": "2iFpKSUCN7zF0Wu4cUTw2Q",
+    "name": "Mueve la Pompa",
+    "artist": "Axe Bahia",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027c0782e56139d4ec95ef5b9a"
+  },
+  {
+    "id": "6HGXaTo4YtyOQlSe9d8aja",
+    "name": "Mix Brasil",
+    "artist": "Porto Seguro",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02249e6d15a0adf781fe768b3d"
+  },
+  {
+    "id": "6mx99rlPKCxJlAvhlTx0mt",
+    "name": "Fim De Semana",
+    "artist": "Netinho",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f0eb2cf2e85866fc180fbe40"
+  },
+  {
+    "id": "4C5EI8PXIVyFHUDBD16PdC",
+    "name": "Pererê / Citação Musical: Saci",
+    "artist": "Ivete Sangalo",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a47e7852970c1bf860c05c5c"
+  },
+  {
+    "id": "5HM1U16xQJ9IcaHCZkSeBL",
+    "name": "Beso en la Boca - Versión Español",
+    "artist": "Axe Bahia",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029600908e45fd9d26d8de5c7b"
+  },
+  {
+    "id": "1djou52IdL1mVEE7gTauxo",
+    "name": "Zoom - Remasterizado 2007",
+    "artist": "Soda Stereo",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b50bb73f2ef9047afa0644a4"
+  },
+  {
+    "id": "3aJBJ4DAfTknfkzbd0G9Um",
+    "name": "Jennifer Del Estero",
+    "artist": "Illya Kuryaki & The Valderramas",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02884dab70a8ac147a7b7342c2"
+  },
+  {
+    "id": "2TuoRWJFfN2DRBNhEaoc6L",
+    "name": "Cha-Cha-Cha",
+    "artist": "Los Tetas",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c76851a730e397c00f0c0240"
+  },
+  {
+    "id": "1wGNjZQoO4Ac5zotF3aZTb",
+    "name": "Bailando Solo",
+    "artist": "Los Bunkers",
+    "year": "2013",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a5d2418a94c6d9ea86ed906a"
+  },
+  {
+    "id": "1Qp77m1Ai0jnuD7ojdYzr9",
+    "name": "Freebola",
+    "artist": "Glup!",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0234753255bf71b2734b7e38db"
+  },
+  {
+    "id": "3FPFhG6jDYBn3jp1Qcgped",
+    "name": "La Corbata de Mi Tío",
+    "artist": "Los Ex",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020d0d84f0e7cb5b9167fe908e"
+  },
+  {
+    "id": "25zzsohqoFVwqS1b3ICe4i",
+    "name": "Te",
+    "artist": "De Saloon",
+    "year": "2014",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0245df2eaa1a2620d879f482fa"
+  },
+  {
+    "id": "4iieOrFHLqYysRyx5D6bD4",
+    "name": "Amar en el Campo",
+    "artist": "Teleradio Donoso",
+    "year": "2009",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c96659d5d8169a0e447d7366"
+  },
+  {
+    "id": "6uwrNagQND3ig9Fqq6hsu4",
+    "name": "Mi Equilibrio Espiritual - Fredy Turbina",
+    "artist": "31 Minutos",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0213b251dd10aa80aea38ca95e"
+  },
+  {
+    "id": "02Qn7URLg5g8rVpQlmmm9r",
+    "name": "Para ti",
+    "artist": "De Saloon",
+    "year": "2014",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029abcb85105285b63f0a14e85"
+  },
+  {
+    "id": "0TPQWYK1iElqqSusi4tBSA",
+    "name": "Wokman",
+    "artist": "Papanegro",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02416461399735d27d19c96b58"
+  },
+  {
+    "id": "0BVYZVB6ITPs5jojmJaNQT",
+    "name": "A Lo Cubano",
+    "artist": "Orishas",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02227aaae82ae48821db8d7e34"
+  },
+  {
+    "id": "3k9dGCm2R2Y70e87aMHYC3",
+    "name": "Hablando a Tu Corazón",
+    "artist": "Charly García, Pedro Aznar",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0242542c948d51893462874c89"
+  },
+  {
+    "id": "3gPVKjgQhnMdk0bz10jzKS",
+    "name": "Vacaciones en el Más Allá",
+    "artist": "Pedropiedra",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02492a49917e493f2f44aaa4fa"
+  },
+  {
+    "id": "0jePqZlutXGa8xz6NNyKAy",
+    "name": "Loco",
+    "artist": "Andrés Calamaro",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e4b8ec3d2ffe1f77c7185d48"
+  },
+  {
+    "id": "6t7HHaRoBvEMqEs29qHpdt",
+    "name": "Bajan",
+    "artist": "Gustavo Cerati",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a2ec3791d9fd51ad343cc885"
+  },
+  {
+    "id": "7Dk43uYcLammTOb4kS7Q9g",
+    "name": "Paseando Por Roma - Remasterizado 2007",
+    "artist": "Soda Stereo",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b50bb73f2ef9047afa0644a4"
+  },
+  {
+    "id": "2Q2zvWmsnfSFBMfqWXeVkD",
+    "name": "We Are Sudamerican Rockers - 2002 Digital Remaster",
+    "artist": "Los Prisioneros",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02482fcc6754733049923bbab2"
+  },
+  {
+    "id": "1CwyfupBufLXfYdPr8LhDF",
+    "name": "Demasiada Presión - Remasterizado 2008",
+    "artist": "Los Fabulosos Cadillacs",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f5aa9ad4c931b2e90e94f673"
+  },
+  {
+    "id": "2PKkCGoCc4idF91R6RvFEN",
+    "name": "Yo Tomo",
+    "artist": "Bersuit Vergarabat",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a0fc7851f47a216e9a902aa6"
+  },
+  {
+    "id": "5iVRdHAUDp3cW2I8d6czBS",
+    "name": "Fanky",
+    "artist": "Charly García",
+    "year": "1989",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0221ef308b4ac767e44afa8e65"
+  },
+  {
+    "id": "3sDmwlRdEdsb1BLDChJSJV",
+    "name": "Se Viene",
+    "artist": "Bersuit Vergarabat",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a0fc7851f47a216e9a902aa6"
+  },
+  {
+    "id": "3NEjfWyF5lrVHGq3sM1jF8",
+    "name": "El Satánico Dr. Cadillac (Versión '93) - Remasterizado 2008",
+    "artist": "Los Fabulosos Cadillacs",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02721cad4da1b767b70e8aa699"
+  },
+  {
+    "id": "0AkmNg3BN8xBuECm5xllwR",
+    "name": "Nunca Quedas Mal Con Nadie",
+    "artist": "Los Prisioneros",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a8ff3f9fe5b57f2e0bfd9e05"
+  },
+  {
+    "id": "41MfyUSxQoo1BgIsNj8eDS",
+    "name": "Manuel Santillán, el León (Versión Reggae) - Remasterizado 2008",
+    "artist": "Los Fabulosos Cadillacs",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026f41a299791d5833d41d78f2"
+  },
+  {
+    "id": "3hWZ9vTXIEUffGVD73qIAb",
+    "name": "El Genio del Dub - Remasterizado 2008",
+    "artist": "Los Fabulosos Cadillacs",
+    "year": "1987",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02772623de3584fe5bb75252aa"
+  },
+  {
+    "id": "71dmuXNeiMCMgfrTFdS2QL",
+    "name": "Sin Cadenas",
+    "artist": "Los Pericos",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02116f159f027fd6bf4da9157c"
+  },
+  {
+    "id": "0bhzdFuUaNH7QV3c2ZKGOK",
+    "name": "Párate Y Mira",
+    "artist": "Los Pericos",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d0024b37fc951b4b05ed6863"
+  },
+  {
+    "id": "3CizlnqcWoZp9Sthem7jPM",
+    "name": "Me Late",
+    "artist": "Los Pericos",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027269ee3318b60a77aeb22c59"
+  },
+  {
+    "id": "6b37xrsNCWYIUphFBazqD6",
+    "name": "Me Gustas Tu",
+    "artist": "Manu Chao",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021dcba4a728ca0b17cbd204a5"
+  },
+  {
+    "id": "0UY0JLj9kxOlgF6FHogCmX",
+    "name": "Mala Vida",
+    "artist": "Mano Negra",
+    "year": "1988",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020b9fca80401e636137c2fc8d"
+  },
+  {
+    "id": "2uR6DAqwZCfDeD6jFrD5zA",
+    "name": "Senor Matanza",
+    "artist": "Mano Negra",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020d462e4c9109ed9b6c625893"
+  },
+  {
+    "id": "2Ur5w6pRsWBq5xnqiwhVgj",
+    "name": "Los Salieris De Charly",
+    "artist": "León Gieco",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02725a7795a7561d163bfd8d71"
+  },
+  {
+    "id": "6zfTUzKLKRXeSzIl7DYPvq",
+    "name": "No Le Dijo Nada",
+    "artist": "Los Ladrones Sueltos",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023941e6625c42b029bb8372b9"
+  },
+  {
+    "id": "0FHpUs8anxUWl3pMXMhmXj",
+    "name": "Mejor No Hablar de Ciertas Cosas",
+    "artist": "Sumo",
+    "year": "1985",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02019290b3d41497eb46e9bd67"
+  },
+  {
+    "id": "4VikOud5ZmdmHH6h7uQeDB",
+    "name": "Nos Siguen Pegando Abajo",
+    "artist": "Charly García",
+    "year": "1983",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b14842a87b833bc0a9339f60"
+  },
+  {
+    "id": "29iIRrSuANyjnwag69PHOJ",
+    "name": "Demoliendo Hoteles",
+    "artist": "Charly García",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a89f53c13537b933a43d2600"
+  },
+  {
+    "id": "2rxf4q3vu3QRiIYFXr8UTu",
+    "name": "Explorador",
+    "artist": "Fother Muckers",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026a09794f5033bd064baaef19"
+  },
+  {
+    "id": "65DBZofI0b79kfHTcWWDuU",
+    "name": "Trátame Suavemente - Remasterizado 2007",
+    "artist": "Soda Stereo",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028fd9b16eb6bdd20c95717258"
+  },
+  {
+    "id": "2PmoxtFwmuP8hnLCaV9wFW",
+    "name": "Con Suavidad",
+    "artist": "Los Prisioneros",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
+  },
+  {
+    "id": "2PkTjm1QAJCZbJ9MqC4RqA",
+    "name": "11 Y 6",
+    "artist": "Fito Paez",
+    "year": "1985",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02921417baf700cc9da1d43b80"
+  },
+  {
+    "id": "7IJC1qatyg2t8SZiwJRvID",
+    "name": "Un Misil En Mi Placard - MTV Unplugged",
+    "artist": "Soda Stereo",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023875f29a2a8234ac7ef2706a"
+  },
+  {
+    "id": "244nCwfi32MNrkALQi2qga",
+    "name": "Corazones Rojos",
+    "artist": "Los Prisioneros",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
+  },
+  {
+    "id": "26180koFa4YfZ8U3Eu5atP",
+    "name": "La Primera Vez",
+    "artist": "Los Tres",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c90c7ca59a3055ba78ae5d89"
+  },
+  {
+    "id": "21KrrLkTtV6f1lRomT0LNl",
+    "name": "Un Hombre Muerto En El Ring",
+    "artist": "Pettinellis",
+    "year": "2019",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02379fe0ff83e5d9b7ab5fdacf"
+  },
+  {
+    "id": "5rGphVLnbPdyBQ5X3rjb2X",
+    "name": "Te Llevo para Que Me Lleves",
+    "artist": "Gustavo Cerati",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a2ec3791d9fd51ad343cc885"
+  },
+  {
+    "id": "0ip3MFKPt3q8ct6tjxU9XC",
+    "name": "Corazón De Sandía",
+    "artist": "Los Tetas",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029f1ca4f1f34bfee3ab2a272a"
+  },
+  {
+    "id": "1RawgF2MjsJpR7cRxvIaal",
+    "name": "Moizefala",
+    "artist": "Los Tres",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0278310de37af0875569acc411"
+  },
+  {
+    "id": "70EgRDKkzHbeSIL8EgbL2Z",
+    "name": "Hojas de Te",
+    "artist": "Los Tres",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0278310de37af0875569acc411"
+  },
+  {
+    "id": "5CRzoLBcZ1K56ADAE4o64w",
+    "name": "Esta Es Para Hacerte Feliz",
+    "artist": "Jorge González",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021fbd0739e5c4c9dcd59792ed"
+  },
+  {
+    "id": "2SJZdhRHQEICu2dbzRPKpa",
+    "name": "No Sabes Que Desperdicio Tengo en el Alma",
+    "artist": "Los Tres",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025751046ec855061a2f347960"
+  },
+  {
+    "id": "3J8UPLZhNFQi3o2qIvwLjY",
+    "name": "No Necesitamos Banderas",
+    "artist": "Los Prisioneros",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a8ff3f9fe5b57f2e0bfd9e05"
+  },
+  {
+    "id": "01mNrMDaDseSKzrTmRfqKa",
+    "name": "Mi Destino",
+    "artist": "Glup!",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ffefaedb11672d48272b1989"
+  },
+  {
+    "id": "3JUVHPatTpMnjf6FSKIvUj",
+    "name": "Huke",
+    "artist": "Julius Popper",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023dcc81916267877a2d662c82"
+  },
+  {
+    "id": "0X95YZY5tGIxfx5k5XnfVL",
+    "name": "Éramos Todos Felices",
+    "artist": "Teleradio Donoso",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023799a4e2e54b75705c103225"
+  },
+  {
+    "id": "60xIw1We9dC9yzqKrdC1EK",
+    "name": "No Me Hables de sufrir",
+    "artist": "Los Bunkers",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028b1621e8e25425a1e70f75f4"
+  },
+  {
+    "id": "5y72L9qFKi4SYvbkWLEzh0",
+    "name": "Da la Claridad a Nuestro Sol",
+    "artist": "Chancho En Piedra",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0231dbf0a5ea5578f97d674e18"
+  },
+  {
+    "id": "0vSMJD0bPCNNHkRTgzZJXB",
+    "name": "Pacífico",
+    "artist": "Ases Falsos",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0280deae578c2e2673abb839ba"
+  },
+  {
+    "id": "0fZcbSFAz0CW8duubWOo79",
+    "name": "Colombo",
+    "artist": "Astro",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0289b00a327d495d101b0878f3"
+  },
+  {
+    "id": "4cyYC67XY3weSVmSLdKLP8",
+    "name": "Taboo",
+    "artist": "Don Omar",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024640a26eb27649006be29a94"
+  },
+  {
+    "id": "19CmuECYssqkPWANF4nLWM",
+    "name": "Para No Verte Más",
+    "artist": "La Mosca",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0260fc79eea7acba5248619f82"
+  },
+  {
+    "id": "4bMZ60QNM6OEehI6b8RtS4",
+    "name": "Matador - Remasterizado 2008",
+    "artist": "Los Fabulosos Cadillacs",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02721cad4da1b767b70e8aa699"
+  },
+  {
+    "id": "6Pur3hWy6Nzc27ilmsp5HA",
+    "name": "Lamento Boliviano",
+    "artist": "Los Enanitos Verdes",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0235bf8a2179962114b8ec7585"
+  },
+  {
+    "id": "6hBfF54vgIAdtb5kbbvt75",
+    "name": "Nada Nuevo Bajo El Sol",
+    "artist": "Los Bunkers",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02aebd6aea9679db9ecf83b4c6"
+  },
+  {
+    "id": "10tzk7ZRjwnLKd3gjKLtTA",
+    "name": "Laura no està",
+    "artist": "Nek",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b290a796d179a53c0271fda6"
+  },
+  {
+    "id": "5HgFoiM1X9P5e5wKlcag5D",
+    "name": "Señor De La Noche",
+    "artist": "Don Omar",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022397ee702f9607fd8d445adc"
+  },
+  {
+    "id": "7Mj6R7TjsPxeLYu0Xdvl73",
+    "name": "Mil Horas",
+    "artist": "Los Abuelos De La Nada",
+    "year": "1983",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b9dd441e8d6989984d0e9a48"
+  },
+  {
+    "id": "2LsbizbOeNa4x6qsi2jAMb",
+    "name": "La flaca",
+    "artist": "Jarabe De Palo",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0248de952267002dbeffe048ad"
+  },
+  {
+    "id": "4skuEIloXWuxxgekKupkEH",
+    "name": "Tu Falta De Querer",
+    "artist": "Mon Laferte",
+    "year": "2015",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025eebf3f8ec6e9807105f3151"
+  },
+  {
+    "id": "2hConpLOB6gmyM8vDkVOof",
+    "name": "Lobo-hombre en París",
+    "artist": "La Unión",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0227ea12415f37ce7c81ac11e5"
+  },
+  {
+    "id": "6eOT73H5zfEwTCe1Y0FDCc",
+    "name": "Sin documentos",
+    "artist": "Los Rodriguez",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02139d10e0ae979a7b4a811140"
+  },
+  {
+    "id": "6kdCN6gTWLcLxmLXoUcwuI",
+    "name": "Eres",
+    "artist": "Café Tacvba",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02624927252564ef4625307897"
+  },
+  {
+    "id": "6OKhBvddAlWxxFnjbpilhu",
+    "name": "La Muralla Verde",
+    "artist": "Los Enanitos Verdes",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c3d72bdf184c8ca79d8a1d0b"
+  },
+  {
+    "id": "74UB6CQRH9ykJEh9ma3XwD",
+    "name": "El Juego Verdadero",
+    "artist": "Tiro De Gracia",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ea17116dfd939d95608809c2"
+  },
+  {
+    "id": "45dWn7gzWdxNO15dPzWRSV",
+    "name": "Yo Te Diré",
+    "artist": "Miranda!",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0241ca8a8fdfcce2d6ff7f2d05"
+  },
+  {
+    "id": "7dITAq1YP5e0kTcaDq4YWI",
+    "name": "Limón y Sal",
+    "artist": "Julieta Venegas",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a043fa84be801dca33dacca1"
+  },
+  {
+    "id": "7G7CveTF706x0PYxnpDsM5",
+    "name": "Coolo",
+    "artist": "Illya Kuryaki & The Valderramas",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02884dab70a8ac147a7b7342c2"
+  },
+  {
+    "id": "0GZ8UVlhn2tjHPpngzoLJk",
+    "name": "La Chica de Humo",
+    "artist": "Emmanuel",
+    "year": "1989",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02315fbff96db9d536dd366d0a"
+  },
+  {
+    "id": "3UgduSS2bCMmatRox69u3g",
+    "name": "Mi Historia Entre Tus Dedos - Remastered 2020",
+    "artist": "Gianluca Grignani",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d329483a2f3ce931b4f7a5d3"
+  },
+  {
+    "id": "5Em7MA991Gn3yhheaul0CX",
+    "name": "Mentira",
+    "artist": "La Ley",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0259cc72552d7a7b58af7553f5"
+  },
+  {
+    "id": "2q9udNV9NK0BL3q9p6TLxf",
+    "name": "Procura",
+    "artist": "ChiChi Peralta, Jandy Feliz",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ee686ebada622d510f8660fb"
+  },
+  {
+    "id": "3kNVYo6BJE9AENxzokM9YC",
+    "name": "Muerte En Hawaii",
+    "artist": "Calle 13",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0216c24c88236c87c148bb4329"
+  },
+  {
+    "id": "1crk0MXXyFQ1zVow6YTJOo",
+    "name": "Los Caminos de la Vida",
+    "artist": "Vicentico",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02cf77d8e892662f32102f7f2e"
+  },
+  {
+    "id": "0swl1tZWBEBOdRVPN6axXe",
+    "name": "Amiga Mía",
+    "artist": "Los Prisioneros",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
+  },
+  {
+    "id": "6MV5epXO1r9krAVGSDJz5L",
+    "name": "Ángel Para Un Final",
+    "artist": "Los Bunkers",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a260edab0edf43df4d40844"
+  },
+  {
+    "id": "2iQIOLSvsHexkMWe8lc9ln",
+    "name": "Hoy",
+    "artist": "Nicole",
+    "year": "2009",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0252ed19219f2285b2d3033322"
+  },
+  {
+    "id": "2LtnnPqxMt2CJDOJ4CngB0",
+    "name": "Gran Pecador",
+    "artist": "Chico Trujillo",
+    "year": "2012",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02469004a917df9b5220135c97"
+  },
+  {
+    "id": "2RognU2ViRdA6HxnpAITJl",
+    "name": "Mariposa tecknicolor",
+    "artist": "Fito Paez",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0201760d9291c8a82283da1013"
+  },
+  {
+    "id": "1Wrzhfa5bNlqvsnCztz190",
+    "name": "Devuélveme a mi chica",
+    "artist": "Hombres G",
+    "year": "1985",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02818ccaf9e08020dc14421bfa"
+  },
+  {
+    "id": "6unZcc3iGVZWzMJvNJdXvL",
+    "name": "Hijo Del Sol Luminoso - Live From Santiago,Chile/1999",
+    "artist": "Joe Vasconcellos",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f74a14bd8f129fbb7abb3b8b"
+  },
+  {
+    "id": "51dNexiESqcJLsGLrmg1Nv",
+    "name": "Cómo Te Voy A Olvidar",
+    "artist": "Los Ángeles Azules",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026557d6aabc5a43e0b12d5e33"
+  },
+  {
+    "id": "0YfDtPub9AsTu4278mDWJE",
+    "name": "Vamo' A Portarnos Mal",
+    "artist": "Calle 13",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0216c24c88236c87c148bb4329"
+  },
+  {
+    "id": "4waqcUQWdj0yH26STWl2Rq",
+    "name": "Rosas",
+    "artist": "La Oreja de Van Gogh",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02820f6e4afa04594a671e484f"
+  },
+  {
+    "id": "7pV8mSDgSPbSMFw9ZP1XXR",
+    "name": "El Niágara en Bicicleta",
+    "artist": "Juan Luis Guerra 4.40",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02536c9d3bdf8a3959efc41a0f"
+  },
+  {
+    "id": "0HmQkmfYXRPweIg1ycw1R8",
+    "name": "Morena mía",
+    "artist": "Miguel Bosé",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02af4730f82764b86ac7f7db8a"
+  },
+  {
+    "id": "3UI9I3e1g1y5T3SMfdgfGO",
+    "name": "Colgando en tus manos (con Marta Sánchez)",
+    "artist": "Carlos Baute, Marta Sánchez",
+    "year": "2009",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023da862a011bf8190c78bac2b"
+  },
+  {
+    "id": "3rgd481ClPZIR6XEDTl2VU",
+    "name": "La Rubia del Avión",
+    "artist": "Los Ladrones Sueltos",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023941e6625c42b029bb8372b9"
+  },
+  {
+    "id": "4m3vLNZkFAjm30XxPXf7E3",
+    "name": "Eres para Mí",
+    "artist": "Julieta Venegas, Ana Tijoux",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a043fa84be801dca33dacca1"
+  },
+  {
+    "id": "1qWLCuCnNcQVVzJm4pu7Zv",
+    "name": "Luna de Miel en la Mano",
+    "artist": "Virus",
+    "year": "1985",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02292c1ca632a1e120d1208c95"
+  },
+  {
+    "id": "129lYDVKnWtlJc2PZJviuA",
+    "name": "A Dios Le Pido",
+    "artist": "Juanes",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0223a1613112c1ecf946f51177"
+  },
+  {
+    "id": "3b1IQflSLrgzYQPGFzI9cl",
+    "name": "Es Por Ti",
+    "artist": "Juanes",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0223a1613112c1ecf946f51177"
+  },
+  {
+    "id": "0gaohTJb734s9Av2YzDNQE",
+    "name": "Huellas - Live From Santiago,Chile/1999",
+    "artist": "Joe Vasconcellos",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f74a14bd8f129fbb7abb3b8b"
+  },
+  {
+    "id": "1p7m9H4H8s0Y7SgRm7j3ED",
+    "name": "Flaca",
+    "artist": "Andrés Calamaro",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e4b8ec3d2ffe1f77c7185d48"
+  },
+  {
+    "id": "7HlULtRMJSTzorUMebka0f",
+    "name": "A un minuto de ti",
+    "artist": "Mikel Erentxun",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02aa30735bb1a97700cf07c6e3"
+  },
+  {
+    "id": "4C2zOFgrXxfNGNpYQWIcaH",
+    "name": "Labios Compartidos",
+    "artist": "Maná",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0206a335c72b44d0bcd4060fcc"
+  },
+  {
+    "id": "6k0jAOjhLufp8IscgoX9pz",
+    "name": "Enamorado De Ti",
+    "artist": "Glup!",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02574be213eecdcc5023dc42ae"
+  },
+  {
+    "id": "5fSDXbY8o9pA3TKwAbfwML",
+    "name": "Mi Primer Millon",
+    "artist": "Bacilos",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e1f4c211ce1ef95454bbbcc4"
+  },
+  {
+    "id": "3oqWr0jDWNXxWufNogGREp",
+    "name": "Crimen",
+    "artist": "Gustavo Cerati",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f89f01679779a2246c78bc7a"
+  },
+  {
+    "id": "3XHg42QOqlevRU7jXRkAKk",
+    "name": "El Duelo",
+    "artist": "La Ley",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ebd88db34e2219ca3121fe08"
+  },
+  {
+    "id": "7DnMd3BxVOedyOyR7K3F8L",
+    "name": "Las de la Intuición",
+    "artist": "Shakira",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02afccde0243b5c750c07f6825"
+  },
+  {
+    "id": "0rHdsAq6qtSTdwJW4luqyW",
+    "name": "Chica Eléctrica",
+    "artist": "La Pozze Latina",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021829d8f59604a2bd0b4ee53f"
+  },
+  {
+    "id": "5EJ2THuhAapEIeQOtXUQ0x",
+    "name": "Oye Mi Amor",
+    "artist": "Maná",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0263f3b7f5abf86ad483b57b77"
+  },
+  {
+    "id": "198qSChSMQFuSimdeeY9gK",
+    "name": "Vasos Vacíos - Remasterizado 2008",
+    "artist": "Los Fabulosos Cadillacs",
+    "year": "1988",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0258cb4a7703f916ff5b3318df"
+  },
+  {
+    "id": "1x6bkwDyWIOZNFY5blRSs1",
+    "name": "La Pachanga",
+    "artist": "Vilma Palma e Vampiros",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020457ded975a6693ce8fc4392"
+  },
+  {
+    "id": "01VMPSphGhG2hQiDQ3m5QJ",
+    "name": "Loca",
+    "artist": "Chico Trujillo",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022671fdb62ebc2f8f7d5cf2f5"
+  },
+  {
+    "id": "6gwaa6ElIixNTvu6RwkMyo",
+    "name": "Puente",
+    "artist": "Gustavo Cerati",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021152471596980e1bba03b6ab"
+  },
+  {
+    "id": "6As9jWGwGowXeSd2OiQzeg",
+    "name": "Miño",
+    "artist": "Los Bunkers",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f404b4eb378a12a37fcb9d99"
+  },
+  {
+    "id": "3EK4tGkSiO5xvvB5sM4tln",
+    "name": "Amárrame",
+    "artist": "Mon Laferte, Juanes",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ac6e52ed084e8209691f208f"
+  },
+  {
+    "id": "4PHX6bpHDxiR9RGzAKWcyk",
+    "name": "Cuando Me Enamoro",
+    "artist": "Enrique Iglesias, Juan Luis Guerra 4.40",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f6fa4a75fccc308f26c726c6"
+  },
+  {
+    "id": "7Apo6o7oxgFyXaSmdx6NHN",
+    "name": "Si Te Vas",
+    "artist": "Shakira",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bfcff1dd252b22bba16a2a5d"
+  },
+  {
+    "id": "0oXLSuno5adlHcPzlzs8l6",
+    "name": "Duele El Amor",
+    "artist": "Aleks Syntek, Ana Torroja",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022ff95cfe681839038a35b115"
+  },
+  {
+    "id": "7jxHeJLVpnP7S08JFF4GBi",
+    "name": "Ciega, Sordomuda",
+    "artist": "Shakira",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bfcff1dd252b22bba16a2a5d"
+  },
+  {
+    "id": "5yMXpZhVnUAFT154F3MQ8G",
+    "name": "Bolero Falaz",
+    "artist": "Aterciopelados",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025d9e4fdf6bcdd703d0065cb4"
+  },
+  {
+    "id": "6hFHsQWB7HdVrSe7efRR82",
+    "name": "Como te extraño mi amor",
+    "artist": "Café Tacvba",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0244fc111787f221cf5629a2b9"
+  },
+  {
+    "id": "3lGMtkONrZdJ8kTCg6KIFf",
+    "name": "Hasta la Raíz",
+    "artist": "Natalia Lafourcade",
+    "year": "2015",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bd4c237c04735257dd64c510"
+  },
+  {
+    "id": "5UWwZ5lm5PKu6eKsHAGxOk",
+    "name": "Everlong",
+    "artist": "Foo Fighters",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024bc9bcdbdc9ac34e37d8b6bb"
+  },
+  {
+    "id": "4xdHI4eFNst0vTZuuKrWjr",
+    "name": "Black Hole Sun",
+    "artist": "Soundgarden",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025124ed45a94033830b320500"
+  },
+  {
+    "id": "11LmqTE2naFULdEP94AUBa",
+    "name": "Heart-Shaped Box",
+    "artist": "Nirvana",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02aca059cebc1841277db22d1c"
+  },
+  {
+    "id": "4dVbhS6OiYvFikshyaQaCN",
+    "name": "My Hero",
+    "artist": "Foo Fighters",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024bc9bcdbdc9ac34e37d8b6bb"
+  },
+  {
+    "id": "5FZxsHWIvUsmSK1IAvm2pp",
+    "name": "Best of You",
+    "artist": "Foo Fighters",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0250d3fff0dc3d9b55f164d8d6"
+  },
+  {
+    "id": "76Je5Wklky23mVoxiRszcN",
+    "name": "Walk",
+    "artist": "Foo Fighters",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fc14d5117520d5bce369a543"
+  },
+  {
+    "id": "6y20BV5L33R8YXM0YuI38N",
+    "name": "No One Knows",
+    "artist": "Queens of the Stone Age",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029eec33b045d88f87b9b06e67"
+  },
+  {
+    "id": "1L94M3KIu7QluZe63g64rv",
+    "name": "Alive",
+    "artist": "Pearl Jam",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022d0e5ab5bd2e234fbcffa3e0"
+  },
+  {
+    "id": "6QewNVIDKdSl8Y3ycuHIei",
+    "name": "Even Flow",
+    "artist": "Pearl Jam",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022d0e5ab5bd2e234fbcffa3e0"
+  },
+  {
+    "id": "6qLEOZvf5gI7kWE63JE7p3",
+    "name": "Interstate Love Song - 2019 Remaster",
+    "artist": "Stone Temple Pilots",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fc90a8ed9924435d62235aa8"
+  },
+  {
+    "id": "5cZqsjVs6MevCnAkasbEOX",
+    "name": "Break Stuff",
+    "artist": "Limp Bizkit",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023783782de74f61e36795bf9c"
+  },
+  {
+    "id": "3IV4swNduIRunHREK80owz",
+    "name": "Rollin' (Air Raid Vehicle)",
+    "artist": "Limp Bizkit",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a31b146c7cf07705d912efe"
+  },
+  {
+    "id": "5QLHGv0DfpeXLNFo7SFEy1",
+    "name": "1979 - Remastered 2012",
+    "artist": "The Smashing Pumpkins",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02431ac6e6f393acf475730ec6"
+  },
+  {
+    "id": "2DlHlPMa4M17kufBvI2lEN",
+    "name": "Chop Suey!",
+    "artist": "System Of A Down",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0207bc7d2a745636c356b4d0aa"
+  },
+  {
+    "id": "0snQkGI5qnAmohLE7jTsTn",
+    "name": "Toxicity",
+    "artist": "System Of A Down",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0207bc7d2a745636c356b4d0aa"
+  },
+  {
+    "id": "3DwQ7AH3xGD9h65ezslm6q",
+    "name": "Enter Sandman - Remastered 2021",
+    "artist": "Metallica",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c1a13209dfe146aef3296e34"
+  },
+  {
+    "id": "3dPQuX8Gs42Y7b454ybpMR",
+    "name": "Seven Nation Army",
+    "artist": "The White Stripes",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027028981d09d2e5833c9c78ad"
+  },
+  {
+    "id": "1KPuohcXPmJYQfdyg9zKmR",
+    "name": "Another One Bites The Dust",
+    "artist": "Queen",
+    "year": "1980",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a4e6eac83c0fe38bf682f643"
+  },
+  {
+    "id": "02xhLoVqpGmOqvolgrwM8w",
+    "name": "One",
+    "artist": "Metallica",
+    "year": "1988",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fe896727e3db1027ed72d885"
+  },
+  {
+    "id": "1Ic9pKxGSJGM0LKeqf6lGe",
+    "name": "All Apologies",
+    "artist": "Nirvana",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c4f52ef8782f0e8ede4c1aaf"
+  },
+  {
+    "id": "5sFDReWLrZHLFZFjHsjUTS",
+    "name": "Would? (2022 Remaster)",
+    "artist": "Alice In Chains",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022d1447994ec24301429681cb"
+  },
+  {
+    "id": "003vvx7Niy0yvhvHt4a68B",
+    "name": "Mr. Brightside",
+    "artist": "The Killers",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ccdddd46119a4ff53eaf1f5d"
+  },
+  {
+    "id": "25FTMokYEbEWHEdss5JLZS",
+    "name": "Teenage Dirtbag",
+    "artist": "Wheatus",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020a3740efa638f10f14fabc46"
+  },
+  {
+    "id": "6W21LNLz9Sw7sUSNWMSHRu",
+    "name": "Freak On a Leash",
+    "artist": "Korn",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024e492e787ed64de43c3a3a21"
+  },
+  {
+    "id": "00Mb3DuaIH1kjrwOku9CGU",
+    "name": "Sk8er Boi",
+    "artist": "Avril Lavigne",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f7ec724fbf97a30869d06240"
+  },
+  {
+    "id": "5xEM5hIgJ1jjgcEBfpkt2F",
+    "name": "Complicated",
+    "artist": "Avril Lavigne",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f7ec724fbf97a30869d06240"
+  },
+  {
+    "id": "5B5eTk7DF8KVp1zpQoY1XY",
+    "name": "The Reason",
+    "artist": "Hoobastank",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0294f8b5f85bad2c8affe6cc7d"
+  },
+  {
+    "id": "2JiDi0qAXsPwhPqA2qaKGt",
+    "name": "Bohemian Rhapsody",
+    "artist": "Queen",
+    "year": "1975",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fdab4a163ab9f6db72c952ee"
+  },
+  {
+    "id": "6N717o83wbmahFGUqkjQj7",
+    "name": "Radio Ga Ga",
+    "artist": "Queen",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020b6e29757c37fb90e4587f65"
+  },
+  {
+    "id": "2F6FfZ4w8z3eJpSxPotVO5",
+    "name": "Falling Away from Me",
+    "artist": "Korn",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e19ecb8de414a0294bd0bf13"
+  },
+  {
+    "id": "3d9DChrdc6BOeFsbrZ3Is0",
+    "name": "Under the Bridge",
+    "artist": "Red Hot Chili Peppers",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02153d79816d853f2694b2cc70"
+  },
+  {
+    "id": "10Nmj3JCNoMeBQ87uw5j8k",
+    "name": "Dani California",
+    "artist": "Red Hot Chili Peppers",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0209fd83d32aee93dceba78517"
+  },
+  {
+    "id": "2aibwv5hGXSgw7Yru8IYTO",
+    "name": "Snow (Hey Oh)",
+    "artist": "Red Hot Chili Peppers",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0209fd83d32aee93dceba78517"
+  },
+  {
+    "id": "0gmbgwZ8iqyMPmXefof8Yf",
+    "name": "How You Remind Me",
+    "artist": "Nickelback",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02699a422d25adc550dc5aa11c"
+  },
+  {
+    "id": "5W8YXBz9MTIDyrpYaCg2Ky",
+    "name": "Last Resort",
+    "artist": "Papa Roach",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02985bf5ede2fe4a048ee85f28"
+  },
+  {
+    "id": "2nLtzopw4rPReszdYBJU6h",
+    "name": "Numb",
+    "artist": "Linkin Park",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025f1f51d14e8bea89484ecd1b"
+  },
+  {
+    "id": "0COqiPhxzoWICwFCS4eZcp",
+    "name": "Bring Me To Life",
+    "artist": "Evanescence",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0225f49ab23f0ec6332efef432"
+  },
+  {
+    "id": "5Xak5fmy089t0FYmh3VJiY",
+    "name": "Black",
+    "artist": "Pearl Jam",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022d0e5ab5bd2e234fbcffa3e0"
+  },
+  {
+    "id": "2gSVKxPDww9Eep5rdvtdem",
+    "name": "My Way",
+    "artist": "Limp Bizkit",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a31b146c7cf07705d912efe"
+  },
+  {
+    "id": "6holGuk1jKHTdWyWBOZi8l",
+    "name": "My Generation",
+    "artist": "Limp Bizkit",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a31b146c7cf07705d912efe"
+  },
+  {
+    "id": "2avKuMN2QXkaG9vvHa2JLt",
+    "name": "Take A Look Around",
+    "artist": "Limp Bizkit",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a31b146c7cf07705d912efe"
+  },
+  {
+    "id": "63OQupATfueTdZMWTxW03A",
+    "name": "Karma Police",
+    "artist": "Radiohead",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c8b444df094279e70d0ed856"
+  },
+  {
+    "id": "70LcF31zb1H0PyJoS1Sx1r",
+    "name": "Creep",
+    "artist": "Radiohead",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ec548c00d3ac2f10be73366d"
+  },
+  {
+    "id": "2MLHyLy5z5l5YRp7momlgw",
+    "name": "Island In The Sun",
+    "artist": "Weezer",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021e0dc5baaabda304b0ad1815"
+  },
+  {
+    "id": "1uKjQoh8JZj9ryuYRhpd7E",
+    "name": "Ahora Te Puedes Marchar",
+    "artist": "Luis Miguel",
+    "year": "1987",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026d2d141c6f14e161ca551971"
+  },
+  {
+    "id": "6Pur3hWy6Nzc27ilmsp5HA",
+    "name": "Lamento Boliviano",
+    "artist": "Los Enanitos Verdes",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0235bf8a2179962114b8ec7585"
+  },
+  {
+    "id": "78DVpEWwmJFC25KGz8fJuE",
+    "name": "Clavado en Un Bar",
+    "artist": "Maná",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022f770148868be769ff9f7a90"
+  },
+  {
+    "id": "4C2zOFgrXxfNGNpYQWIcaH",
+    "name": "Labios Compartidos",
+    "artist": "Maná",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0206a335c72b44d0bcd4060fcc"
+  },
+  {
+    "id": "5vHLwhxxlGzmClMcxRRFPr",
+    "name": "Lithium",
+    "artist": "Nirvana",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fbc71c99f9c1296c56dd51b6"
+  },
+  {
+    "id": "1Ic9pKxGSJGM0LKeqf6lGe",
+    "name": "All Apologies",
+    "artist": "Nirvana",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c4f52ef8782f0e8ede4c1aaf"
+  },
+  {
+    "id": "5UWwZ5lm5PKu6eKsHAGxOk",
+    "name": "Everlong",
+    "artist": "Foo Fighters",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024bc9bcdbdc9ac34e37d8b6bb"
+  },
+  {
+    "id": "3d9DChrdc6BOeFsbrZ3Is0",
+    "name": "Under the Bridge",
+    "artist": "Red Hot Chili Peppers",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02153d79816d853f2694b2cc70"
+  },
+  {
+    "id": "6W1BLmVBxkqZwFQcORQLnv",
+    "name": "Tren Al Sur",
+    "artist": "Los Prisioneros",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
+  },
+  {
+    "id": "6Pur3hWy6Nzc27ilmsp5HA",
+    "name": "Lamento Boliviano",
+    "artist": "Los Enanitos Verdes",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0235bf8a2179962114b8ec7585"
+  },
+  {
+    "id": "6OKhBvddAlWxxFnjbpilhu",
+    "name": "La Muralla Verde",
+    "artist": "Los Enanitos Verdes",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c3d72bdf184c8ca79d8a1d0b"
+  },
+  {
+    "id": "5EJ2THuhAapEIeQOtXUQ0x",
+    "name": "Oye Mi Amor",
+    "artist": "Maná",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0263f3b7f5abf86ad483b57b77"
+  },
+  {
+    "id": "6kdCN6gTWLcLxmLXoUcwuI",
+    "name": "Eres",
+    "artist": "Café Tacvba",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02624927252564ef4625307897"
+  },
+  {
+    "id": "4oR2kX5BI50GBnQGRdRRsM",
+    "name": "Estrechez De Corazón",
+    "artist": "Los Prisioneros",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c5246f80d22d902d0be31cbf"
+  },
+  {
+    "id": "6hFHsQWB7HdVrSe7efRR82",
+    "name": "Como te extraño mi amor",
+    "artist": "Café Tacvba",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0244fc111787f221cf5629a2b9"
+  },
+  {
+    "id": "0FRpkVdaghjib91eaXOA97",
+    "name": "Por Qué No Se Van",
+    "artist": "Los Prisioneros",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e3c716aaec57ac6b73cdd68f"
+  },
+  {
+    "id": "0NhbvFZXkZPWxPcQdtVFLZ",
+    "name": "Muevan Las Industrias",
+    "artist": "Los Prisioneros",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e3c716aaec57ac6b73cdd68f"
+  },
+  {
+    "id": "0chYiddNUMKEj9nGMUVNoB",
+    "name": "Llueve Sobre La Ciudad",
+    "artist": "Los Bunkers",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026d48de5880e031310e8ba434"
+  },
+  {
+    "id": "2zLLGT8WWT1dl73TlVL9qs",
+    "name": "Mariposa Traicionera - 2020 Remasterizado",
+    "artist": "Maná",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0276bf45cca3f05a6e1729ea90"
+  },
+  {
+    "id": "19ScoKGqnfUggyqOVQjsoH",
+    "name": "La ingrata",
+    "artist": "Café Tacvba",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023b9211139eb247b12f6ba6c5"
+  },
+  {
+    "id": "7J2885UBOaG6x3LLkp2YGf",
+    "name": "En La Ciudad De La Furia - Remasterizado 2007",
+    "artist": "Soda Stereo",
+    "year": "1988",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0282cf3a9e2e2b6b1b3f994d38"
+  },
+  {
+    "id": "0oakHTPj4SF7Si0NAsLwi8",
+    "name": "Las flores",
+    "artist": "Café Tacvba",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023b9211139eb247b12f6ba6c5"
+  },
+  {
+    "id": "15T3otpUnJKin5njR8x0Tx",
+    "name": "El Baile De Los Que Sobran",
+    "artist": "Los Prisioneros",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e3c716aaec57ac6b73cdd68f"
+  },
+  {
+    "id": "2HhDyKNDf3rcTFkKYPG8bD",
+    "name": "Sexo",
+    "artist": "Los Prisioneros",
+    "year": "1984",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d49e25281048e9bedd82ec86"
+  },
+  {
+    "id": "1Qp77m1Ai0jnuD7ojdYzr9",
+    "name": "Freebola",
+    "artist": "Glup!",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0234753255bf71b2734b7e38db"
+  }
+];
+
+        let activeDeck = [];
+        let playedHistory = [];
+        let currentTrack = null;
+
+        // Inicializar juego leyendo de localStorage para no perder la partida al refrescar sin querer
+        window.addEventListener('load', () => {
+            cargarPartida();
+            actualizarInterfaz();
+        });
+
+        function guardarPartida() {
+            localStorage.setItem('hitster_active_deck', JSON.stringify(activeDeck));
+            localStorage.setItem('hitster_played_history', JSON.stringify(playedHistory));
+            localStorage.setItem('hitster_current_track', JSON.stringify(currentTrack));
+        }
+
+        function cargarPartida() {
+            const storedDeck = localStorage.getItem('hitster_active_deck');
+            const storedHistory = localStorage.getItem('hitster_played_history');
+            const storedCurrent = localStorage.getItem('hitster_current_track');
+
+            if (storedDeck && storedHistory) {
+                activeDeck = JSON.parse(storedDeck);
+                playedHistory = JSON.parse(storedHistory);
+                currentTrack = storedCurrent ? JSON.parse(storedCurrent) : null;
+            } else {
+                reiniciarMazo();
+            }
+        }
+
+        function reiniciarMazo() {
+            // Copiar la lista base y barajarla (Algoritmo Fisher-Yates)
+            activeDeck = [...baseTracks];
+            for (let i = activeDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [activeDeck[i], activeDeck[j]] = [activeDeck[j], activeDeck[i]];
+            }
+            playedHistory = [];
+            currentTrack = null;
+            guardarPartida();
+            actualizarInterfaz();
+        }
+
+        function confirmarReinicio() {
+            if (confirm("¿Estás seguro de que quieres reiniciar el mazo? Se volverán a incluir todas las canciones de la lista.")) {
+                reiniciarMazo();
+            }
+        }
+
+        function sacarCarta() {
+            if (activeDeck.length === 0) {
+                alert("🎉 ¡Felicidades! Se han terminado todas las canciones del mazo digital. Haz clic en reiniciar para volver a jugar.");
+                return;
+            }
+
+            // Ocultar respuesta del anterior por seguridad
+            document.getElementById('answer-container').style.display = 'none';
+            document.getElementById('btn-reveal').innerText = "👁️ VER RESPUESTA";
+
+            // Tomar la primera canción del mazo barajado
+            currentTrack = activeDeck.shift();
+            playedHistory.push(currentTrack);
+
+            guardarPartida();
+            actualizarInterfaz();
+        }
+
+        function toggleRespuesta() {
+            const answerBox = document.getElementById('answer-container');
+            const btnReveal = document.getElementById('btn-reveal');
+            
+            if (answerBox.style.display === 'none' || answerBox.style.display === '') {
+                answerBox.style.display = 'block';
+                btnReveal.innerText = "🙈 OCULTAR RESPUESTA";
+            } else {
+                answerBox.style.display = 'none';
+                btnReveal.innerText = "👁️ VER RESPUESTA";
+            }
+        }
+
+        function actualizarInterfaz() {
+            const totalSongs = baseTracks.length;
+            const remaining = activeDeck.length;
+            
+            document.getElementById('deck-counter').innerText = `CARTAS RESTANTES: ${remaining} / ${totalSongs}`;
+
+            const placeholder = document.getElementById('placeholder-text');
+            const qrContainer = document.getElementById('qr-container');
+            const qrImg = document.getElementById('qr-img-element');
+            const btnReveal = document.getElementById('btn-reveal');
+            const cardCanvas = document.getElementById('card-canvas');
+
+            if (currentTrack) {
+                placeholder.style.display = 'none';
+                qrContainer.style.display = 'block';
+                btnReveal.style.display = 'block';
+                cardCanvas.classList.add('active');
+
+                // Armar link del QR dinámicamente apuntando a tu reproductor
+                const targetUrl = `https://monoconbeston.github.io/reproductor-hitster/?id=${currentTrack.id}`;
+                
+                // Usamos la API pública de QR code para cargarlo directo en una etiqueta Image súper rápida
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(targetUrl)}`;
+
+                // Cargar datos de respuesta oculta
+                document.getElementById('song-title').innerText = currentTrack.name;
+                document.getElementById('song-artist').innerText = currentTrack.artist;
+                document.getElementById('song-year').innerText = currentTrack.year;
+                
+                const coverImg = document.getElementById('song-cover');
+                if (currentTrack.image_url) {
+                    coverImg.src = currentTrack.image_url;
+                    coverImg.style.display = 'inline-block';
+                } else {
+                    coverImg.style.display = 'none';
+                }
+            } else {
+                placeholder.style.display = 'block';
+                qrContainer.style.display = 'none';
+                btnReveal.style.display = 'none';
+                document.getElementById('answer-container').style.display = 'none';
+                cardCanvas.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
