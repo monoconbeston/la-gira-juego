@@ -198,7 +198,7 @@
             color: #f0ecff;
         }
 
-        /* --- RESPUESTA SECRETA (HOST) --- */
+        /* --- RESPUESTA SECRETA (MANAGER) --- */
         .answer-box {
             display: none;
             width: 100%;
@@ -515,7 +515,7 @@
                 </div>
             </div>
 
-            <!-- Caja de respuesta oculta para el host -->
+            <!-- Caja de respuesta oculta para el Manager -->
             <div class="answer-box" id="answer-container">
                 <div class="answer-title" id="song-title">Nombre de la canción</div>
                 <div class="answer-artist" id="song-artist">Artista</div>
@@ -4816,19 +4816,27 @@
             }
         ];
 
-        // Plantillas de subastas y negociaciones (Palabras Prohibidas / Quién da más)
+        // Plantillas de subastas y negociaciones (¡Quién da más!)
         const pujas = [
             {
-                title: "🔥 QUIÉN DA MÁS - POP LATINO",
-                desc: "El Host inicia una subasta rápida en la mesa: '¿Cuántos artistas de Pop Latino en español puedes nombrar en 15 segundos sin repetir?'. Los participantes pujan por turnos (ej: 'Yo 5', 'Yo 8', 'Yo 10'). El mejor postor tiene 15 segundos para lograrlo. ¡Si lo logra avanza 2 casillas; si falla retrocede 1!"
+                title: "🔥 ¡QUIÉN DA MÁS! - ESTILO POP",
+                icon: "🎸",
+                desc: "Estilo musical de carretera: <strong style='color:var(--accent-gold);'>POP / DANCE</strong>.<br><br>Quien sacó la carta elige a su contrincante y propone cuántos artistas o bandas de este estilo puede nombrar en 15 segundos. Su contrincante debe superar el número o desafiarlo. Se puja en la mesa. Quien se quede con la puja más alta debe cumplirlos. Gana quien cumpla la regla (avanza 2 espacios), o el desafiante si el otro falla (el perdedor retrocede 1 espacio)."
             },
             {
-                title: "🔥 QUIÉN DA MÁS - ROCK LATINO",
-                desc: "El Host inicia la subasta: '¿Cuántas bandas de Rock en Español puedes nombrar en 15 segundos?'. Las bandas pujan por ganar el reto. El mejor postor debe realizar el listado. Éxito = avanza 2 espacios en el tablero. Fracaso = retrocede 1."
+                title: "🔥 ¡QUIÉN DA MÁS! - ESTILO ROCK / METAL",
+                icon: "⚡",
+                desc: "Estilo musical de carretera: <strong style='color:var(--accent-gold);'>ROCK / METAL</strong>.<br><br>Quien sacó la carta elige a su contrincante y propone cuántos artistas o bandas de este estilo puede nombrar en 15 segundos. Su contrincante debe superar el número o desafiarlo. Se puja en la mesa. Quien se quede con la puja más alta debe cumplirlos. Gana quien cumpla la regla (avanza 2 espacios), o el desafiante si el otro falla (el perdedor retrocede 1 espacio)."
             },
             {
-                title: "🤫 PALABRAS PROHIBIDAS: EL MENTIROSO",
-                desc: "El jugador activo tiene 30 segundos para contar una anécdota real o inventada relacionada con conciertos. Durante su relato NO puede pronunciar las palabras 'MÚSICA', 'CANTAR' o 'CANCIÓN'. El resto de participantes debe juzgar si es VERDAD o MENTIRA. ¡Si logras engañarlos o hablar limpio, avanzas 2 espacios!"
+                title: "🔥 ¡QUIÉN DA MÁS! - MÚSICA URBANA",
+                icon: "🎤",
+                desc: "Estilo musical de carretera: <strong style='color:var(--accent-gold);'>MÚSICA URBANA / REGGAETON</strong>.<br><br>Quien sacó la carta elige a su contrincante y propone cuántos artistas o bandas de este estilo puede nombrar en 15 segundos. Su contrincante debe superar el número o desafiarlo. Se puja en la mesa. Quien se quede con la puja más alta debe cumplirlos. Gana quien cumpla la regla (avanza 2 espacios), o el desafiante si el otro falla (el perdedor retrocede 1 espacio)."
+            },
+            {
+                title: "🔥 ¡QUIÉN DA MÁS! - ROMÁNTICO / BALADAS",
+                icon: "💖",
+                desc: "Estilo musical de carretera: <strong style='color:var(--accent-gold);'>MÚSICA ROMÁNTICA / BALADAS</strong>.<br><br>Quien sacó la carta elige a su contrincante y propone cuántos artistas o bandas de este estilo puede nombrar en 15 segundos. Su contrincante debe superar el número o desafiarlo. Se puja en la mesa. Quien se quede con la puja más alta debe cumplirlos. Gana quien cumpla la regla (avanza 2 espacios), o el desafiante si el otro falla (el perdedor retrocede 1 espacio)."
             }
         ];
 
@@ -4878,21 +4886,21 @@
 
             shuffledTracks.forEach(track => {
                 const rand = Math.random();
-                if (rand < 0.60) {
+                if (rand < 0.80) {
                     // Canción normal
                     tempDeck.push({
                         type: "song",
                         subtype: "normal",
                         data: track
                     });
-                } else if (rand < 0.75) {
+                } else if (rand < 0.88) {
                     // QR+ Racha
                     tempDeck.push({
                         type: "song",
                         subtype: "racha",
                         data: track
                     });
-                } else if (rand < 0.87) {
+                } else if (rand < 0.95) {
                     // Desafío Tararea
                     tempDeck.push({
                         type: "song",
@@ -4913,7 +4921,7 @@
             const numPureChallenges = Math.max(10, Math.floor(baseTracks.length * 0.12));
             for (let i = 0; i < numPureChallenges; i++) {
                 const randType = Math.random();
-                if (randType < 0.35) {
+                if (randType < 0.30) {
                     const word = palabrasMagicas[Math.floor(Math.random() * palabrasMagicas.length)];
                     tempDeck.push({
                         type: "challenge_pure",
@@ -4921,10 +4929,10 @@
                         data: {
                             icon: "✨",
                             title: "PALABRA MÁGICA",
-                            desc: `¡Duelo de Bandas! La palabra elegida en carretera es: <strong style="color:var(--accent-gold); font-size:1.3rem;">${word}</strong>.<br><br>El primer jugador en cantar un fragmento de una canción real que contenga esta palabra avanza <strong>2 espacios</strong>.`
+                            desc: `¡Duelo de Bandas! La palabra elegida en carretera es: <strong style="color:var(--accent-gold); font-size:1.3rem;">${word}</strong>.<br><br>Quien sacó la carta elige a su contendor y parte cantando un fragmento de canción real que la contenga. Se van turnando en la mesa. ¡El ganador de la racha avanza <strong>2 espacios</strong> y el perdedor retrocede <strong>1 espacio</strong>!`
                         }
                     });
-                } else if (randType < 0.70) {
+                } else if (randType < 0.80) {
                     const trivia = trivias[Math.floor(Math.random() * trivias.length)];
                     tempDeck.push({
                         type: "challenge_pure",
@@ -4932,7 +4940,7 @@
                         data: {
                             icon: "🧠",
                             title: "TRIVIA DE CARRETERA",
-                            desc: `<strong>PREGUNTA:</strong> ${trivia.q}<br><br><strong>A)</strong> ${trivia.a}<br><strong>B)</strong> ${trivia.b}<br><strong>C)</strong> ${trivia.c}`,
+                            desc: `<strong>PREGUNTA:</strong> ${trivia.q}<br><br><strong>A)</strong> ${trivia.a}<br><strong>B)</strong> ${trivia.b}<br><strong>C)</strong> ${trivia.c}<br><br><span style="color:var(--accent-gold); font-weight:bold;">🏆 REGLA: ¡Si acierta avanza 1 espacio, si falla no avanza!</span>`,
                             answer: trivia.ans
                         }
                     });
@@ -5085,6 +5093,17 @@
             if (currentItem) {
                 placeholder.style.display = 'none';
 
+                // Salvaguardas para evitar palabras "undefined"
+                if (currentItem.data) {
+                    currentItem.data.name = currentItem.data.name || "Alerta de Desafío";
+                    currentItem.data.artist = currentItem.data.artist || "Alerta de Desafío";
+                    currentItem.data.year = currentItem.data.year || "Alerta de Desafío";
+                    currentItem.data.title = currentItem.data.title || "Alerta de Desafío";
+                    currentItem.data.desc = currentItem.data.desc || "Alerta de Desafío";
+                    currentItem.data.answer = currentItem.data.answer || "Alerta de Desafío";
+                }
+                const subtype = currentItem.subtype || "normal";
+
                 if (currentItem.type === "song") {
                     songContainer.style.display = 'block';
                     pureChallengeContainer.style.display = 'none';
@@ -5096,14 +5115,14 @@
                     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(targetUrl)}`;
 
                     // Gestionar subtipos
-                    if (currentItem.subtype === "normal") {
+                    if (subtype === "normal") {
                         cardCanvas.classList.add('active-song');
                         cardHeaderBadge.innerText = "CARTA CANCIONERA";
                         cardHeaderBadge.style.color = "var(--accent-blue)";
                         songChallengeBox.style.display = 'none';
                         timerContainer.style.display = 'none';
                     } 
-                    else if (currentItem.subtype === "racha") {
+                    else if (subtype === "racha") {
                         cardCanvas.classList.add('active-racha');
                         cardHeaderBadge.innerText = "CARTA RACHA ➕";
                         cardHeaderBadge.style.color = "var(--accent-gold)";
@@ -5114,7 +5133,7 @@
                         songChallengeText.innerHTML = "¡Respuesta correcta te da un turno extra! Juega la siguiente carta inmediatamente.";
                         timerContainer.style.display = 'none';
                     } 
-                    else if (currentItem.subtype === "tararea") {
+                    else if (subtype === "tararea") {
                         cardCanvas.classList.add('active-song');
                         cardHeaderBadge.innerText = "DESAFÍO TARAREA";
                         cardHeaderBadge.style.color = "var(--accent-blue)";
@@ -5125,7 +5144,7 @@
                         songChallengeText.innerHTML = "Escucha el tema de forma secreta en el reproductor (puedes usar audífonos) y tararea la melodía. Tu equipo tiene <strong>20 segundos</strong> para adivinar el Nombre o Artista.";
                         timerContainer.style.display = 'flex';
                     } 
-                    else if (currentItem.subtype === "continua") {
+                    else if (subtype === "continua") {
                         cardCanvas.classList.add('active-song');
                         cardHeaderBadge.innerText = "CONTINÚA LA CANCIÓN";
                         cardHeaderBadge.style.color = "var(--accent-pink)";
@@ -5133,11 +5152,11 @@
                         songChallengeBox.style.display = 'block';
                         songChallengeBox.className = "challenge-box box-continua";
                         challengeTag.innerText = "🎤 REGLA CANTAR";
-                        songChallengeText.innerHTML = "El Host reproduce el tema y debe pausarlo en mitad del coro. ¡El participante activo debe seguir cantando la letra durante <strong>5 segundos</strong> para avanzar 3 espacios!";
+                        songChallengeText.innerHTML = "El Manager reproduce el tema y debe pausarlo en mitad del coro. ¡Quien sacó la carta debe seguir cantando la letra durante <strong>5 segundos</strong>! Si lo logra avanza <strong>1 espacio</strong>; si falla, no avanza.";
                         timerContainer.style.display = 'none';
                     }
 
-                    // Cargar datos ocultos para el Host
+                    // Cargar datos ocultos para el Manager
                     document.getElementById('song-title').innerText = currentItem.data.name;
                     document.getElementById('song-artist').innerText = currentItem.data.artist;
                     document.getElementById('song-year').innerText = currentItem.data.year;
@@ -5155,7 +5174,7 @@
                     pureChallengeContainer.style.display = 'block';
                     btnReveal.style.display = 'none';
 
-                    if (currentItem.subtype === "reversa") {
+                    if (subtype === "reversa") {
                         cardCanvas.classList.add('active-reversa');
                     } else {
                         cardCanvas.classList.add('active-challenge');
@@ -5166,7 +5185,7 @@
                     document.getElementById('pure-challenge-desc').innerHTML = currentItem.data.desc;
 
                     // Si es trivia, añadir la respuesta secreta detrás de un botón en la misma interfaz
-                    if (currentItem.subtype === "trivia") {
+                    if (subtype === "trivia") {
                         btnReveal.style.display = 'block';
                         document.getElementById('song-title').innerText = "Respuesta Correcta:";
                         document.getElementById('song-artist').innerText = currentItem.data.answer;
