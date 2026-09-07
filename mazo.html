@@ -3,27 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mazo Digital Pro - Hitster</title>
+    <title>La Gira: Mazo Digital</title>
     
     <!-- Configuración PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0d0d11">
+    <meta name="theme-color" content="#0d0c15">
 
     <style>
         :root {
-            --bg-color: #0d0d11;
-            --card-bg: #161622;
-            --accent-color: #1db954; /* Verde Spotify */
-            --accent-blue: #00bcd4;
-            --accent-purple: #bb86fc; /* Color de Desafíos */
+            --bg-color: #0d0c15;
+            --card-bg: #151226;
+            --accent-pink: #ff0055;
+            --accent-purple: #9d4edd;
+            --accent-gold: #ffb703;
+            --accent-blue: #00b4d8;
             --text-color: #ffffff;
-            --text-muted: #a0a0b0;
+            --text-muted: #a49fc6;
+            --card-border-song: var(--accent-blue);
+            --card-border-racha: var(--accent-gold);
+            --card-border-challenge: var(--accent-purple);
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top, #1a1235 0%, #0d0c15 100%);
             color: var(--text-color);
             margin: 0;
             padding: 0;
@@ -38,105 +43,159 @@
         }
 
         .container {
-            width: 90%;
+            width: 92%;
             max-width: 420px;
             text-align: center;
             background: var(--card-bg);
             padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 28px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             box-sizing: border-box;
+            margin: 15px 0;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+
+        .header-title span {
+            font-size: 1.5rem;
         }
 
         h1 {
-            font-size: 1.5rem;
-            margin: 0 0 5px 0;
-            letter-spacing: 1px;
-            color: var(--text-color);
+            font-size: 1.4rem;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-pink) 50%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .counter {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 20px;
-            font-weight: 500;
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        /* --- DISPLAY DE CARTA --- */
+        /* --- CARD CANVAS (CARTA EN PANTALLA) --- */
         .card-display {
-            min-height: 310px;
+            min-height: 330px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 2px dashed rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            border: 2px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
             padding: 20px;
-            background-color: rgba(0,0,0,0.2);
+            background-color: rgba(0, 0, 0, 0.3);
             position: relative;
             margin-bottom: 20px;
             box-sizing: border-box;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
+        /* Estilos de bordes para tipos de cartas activos */
         .card-display.active-song {
             border-style: solid;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 15px rgba(0, 188, 212, 0.15);
+            border-color: var(--card-border-song);
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.25);
+        }
+
+        .card-display.active-racha {
+            border-style: solid;
+            border-color: var(--card-border-racha);
+            background: radial-gradient(circle, #292110 0%, #151226 100%);
+            box-shadow: 0 0 25px rgba(255, 183, 3, 0.35);
         }
 
         .card-display.active-challenge {
             border-style: solid;
-            border-color: var(--accent-purple);
-            background: radial-gradient(circle, #241935 0%, #161022 100%);
-            box-shadow: 0 0 20px rgba(187, 134, 252, 0.25);
+            border-color: var(--card-border-challenge);
+            background: radial-gradient(circle, #221435 0%, #151226 100%);
+            box-shadow: 0 0 25px rgba(157, 78, 221, 0.3);
+        }
+
+        .card-display.active-reversa {
+            border-style: solid;
+            border-color: var(--accent-pink);
+            background: radial-gradient(circle, #35101a 0%, #151226 100%);
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.3);
         }
 
         .qr-placeholder {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
-            text-align: center;
+            line-height: 1.5;
         }
 
         /* QR Imagen */
         .qr-img {
-            width: 200px;
-            height: 200px;
+            width: 190px;
+            height: 190px;
             background: white;
             padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-radius: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
             margin-bottom: 12px;
+            transition: transform 0.2s;
         }
 
-        /* --- CONTENEDOR DESAFÍO EN PANTALLA --- */
+        /* --- DETALLE DESAFÍO EN PANTALLA --- */
         .challenge-box {
-            background-color: rgba(187, 134, 252, 0.1);
-            border: 1px solid rgba(187, 134, 252, 0.3);
-            border-radius: 12px;
-            padding: 12px;
-            margin: 12px 0 0 0;
+            border-radius: 14px;
+            padding: 12px 15px;
+            margin: 10px 0 0 0;
             width: 100%;
             box-sizing: border-box;
             animation: fadeIn 0.3s ease;
+            text-align: left;
+        }
+
+        .challenge-box.box-racha {
+            background-color: rgba(255, 183, 3, 0.1);
+            border: 1px solid rgba(255, 183, 3, 0.3);
+        }
+
+        .challenge-box.box-tararea {
+            background-color: rgba(0, 180, 216, 0.1);
+            border: 1px solid rgba(0, 180, 216, 0.3);
+        }
+
+        .challenge-box.box-continua {
+            background-color: rgba(255, 0, 85, 0.1);
+            border: 1px solid rgba(255, 0, 85, 0.3);
         }
 
         .challenge-tag {
-            color: var(--accent-purple);
             font-size: 0.75rem;
-            font-weight: bold;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
+        .box-racha .challenge-tag { color: var(--accent-gold); }
+        .box-tararea .challenge-tag { color: var(--accent-blue); }
+        .box-continua .challenge-tag { color: var(--accent-pink); }
+
         .challenge-text {
-            font-size: 0.88rem;
-            line-height: 1.35;
-            color: #f1e9ff;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #f0ecff;
         }
 
         /* --- RESPUESTA SECRETA (HOST) --- */
@@ -145,144 +204,305 @@
             width: 100%;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255,255,255,0.12);
             text-align: center;
             animation: fadeIn 0.3s ease;
         }
 
         .answer-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             color: #fff;
             margin-bottom: 3px;
         }
 
         .answer-artist {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .answer-year {
             font-size: 1.8rem;
             font-weight: 900;
-            color: var(--accent-color);
+            color: var(--accent-gold);
             margin: 5px 0;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 183, 3, 0.3);
         }
 
         .answer-cover {
-            width: 80px;
-            height: 80px;
+            width: 75px;
+            height: 75px;
             border-radius: 8px;
             object-fit: cover;
             border: 1px solid rgba(255,255,255,0.1);
             margin-top: 8px;
         }
 
-        /* --- DISEÑO DE CARTA DE DESAFÍO PURO --- */
+        /* --- DISEÑO DE CARTA DESAFÍO PURO --- */
         .challenge-card-body {
             text-align: center;
-            padding: 10px;
+            padding: 5px;
         }
 
         .challenge-card-icon {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
-            animation: pulse 1.5s infinite;
+            font-size: 3rem;
+            margin-bottom: 8px;
+            animation: pulse 1.6s infinite;
         }
 
         .challenge-card-title {
-            font-size: 1.4rem;
-            font-weight: bold;
+            font-size: 1.25rem;
+            font-weight: 800;
             color: var(--accent-purple);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .challenge-card-desc {
-            font-size: 1rem;
-            line-height: 1.5;
-            color: #ffffff;
-            background: rgba(255,255,255,0.04);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
+        .card-display.active-reversa .challenge-card-title {
+            color: var(--accent-pink);
         }
 
-        /* --- BOTONES --- */
+        .challenge-card-desc {
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: #f1eeff;
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+        }
+
+        /* --- REGLAS DE PUNTUACIÓN EN CARTA --- */
+        .scoring-card-helper {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 8px 10px;
+            margin-top: 8px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .scoring-card-helper span strong {
+            color: var(--accent-gold);
+        }
+
+        /* --- INTERACTIVE TIMER FOR TARAREA --- */
+        .timer-container {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .timer-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+            transition: all 0.3s;
+        }
+
+        .timer-circle.warning {
+            border-color: var(--accent-pink);
+            color: var(--accent-pink);
+            animation: blink 0.8s infinite;
+        }
+
+        .timer-btn {
+            background-color: rgba(0, 180, 216, 0.15);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* --- BOTONES DE CONTROL --- */
         .btn {
             border: none;
-            padding: 14px 24px;
+            padding: 13px 22px;
             font-size: 0.95rem;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             transition: all 0.2s ease;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             box-sizing: border-box;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary {
-            background-color: var(--accent-blue);
-            color: black;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-purple) 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 0, 85, 0.3);
         }
 
         .btn-secondary {
-            background-color: #2e2e3e;
+            background-color: rgba(255,255,255,0.06);
             color: white;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #ff8c00 100%);
+            color: black;
+            box-shadow: 0 5px 15px rgba(255, 183, 3, 0.25);
+            font-size: 0.85rem;
+            padding: 11px 20px;
         }
 
         .btn-danger {
-            background-color: #cf6679;
-            color: black;
-            font-size: 0.8rem;
-            padding: 8px 16px;
+            background-color: rgba(207, 102, 121, 0.12);
+            color: #cf6679;
+            border: 1px solid rgba(207, 102, 121, 0.2);
+            font-size: 0.75rem;
+            padding: 7px 14px;
             width: auto;
             margin-top: 15px;
-            opacity: 0.7;
+            border-radius: 6px;
         }
 
         .btn:active {
             transform: scale(0.97);
         }
 
+        /* --- DESAFÍO FINAL MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(13, 12, 21, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 25px;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 0 35px rgba(255, 183, 3, 0.3);
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: float 2s infinite ease-in-out;
+        }
+
+        .modal-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .modal-desc {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #f1eeff;
+            text-align: left;
+            background-color: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* --- ANIMATIONS --- */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.08); opacity: 0.9; }
+            50% { transform: scale(1.08); opacity: 0.95; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>MAZO DIGITAL PRO</h1>
+        <!-- CABECERA -->
+        <div class="header-title">
+            <span>🚌</span>
+            <h1>LA GIRA</h1>
+        </div>
         <div class="counter" id="deck-counter">Cargando baraja...</div>
 
         <!-- VISUALIZACIÓN DE LA CARTA ACTUAL -->
         <div class="card-display" id="card-canvas">
             <!-- Marcador de posición inicial -->
             <div class="qr-placeholder" id="placeholder-text">
-                🃏<br><br>Presiona "SACAR NUEVA CARTA"<br>para empezar el juego con desafíos
+                🃏<br><br>Presiona "SACAR NUEVA CARTA"<br>para arrancar tu gira musical
             </div>
 
             <!-- Caja de Carta de Canción con QR -->
             <div id="song-card-container" style="display:none; width: 100%;">
+                <div id="card-header-badge" style="margin-bottom: 12px; font-weight:800; font-size:0.8rem; letter-spacing:1px; text-transform:uppercase;">CARTA CANCIONERA</div>
+                
                 <img id="qr-img-element" class="qr-img" src="" alt="Código QR">
                 
                 <!-- Caja de Desafío/Trivia integrada con la canción -->
                 <div class="challenge-box" id="song-challenge-box" style="display:none;">
-                    <div class="challenge-tag">🔥 Desafío de la Carta</div>
-                    <div class="challenge-text" id="song-challenge-text">¿Imita al artista o adivina la trivia?</div>
+                    <div class="challenge-tag" id="challenge-tag-element">🔥 Desafío Activo</div>
+                    <div class="challenge-text" id="song-challenge-text">Instrucciones</div>
+                    
+                    <!-- Temporizador interactivo -->
+                    <div class="timer-container" id="tararea-timer" style="display:none;">
+                        <div class="timer-circle" id="timer-display">20</div>
+                        <button class="timer-btn" id="timer-ctrl-btn" onclick="toggleTimer()">Iniciar</button>
+                    </div>
+                </div>
+
+                <!-- Ayudante de puntuación -->
+                <div class="scoring-card-helper">
+                    <span>3 datos = <strong>+3</strong></span>
+                    <span>2 datos = <strong>+2</strong></span>
+                    <span>1 dato = <strong>+1</strong></span>
                 </div>
             </div>
 
@@ -304,11 +524,30 @@
             </div>
         </div>
 
-        <!-- CONTROLES -->
+        <!-- CONTROLES PRINCIPALES -->
         <button class="btn btn-primary" onclick="sacarCarta()" id="btn-draw">🃏 SACAR NUEVA CARTA</button>
         <button class="btn btn-secondary" onclick="toggleRespuesta()" id="btn-reveal" style="display:none;">👁️ VER RESPUESTA</button>
         
+        <!-- BOTÓN DESAFÍO FINAL -->
+        <button class="btn btn-gold" onclick="abrirDesafioFinal()">👑 DESAFÍO FINAL (7 pts)</button>
+
         <button class="btn btn-danger" onclick="confirmarReinicio()">🔄 REINICIAR MAZO</button>
+    </div>
+
+    <!-- MODAL DE DESAFÍO FINAL -->
+    <div class="modal" id="modal-final">
+        <div class="modal-content">
+            <div class="modal-icon">🏆🌌</div>
+            <div class="modal-title">La Esfera de Las Vegas</div>
+            <div class="modal-desc">
+                ¡Bienvenido a la cima de <strong>La Gira</strong>! Para consagrarte como la banda legendaria del juego y reclamar los <strong>7 puntos de la victoria</strong>, debes superar la Gran Prueba:<br><br>
+                1. Saca una nueva carta cancionera normal del mazo.<br>
+                2. El participante activo debe adivinar los <strong>3 datos exactos</strong> (Nombre, Artista y Año exacto) sin cometer errores.<br>
+                3. Además, debe <strong>cantar el coro a capela</strong> durante 10 segundos frente a toda la mesa.<br><br>
+                ¿La banda está lista para hacer historia?
+            </div>
+            <button class="btn btn-primary" onclick="cerrarDesafioFinal()">🎮 VOLVER AL JUEGO</button>
+        </div>
     </div>
 
     <script>
@@ -364,13 +603,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
   },
   {
-    "id": "59D4DOkspUbWyMmbAPQkxZ",
-    "name": "VOY A LLeVARTE PA PR",
-    "artist": "Bad Bunny",
-    "year": "2025",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbd45c8d36e0e045ef640411"
-  },
-  {
     "id": "1DxEbt6OSbrkRthk6pjZue",
     "name": "MERCHO",
     "artist": "LiL CaKe, Migrantes, Nico Valdi",
@@ -397,13 +629,6 @@
     "artist": "Quevedo",
     "year": "2023",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02acbcd04fa4069f14741477ee"
-  },
-  {
-    "id": "1kqH58eGh2ZTOHwqBIB2tM",
-    "name": "Una Foto Remix (feat. Emilia)",
-    "artist": "Mesita, Nicki Nicole, Tiago PZK, Emilia",
-    "year": "2024",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02e12bbceb3952d2a68e7ebdcd"
   },
   {
     "id": "5QjmUqgpPQgXgg4606DqZF",
@@ -525,13 +750,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02946f1ea32cc7681e7a86e9ca"
   },
   {
-    "id": "1Hs1uUl8o2VtDp1DABFq0O",
-    "name": "Los del Espacio",
-    "artist": "LIT killah, Tiago PZK, Maria Becerra, Duki, Emilia, Rusherking, Big One, FMK",
-    "year": "2023",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e028d2b4b4ff1b3954f115474f0"
-  },
-  {
     "id": "3QbfCvCAOCrSGNcGjtOjYM",
     "name": "capaz (merengueton)",
     "artist": "Alleh, Yorghaki",
@@ -572,13 +790,6 @@
     "artist": "Arcángel, Grupo Frontera",
     "year": "2023",
     "image_url": "https://i.scdn.co/image/ab67616d00001e025947e677a3370208d0ba491d"
-  },
-  {
-    "id": "6PDlkWmrq2ZKiUuFt2aQsH",
-    "name": "Loco",
-    "artist": "Justin Quiles, Chimbala, Zion & Lennox",
-    "year": "2021",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e028f71c3bb4e6d1bc4ea36cce0"
   },
   {
     "id": "2lCkncy6bIB0LTMT7kvrD1",
@@ -630,13 +841,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02f44e101b3b2ba930ccf9494d"
   },
   {
-    "id": "0NO2zL0kw8sGGnaMvHKAZF",
-    "name": "Marisola - Remix",
-    "artist": "Cris MJ, Duki, Nicki Nicole, Standly, Stars Music Chile",
-    "year": "2022",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0284abc8c6cf1e122113f7ab8b"
-  },
-  {
     "id": "5RqSsdzTNPX1uzkmlHCFvK",
     "name": "QLONA",
     "artist": "KAROL G, Peso Pluma",
@@ -651,39 +855,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
   },
   {
-    "id": "1rEsfHhBFTuTPekF8M5O3f",
-    "name": "La Triple T",
-    "artist": "TINI",
-    "year": "2023",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e020c5b7823a8b0ac6feb53fd11"
-  },
-  {
     "id": "3lCbsHaN1wCxyDzcNN2x4N",
     "name": "Si Me Tomo Una Cerveza",
     "artist": "Migrantes, Alico",
     "year": "2020",
     "image_url": "https://i.scdn.co/image/ab67616d00001e025be19f8ad3ea24a4e4979dd1"
-  },
-  {
-    "id": "31i56LZnwE6uSu3exoHjtB",
-    "name": "Neverita",
-    "artist": "Bad Bunny",
-    "year": "2022",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
-  },
-  {
-    "id": "7ABLbnD53cQK00mhcaOUVG",
-    "name": "LALA",
-    "artist": "Myke Towers",
-    "year": "2023",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02d646ace05ec913ac690a00c3"
-  },
-  {
-    "id": "4w8niZpiMy6qz1mntFA5uM",
-    "name": "Taki Taki (with Selena Gomez, Ozuna & Cardi B)",
-    "artist": "DJ Snake, Selena Gomez, Ozuna, Cardi B",
-    "year": "2018",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02e105c410a7b390c61a58cbf8"
   },
   {
     "id": "1iatbSLJGSR9wYz3knoCF2",
@@ -728,32 +904,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02938660520f09a1bae2ed4699"
   },
   {
-    "id": "4kXxEhuatrvwrTQycA7s9B",
-    "name": "BIZCOCHITO",
-    "artist": "ROSALÍA",
-    "year": "2022",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02ac8367a27c0eb7195dc3a58d"
-  },
-  {
     "id": "2nwa6nS5lXnsvwX48RWkbS",
     "name": "Que Te Vaya Bien",
     "artist": "Santaferia, Grupo Zúmbale Primo",
     "year": "2022",
     "image_url": "https://i.scdn.co/image/ab67616d00001e021012ee9e2e819755f80e8a4f"
-  },
-  {
-    "id": "6mmPpaltUZK7xjNlBPQQ0p",
-    "name": "Desesperados",
-    "artist": "Rauw Alejandro, Chencho Corleone",
-    "year": "2021",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02f793c0c53727d8c5c950f809"
-  },
-  {
-    "id": "4ojwGTehgBRAg52jbFgzJg",
-    "name": "Me Reclama",
-    "artist": "Mambo Kingz, DJ Luian, Luigi 21 Plus, Ozuna",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e021e305237dcf442b57030c9d5"
   },
   {
     "id": "505v13epFXodT9fVAJ6h8k",
@@ -770,25 +925,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e022d6016751b8ea5e66e83cd04"
   },
   {
-    "id": "3AXw3pd7KHGSogprPSxrMh",
-    "name": "Tengo Un Plan - Remix",
-    "artist": "Key-Key, Ozuna",
-    "year": "2024",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02dad89c3af44b2b609f6820c1"
-  },
-  {
     "id": "4sl3IoHskl2Kbdy27gZ4yn",
     "name": "Una Foto",
     "artist": "Mesita",
     "year": "2023",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02494f7079a2a76c23f1d76bda"
-  },
-  {
-    "id": "2FqTbwiogEVvZnkarPf5BV",
-    "name": "HOLA PERDIDA REMIX",
-    "artist": "Luck Ra, Maluma, KHEA",
-    "year": "2024",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0249c49895f3d650e6dfd582c4"
   },
   {
     "id": "6kPCcIAGoTeRrh8qrmKa90",
@@ -805,13 +946,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02c4583f3ad76630879a75450a"
   },
   {
-    "id": "2pR6bipXfJySBhje19SW02",
-    "name": "Marisola",
-    "artist": "Stars Music Chile, Cris MJ, Standly",
-    "year": "2022",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e028b43f1312c1be458771e1f8f"
-  },
-  {
     "id": "6WatFBLVB0x077xWeoVc2k",
     "name": "Si Antes Te Hubiera Conocido",
     "artist": "KAROL G",
@@ -824,20 +958,6 @@
     "artist": "Shakira",
     "year": "2024",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02ab3c4257d46b6350454c2f4b"
-  },
-  {
-    "id": "6UNLWd8LUk9nNgmU6AcXct",
-    "name": "CHINGON",
-    "artist": "Martinwhite, NEMJ",
-    "year": "2024",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02813b9dc40323b04db8260988"
-  },
-  {
-    "id": "4dLLdfiniBhDP9dlJQIOi4",
-    "name": "Perdonarte, ¿Para Qué?",
-    "artist": "Los Ángeles Azules, Emilia",
-    "year": "2024",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02f975282219ded7470e667000"
   },
   {
     "id": "27uAea0qcUz3a7jKnAT7KG",
@@ -875,20 +995,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02c160ede886e4e54350c0cec9"
   },
   {
-    "id": "6Sq7ltF9Qa7SNFBsV5Cogx",
-    "name": "Me Porto Bonito",
-    "artist": "Bad Bunny, Chencho Corleone",
-    "year": "2022",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
-  },
-  {
-    "id": "51FvjPEGKq2zByeeEQ43V9",
-    "name": "El Merengue",
-    "artist": "Marshmello, Manuel Turizo",
-    "year": "2023",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02bef51a8d2e9c2261a84cb680"
-  },
-  {
     "id": "6ebo7CQn4ILLGvXRmXHhQz",
     "name": "Miénteme",
     "artist": "TINI, Maria Becerra",
@@ -924,20 +1030,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e025ef65e3a30d372a55b19dfa6"
   },
   {
-    "id": "3iXtNVICHTu2FEhh3bMWoV",
-    "name": "Bronceado - Remix",
-    "artist": "Marama, MYA, Robleis",
-    "year": "2023",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e022f291ddfbe75870bf70d1b0e"
-  },
-  {
-    "id": "2qG5sZ7Si6sdK74qLxedYM",
-    "name": "Con Altura",
-    "artist": "ROSALÍA, J Balvin, El Guincho",
-    "year": "2019",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0265b0e3e1bd8b5fe2f602c1ea"
-  },
-  {
     "id": "4QXdarIBu7JDxVTTF4FHWE",
     "name": "LuisMi",
     "artist": "Polimá Westcoast, Young Cister",
@@ -950,13 +1042,6 @@
     "artist": "Valentino Merlo, The La Planta",
     "year": "2024",
     "image_url": "https://i.scdn.co/image/ab67616d00001e0281bccfaf5e0303cf48145e2e"
-  },
-  {
-    "id": "6rtVnWS23c2k09s0xO46ed",
-    "name": "Tírate un Paso / Tembleque / Soy una Gárgola / Toma Toma / Látigo",
-    "artist": "Los Wachiturros",
-    "year": "2014",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02db7f63eb9fb65ec8d3e1f7d3"
   },
   {
     "id": "0Lahr7sUDdtYnX3n3KobR6",
@@ -978,27 +1063,6 @@
     "artist": "Ke Personajes, J Balvin",
     "year": "2025",
     "image_url": "https://i.scdn.co/image/ab67616d00001e0251c0592b1a240ec9b23f6b97"
-  },
-  {
-    "id": "2mdrVnxEnPR6iFijakkxQS",
-    "name": "QLOO*",
-    "artist": "Young Cister, Kreamly",
-    "year": "2025",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0213189b29e3f97c1e7442508e"
-  },
-  {
-    "id": "6s9PpYbExKlHuJ8JMyep21",
-    "name": "Bing Bong",
-    "artist": "Yailin la Mas Viral, Puyalo Pantera",
-    "year": "2024",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0203ce40447298d4373551576f"
-  },
-  {
-    "id": "6JjPBQfI2Y8nIjnm65X6Pw",
-    "name": "X (feat. Maluma & Ozuna) - Remix",
-    "artist": "Nicky Jam, J Balvin, Maluma, Ozuna",
-    "year": "2018",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e024b1734e4d48786063992ce04"
   },
   {
     "id": "4bw8mcDUSRWfQo63ZTYRnU",
@@ -1043,13 +1107,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02fef5b866326e3451bde28ff2"
   },
   {
-    "id": "6gV8ALkSHfJi7Bprabr1FC",
-    "name": "Inocente",
-    "artist": "Roze Oficial, Peipper",
-    "year": "2023",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0262fcd653e4b7ad78efa53806"
-  },
-  {
     "id": "3k3NWokhRRkEPhCzPmV8TW",
     "name": "Ojitos Lindos",
     "artist": "Bad Bunny, Bomba Estéreo",
@@ -1057,88 +1114,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e0249d694203245f241a1bcaa72"
   },
   {
-    "id": "4FHXsehfIbyPCJLP7fCnIF",
-    "name": "Ritmo",
-    "artist": "Raffa Fl",
-    "year": "2021",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02c632710935419d8475d5c694"
-  },
-  {
-    "id": "2dgKoQxqv5qiM8zL33FOYf",
-    "name": "Callaita - Remix",
-    "artist": "Santiago Novello",
-    "year": "2021",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0247bb1dd4494df9da7e07b343"
-  },
-  {
-    "id": "7ltBkmWDyPxBM4Q8RzwaB1",
-    "name": "Columbia - Remix",
-    "artist": "AG Remix, Albert Gonzalez",
-    "year": "2023",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02f743216902f4b52301d9921d"
-  },
-  {
-    "id": "2EFxmVoPR2kkCvy5dtNB7T",
-    "name": "Efecto - Remix",
-    "artist": "Emmi Dj, Maru Mix",
-    "year": "2022",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02269661e3e97456ff8bcf2bf6"
-  },
-  {
-    "id": "4mj0rWZkEupbbMer23YrBL",
-    "name": "CAFé CON RON",
-    "artist": "Mareels",
-    "year": "2025",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0232c09e0d1223de1b2c49e5e3"
-  },
-  {
-    "id": "3IwGp5x8qB7pCaf6PmT5u0",
-    "name": "Latido",
-    "artist": "Iglesias",
-    "year": "2025",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e020abb40080ec2906b7f4a7089"
-  },
-  {
-    "id": "7lCjcdyl76iGPe42WvSK8e",
-    "name": "El Apagon - Remix",
-    "artist": "ELITE Djs",
-    "year": "2022",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0214f198f5cc4a9f1963c9d8bf"
-  },
-  {
-    "id": "6RJHr0qPLeEWvQ0F2i3sur",
-    "name": "Baile Inolvidable - Remix",
-    "artist": "Agus Maidana, Nico Manriquez",
-    "year": "2025",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02db3e8fd248a6f4014dd4612c"
-  },
-  {
-    "id": "1MPtRzIQNroAda6vKPk8pE",
-    "name": "Nuevayol (Tech House) - Remix",
-    "artist": "Dj Ezee",
-    "year": "2025",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02299e610b5ff838f2f2c341fa"
-  },
-  {
-    "id": "2DEZmgHKAvm41k4J3R2E9Y",
-    "name": "Safaera",
-    "artist": "Bad Bunny, Jowell & Randy, Ñengo Flow",
-    "year": "2020",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02548f7ec52da7313de0c5e4a0"
-  },
-  {
     "id": "1HEwEN64NjgTaHmo7LfkX8",
     "name": "no tiene sentido",
     "artist": "Beéle",
     "year": "2025",
     "image_url": "https://i.scdn.co/image/ab67616d00001e022feb67a486bcf117e7fb15b0"
-  },
-  {
-    "id": "2ZyrAym0sRLwt4PhGotHuI",
-    "name": "LA VILLA",
-    "artist": "Ryan Castro, Kapo, Gangsta",
-    "year": "2025",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e024f0b5d2c8e5f6b86fcd73ca9"
   },
   {
     "id": "6YYmoV9YbBefsspGmqFHbs",
@@ -1197,25 +1177,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e022d0e5ab5bd2e234fbcffa3e0"
   },
   {
-    "id": "0F2LiyHp9E0pAanpfnzHNp",
-    "name": "Cherub Rock - 2011 Remaster",
-    "artist": "The Smashing Pumpkins",
-    "year": "1993",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02f00d9c29f0eb7691f908f23a"
-  },
-  {
     "id": "2EYnvZoSEkwiC8ynBcjLyi",
     "name": "Swallowed - Remastered",
     "artist": "Bush",
     "year": "1996",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02480f135db3f0c9dffa2b65c8"
-  },
-  {
-    "id": "02lTDOxHeXTHsdwXoz6lpC",
-    "name": "In the Meantime",
-    "artist": "Spacehog",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e029511e3a2fc113eae0dd111dd"
   },
   {
     "id": "4AkFvW4VdNDNmVXehylmrr",
@@ -1330,39 +1296,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e020158cbde70672dd821972907"
   },
   {
-    "id": "0pwObEOHolQZSldJ2q1wpy",
-    "name": "Stinkfist",
-    "artist": "TOOL",
-    "year": "1996",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0247daa44983fa6079910ed295"
-  },
-  {
     "id": "2MuWTIM3b0YEAskbeeFE1i",
     "name": "Master Of Puppets",
     "artist": "Metallica",
     "year": "1986",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02668e3aca3167e6e569a9aa20"
-  },
-  {
-    "id": "4tPHBRIPsB55nssjvKDbjj",
-    "name": "Disposable Heroes",
-    "artist": "Metallica",
-    "year": "1986",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02668e3aca3167e6e569a9aa20"
-  },
-  {
-    "id": "4gAV3sMEZn4lrfKPGARCqA",
-    "name": "Israel's Son",
-    "artist": "Silverchair",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0272c3447a562fc7be1c8e1255"
-  },
-  {
-    "id": "2OUR8g12h5qsGDs1v5lqvp",
-    "name": "Swerve City",
-    "artist": "Deftones",
-    "year": "2012",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0273652b7a0dc388dd1d044b69"
   },
   {
     "id": "4UFQBhIOgANiBG44USIgsf",
@@ -1435,13 +1373,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02053f006079bce979e5fef1e1"
   },
   {
-    "id": "4OCzAGgyWsUKpdWufYywZm",
-    "name": "Cochise",
-    "artist": "Audioslave",
-    "year": "2002",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e024d94e1251b7e8c5e247de39c"
-  },
-  {
     "id": "59WN2psjkt1tyaxjspN8fp",
     "name": "Killing In The Name",
     "artist": "Rage Against The Machine",
@@ -1468,27 +1399,6 @@
     "artist": "Marilyn Manson",
     "year": "2004",
     "image_url": "https://i.scdn.co/image/ab67616d00001e023e2c4ed336c6b4ebb1a4bde9"
-  },
-  {
-    "id": "0EYOdF5FCkgOJJla8DI2Md",
-    "name": "B.Y.O.B.",
-    "artist": "System Of A Down",
-    "year": "2005",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02c65f8d04502eeddbdd61fa71"
-  },
-  {
-    "id": "5qQxqHhrMzDdEFOtcAYNk2",
-    "name": "Digging the Grave",
-    "artist": "Faith No More",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e027201b2b127bdd451472373ee"
-  },
-  {
-    "id": "2V4Bc2I962j7acQj1N0PiQ",
-    "name": "Celebrity Skin",
-    "artist": "Hole",
-    "year": "1998",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e020649124c37ce988317263671"
   },
   {
     "id": "5UWwZ5lm5PKu6eKsHAGxOk",
@@ -1554,13 +1464,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02507886e5e490a8f1361c46fa"
   },
   {
-    "id": "6Lg1r56wubG76t2fOF9iNa",
-    "name": "Mira Niñita - 2020 Remasterizado",
-    "artist": "Los Jaivas",
-    "year": "1973",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02507886e5e490a8f1361c46fa"
-  },
-  {
     "id": "0FRpkVdaghjib91eaXOA97",
     "name": "Por Qué No Se Van",
     "artist": "Los Prisioneros",
@@ -1587,13 +1490,6 @@
     "artist": "Sol y Lluvia",
     "year": "2013",
     "image_url": "https://i.scdn.co/image/ab67616d00001e0243b930af2d2e87c1cd6046ae"
-  },
-  {
-    "id": "6AkRD0PiHw6DYKTUefJzAg",
-    "name": "Candombe Para José",
-    "artist": "Illapu",
-    "year": "2002",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e027cb6ccda40ba677a6c5ac54f"
   },
   {
     "id": "0igRRwt1nnRIAhFFkrOgkz",
@@ -1638,32 +1534,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e0256c7b6d25ebfa1b6178584e4"
   },
   {
-    "id": "1J3YwZoLyuT0pPOtMbenOE",
-    "name": "Aconcagua",
-    "artist": "Los Jaivas",
-    "year": "1982",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0256c7b6d25ebfa1b6178584e4"
-  },
-  {
-    "id": "361zrhidWZOrmjFExUpfSy",
-    "name": "Takirari del Puerto",
-    "artist": "Los Jaivas",
-    "year": "1982",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0256c7b6d25ebfa1b6178584e4"
-  },
-  {
     "id": "0aHps38kFw6Aqg9sJpD97d",
     "name": "La Joya Del Pacífico",
     "artist": "Joe Vasconcellos",
     "year": "2006",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02f74a14bd8f129fbb7abb3b8b"
-  },
-  {
-    "id": "3AMth1gnz9PbQnEfUVZbp2",
-    "name": "Pregon Para Iluminarse",
-    "artist": "Los Jaivas",
-    "year": "1975",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02b5ac0738b808070a0786b001"
   },
   {
     "id": "3hucW9oJIdJkxjaNxAc6wd",
@@ -1685,13 +1560,6 @@
     "artist": "Victor Jara",
     "year": "1971",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02ed30ea3ea725626a55d19b1a"
-  },
-  {
-    "id": "6ftHPJyEHGqMaml3ZEwPm1",
-    "name": "Llueve Sobre La Ciudad",
-    "artist": "Los Bunkers",
-    "year": "2005",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0217cf04d6f54f52243c37bc51"
   },
   {
     "id": "0VvwpKqD7cOYubrK030fGR",
@@ -1720,20 +1588,6 @@
     "artist": "Joe Vasconcellos",
     "year": "1995",
     "image_url": "https://i.scdn.co/image/ab67616d00001e021443f89117ffd83e8e3d4502"
-  },
-  {
-    "id": "5ycOBJyHjc40mNGB3Dim7Y",
-    "name": "Cuentame Una Historia Original",
-    "artist": "Los Prisioneros",
-    "year": "1990",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
-  },
-  {
-    "id": "2devOvQdt2r3lLOWu92O4x",
-    "name": "Amor Americano",
-    "artist": "Los Jaivas",
-    "year": "1981",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02614bdf1119b73ddaa9c6ba65"
   },
   {
     "id": "6bEhhqg8vVNlnmj9CF6O0C",
@@ -1827,27 +1681,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e028d2430c338f5d70a8ac1938e"
   },
   {
-    "id": "0lnbIDYQKrD9VzNq3Ezyn2",
-    "name": "El Curanto",
-    "artist": "Chancho En Piedra",
-    "year": "2000",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e026314dfd5f48894c0ad9f1903"
-  },
-  {
-    "id": "4IvYW5NRB5U8FE1nHTQkGn",
-    "name": "Dejando Libre el Amor",
-    "artist": "Chancho En Piedra",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02000bcf388f23e7a6e35c891a"
-  },
-  {
-    "id": "6mevK2IlIU5rmvkfqxCFWT",
-    "name": "Discojapi",
-    "artist": "Chancho En Piedra",
-    "year": "1998",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e028d2430c338f5d70a8ac1938e"
-  },
-  {
     "id": "7vgIGcKJDS0sJLajb9iV6U",
     "name": "Asi Es La Vida",
     "artist": "Glup!",
@@ -1911,34 +1744,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
   },
   {
-    "id": "2a5eCWoqUyDzadBT8eqb32",
-    "name": "Fe",
-    "artist": "Lucybell",
-    "year": "2006",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02a7212fb1dfb585a8ef21d0a6"
-  },
-  {
-    "id": "5EhButiJbrrRbO3qguSKkg",
-    "name": "Cuando Respiro En Tu Boca",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "1ATlBCLlWAKUvfcFWciix0",
-    "name": "Lunas",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "1mUKIFqjCZPebAEGsQ15yo",
-    "name": "Angeles Siameses",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
     "id": "6BhCYG1npuuuXnwCicz1sR",
     "name": "Vete",
     "artist": "Lucybell",
@@ -1946,88 +1751,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
   },
   {
-    "id": "4VzffTMgdAbB2ZVqrx4IBL",
-    "name": "Rodar",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "0euc5nPmz6KCIkR8i9G5qX",
-    "name": "Eclipse",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "5RSUakev7IY5LBwBvLdxRP",
-    "name": "Que No Me Vengan Con Paraisos",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "6ZKnnL2qpBTBQClzNpivgZ",
-    "name": "Sin Alas",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "732ZIHeosbnTDFXUa6kulE",
-    "name": "Desde Acá",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "2INJLOALCa1fIVyYkmybU8",
-    "name": "Tú",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
     "id": "5zvQ8fr8KiFqeBnkib4vHG",
     "name": "De Sudor Y Ternura",
     "artist": "Lucybell",
     "year": "1995",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "1k3uf1Qr8xtDWXoZnUXWWP",
-    "name": "Grito Otoñal",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "5RSUakev7IY5LBwBvLdxRP",
-    "name": "Que No Me Vengan Con Paraisos",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "5zvQ8fr8KiFqeBnkib4vHG",
-    "name": "De Sudor Y Ternura",
-    "artist": "Lucybell",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02268b1434c810093582f5f1ca"
-  },
-  {
-    "id": "3aCtwP2vHagbuBbshlUSri",
-    "name": "Mi Luz Crece",
-    "artist": "Lucybell",
-    "year": "1996",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4114e0a24bc274ddbaf6bc0"
-  },
-  {
-    "id": "7Iq4yqFDuqTvF22Gw8lAiQ",
-    "name": "Entre El Sol Y Dos Ojos",
-    "artist": "Lucybell",
-    "year": "1996",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4114e0a24bc274ddbaf6bc0"
   },
   {
     "id": "3pDhN3qB33AOPhQEkUCaWt",
@@ -2058,13 +1786,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e022bf273f977582e8f890192fe"
   },
   {
-    "id": "3NVvbKNndun3sfDKJANhw4",
-    "name": "Marianela",
-    "artist": "Lirico En La Casa",
-    "year": "2017",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e023afc04865216ba06fc80a862"
-  },
-  {
     "id": "5uRd1tmUAvfFGSPR5266Xp",
     "name": "Tu Cariñito",
     "artist": "Luisito Ayala Y La Puerto Rican Power",
@@ -2077,13 +1798,6 @@
     "artist": "Pitbull, Osmani Garcia \\\"La Voz\\\"",
     "year": "2015",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02a1cc249569898d31407fcf7c"
-  },
-  {
-    "id": "5Y9fnynLlIvqtM710MHzfz",
-    "name": "Síguelo Bailando",
-    "artist": "Ozuna",
-    "year": "2017",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02b0a875d7f1bfe4ec4aaffa48"
   },
   {
     "id": "51XTKzrOz81B2ncZ2CEMOC",
@@ -2107,32 +1821,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e029ce5d64fac62023f21f8f04a"
   },
   {
-    "id": "1DrDfpOx4P4LMxFhtOmeyD",
-    "name": "Fanatica Sensual",
-    "artist": "Plan B",
-    "year": "2014",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e029ffb99a9a28c0adeb365c4c7"
-  },
-  {
     "id": "0dgwWXkfcWyB2a2qTgEc0F",
     "name": "Verano Azul",
     "artist": "Juan Magán",
     "year": "2009",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02faac6c9884c61a76a9da999c"
-  },
-  {
-    "id": "39KVUG2LifQa7dqQvzlgZG",
-    "name": "Tírate un Paso / Tembleque / Soy una Gárgola / Toma Toma / Látigo",
-    "artist": "Los Wachiturros",
-    "year": "2014",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02ab11802c34d8e72653f6989a"
-  },
-  {
-    "id": "3lC4mM6NiSLttfYTv1HTNQ",
-    "name": "Bailan Rochas y Chetas",
-    "artist": "Nene Malo, Magenta",
-    "year": "2012",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02b4001da146a21be6471ecd1d"
   },
   {
     "id": "2aE0HrYHGbyXpgOnMY03Id",
@@ -2240,25 +1933,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e0231efc094729062d8452bd920"
   },
   {
-    "id": "7mL0vTeXzlUj2jsApatA83",
-    "name": "Agárrala - Remix",
-    "artist": "Trebol Clan",
-    "year": "2004",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e027f97f0064ebdf54e126feb78"
-  },
-  {
     "id": "5JLV62rg4jtnoElc4P9F6K",
     "name": "Quiero Bailar",
     "artist": "Ivy Queen",
     "year": "2004",
     "image_url": "https://i.scdn.co/image/ab67616d00001e022372ef8dbdcdd797de8956bb"
-  },
-  {
-    "id": "0e8DgtfJnWTBarF9YGMd0N",
-    "name": "Ven Bailalo - Reggaeton Mix",
-    "artist": "Angel Y Khriz",
-    "year": "2005",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0299aa528b887ebf67a1e5375d"
   },
   {
     "id": "6G4U9avyBNEfP0fAIduev3",
@@ -2373,53 +2052,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02294ea58a8ac4ae598c46d0b0"
   },
   {
-    "id": "5w9c2J52mkdntKOmRLeM2m",
-    "name": "Con Calma",
-    "artist": "Daddy Yankee, Snow",
-    "year": "2019",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02896ffcd42561c44fea2bae7b"
-  },
-  {
-    "id": "2oeyvFG0mFFDHUxhPVObNk",
-    "name": "Flow Natural",
-    "artist": "Tito \\\"El Bambino\\\", Beenie Man, Deevani",
-    "year": "2006",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02abebca5919b3af8e5b189ff9"
-  },
-  {
-    "id": "1ly10TNmCejjiwCM0K0vrN",
-    "name": "Pam Pam",
-    "artist": "Wisin & Yandel",
-    "year": "2013",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e027cf6facd89c47445e6a4fcea"
-  },
-  {
     "id": "1PZrHbJjt5t7dP9OGRxcD0",
     "name": "Dale Don Dale",
     "artist": "Don Omar",
     "year": "2003",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02b4070df60fced11f282548d0"
-  },
-  {
-    "id": "5oQDYIpN3ieXNHwXAr8TXf",
-    "name": "Na De Na",
-    "artist": "Angel Y Khriz, Gocho \\\"El Lápiz De Platino\\\", John Eric",
-    "year": "2008",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02243f0010b0927e78ccd9e8e2"
-  },
-  {
-    "id": "0qp29frhNoklK9WvxERqlS",
-    "name": "Tocarte Toa (feat. Natya)",
-    "artist": "Big Yamo, Natya",
-    "year": "2013",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e028f5d0ed60bcdae9c8a2c56bb"
-  },
-  {
-    "id": "1DDhhUMJhjZEFelUMlqUot",
-    "name": "Hasta Abajo - Remix",
-    "artist": "Don Omar",
-    "year": "2021",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e023b1bf977ba3750ec796193d0"
   },
   {
     "id": "2a1o6ZejUi8U3wzzOtCOYw",
@@ -2429,20 +2066,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e024640a26eb27649006be29a94"
   },
   {
-    "id": "614NVFo5csQqRnryl4jXs2",
-    "name": "El Teléfono",
-    "artist": "Héctor \\\"El Father\\\", Wisin & Yandel",
-    "year": "2006",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02d48062765f4871ca6a2917e1"
-  },
-  {
-    "id": "39FKtFw4GagJDW62hhHVuM",
-    "name": "Frikitona",
-    "artist": "Boy Wonder CF, Plan B",
-    "year": "2011",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02e5afb354deaef85c02abe6d2"
-  },
-  {
     "id": "4fJWoaQqGZwp3quw9OpLMe",
     "name": "Pose",
     "artist": "Daddy Yankee",
@@ -2450,32 +2073,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02bcc30c5fa48fca3218c3ffa4"
   },
   {
-    "id": "774Vy9sPhpePjj0B7WHaG2",
-    "name": "Prrrum",
-    "artist": "Cosculluela",
-    "year": "2010",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e022fe0dc7397290ffc42bd7b99"
-  },
-  {
-    "id": "5YzA563GXTuwQaRq24z1k5",
-    "name": "Como Antes (feat. Wisin)",
-    "artist": "Yandel, Wisin",
-    "year": "2017",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02a6fa856d2b032f6a11fcc0dd"
-  },
-  {
     "id": "3nDNXKBb5fRTuQXpeowWTT",
     "name": "Algo Me Gusta De Ti",
     "artist": "Wisin & Yandel",
     "year": "2012",
     "image_url": "https://i.scdn.co/image/ab67616d00001e026be6ef1173c9a2bb6705981c"
-  },
-  {
-    "id": "0tDSgSmZsbxCkdkfUPjg59",
-    "name": "5 Letras",
-    "artist": "Alexis y Fido",
-    "year": "2007",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0229d73e11d466d6dd8917173f"
   },
   {
     "id": "4oROqjxNSBrVxrcSaW77Mc",
@@ -2548,13 +2150,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e023a7c1e0b718a04b5230db2d2"
   },
   {
-    "id": "5jgoPPQ3w4FJMie9ADO4Z7",
-    "name": "Ven Ven Ven - Versión Karen Paola 2024",
-    "artist": "Karen Paola",
-    "year": "2024",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e029040dbdf622bda992a1af404"
-  },
-  {
     "id": "1Je1IMUlBXcx1Fz0WE7oPT",
     "name": "Wannabe",
     "artist": "Spice Girls",
@@ -2567,13 +2162,6 @@
     "artist": "Backstreet Boys",
     "year": "1997",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
-  },
-  {
-    "id": "0phGofl3ppS5Itk1zM9eKa",
-    "name": "Ghostbusters - from the \\\"Ghostbusters\\\" Original Motion Picture Soundtrack",
-    "artist": "Ray Parker Jr.",
-    "year": "1984",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02e043448727a1234eecde4139"
   },
   {
     "id": "3S2R0EVwBSAVMd5UMgKTL0",
@@ -2681,32 +2269,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e023a7c1e0b718a04b5230db2d2"
   },
   {
-    "id": "2DTQUOfYJAjdo7utgjnU4u",
-    "name": "Baker Street",
-    "artist": "Undercover",
-    "year": "1992",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0281f3f720305379713c1b3c9a"
-  },
-  {
-    "id": "6FkonFrR2Vyl8jdzhnkTvM",
-    "name": "Lady",
-    "artist": "Mendez",
-    "year": "2011",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e025c9f8e7686f003d1018c0e97"
-  },
-  {
     "id": "6vaMNTKuiIHcd6OAbud7gF",
     "name": "Chiki-Chiki",
     "artist": "Mendez",
     "year": "2002",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02291282b4b3997ba440b20026"
-  },
-  {
-    "id": "7Eo3fkg16MzIgv9SxxSonH",
-    "name": "Llegó la Cripta",
-    "artist": "El Chombo, Aldo Ranks",
-    "year": "1999",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02e45526dcea9c7d50bfd89ece"
   },
   {
     "id": "4XTMj7kd8DHLl0r7ghmEAr",
@@ -2730,41 +2297,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
   },
   {
-    "id": "5jZlPGOiYTcBjgVCXofrOz",
-    "name": "That's The Way I Like It",
-    "artist": "Backstreet Boys",
-    "year": "1997",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
-  },
-  {
-    "id": "1GBr3WGJzV6lGycAS8SBbv",
-    "name": "10.000 Promises",
-    "artist": "Backstreet Boys",
-    "year": "1997",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
-  },
-  {
-    "id": "5CMdasTE4CPRNSC9VSJrsz",
-    "name": "Like A Child",
-    "artist": "Backstreet Boys",
-    "year": "1997",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
-  },
-  {
-    "id": "2L6Dh1e3Z8UsKsmoy74Jjx",
-    "name": "Hey Mr. DJ (Keep Playin' This Song)",
-    "artist": "Backstreet Boys",
-    "year": "1997",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
-  },
-  {
-    "id": "493rl5ffrRvS5uPbRfwVFh",
-    "name": "Set Adrift on Memory Bliss",
-    "artist": "Backstreet Boys",
-    "year": "1997",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
-  },
-  {
     "id": "7iiPCPiyAcKTwFfElnQUB9",
     "name": "That's What She Said",
     "artist": "Backstreet Boys",
@@ -2772,78 +2304,8 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
   },
   {
-    "id": "0SyPNRaOlEonBpX2ZbupNk",
-    "name": "If You Want It To Be Good Girl (Get Yourself a Bad Boy)",
-    "artist": "Backstreet Boys",
-    "year": "1997",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
-  },
-  {
-    "id": "6h4JFamZhYCPtR6WkrFdv4",
-    "name": "If I Don't Have You",
-    "artist": "Backstreet Boys",
-    "year": "1997",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02530cec85d4543693bd726167"
-  },
-  {
     "id": "3LNZSTiwQYL7BnTfHvIOII",
     "name": "Una Cerveza",
-    "artist": "Rafaga",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
-  },
-  {
-    "id": "51n1ncCPculGdNwxRZCC9O",
-    "name": "Tú",
-    "artist": "Rafaga",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
-  },
-  {
-    "id": "5PBglLuGrJFWg7Z3mRqFYi",
-    "name": "Vete",
-    "artist": "Rafaga",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
-  },
-  {
-    "id": "5PqStBGWVYu02RJQSWuMUH",
-    "name": "Hazme Entender",
-    "artist": "Rafaga",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
-  },
-  {
-    "id": "0JBkchnMAPf4dhQQEXAl9H",
-    "name": "Tus Labios",
-    "artist": "Rafaga",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
-  },
-  {
-    "id": "4WToBp74uK9SGxR564RFdd",
-    "name": "Te Pido Perdón",
-    "artist": "Rafaga",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
-  },
-  {
-    "id": "78norjtnShQut2WZUw3W9s",
-    "name": "Tan Solo Un Minuto",
-    "artist": "Rafaga",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
-  },
-  {
-    "id": "0TRnVZShOcAONREL57LL1n",
-    "name": "Porque Te Vas",
-    "artist": "Rafaga",
-    "year": "2016",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
-  },
-  {
-    "id": "3CdIuqjoJuayYKdIj0autp",
-    "name": "Vengo A Gritar Que Te Amo",
     "artist": "Rafaga",
     "year": "2016",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02efb3ab9c0bbc31da0be962a4"
@@ -2912,13 +2374,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e020b225f8309af850a2aa205f1"
   },
   {
-    "id": "2z809doWJXQWxioqg6kczt",
-    "name": "Robi-Rob's Boriqua Anthem (feat. Trilogy) - Single Version",
-    "artist": "C & C Music Factory, Trilogy",
-    "year": "2010",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02db540ab9625506f1d7da064a"
-  },
-  {
     "id": "3PTysj6y3uHdu5RYJLIEKd",
     "name": "El Cepillo",
     "artist": "Fulanito",
@@ -2931,13 +2386,6 @@
     "artist": "Ilegales",
     "year": "1997",
     "image_url": "https://i.scdn.co/image/ab67616d00001e027ec1aa43dd1f6b93f4e83225"
-  },
-  {
-    "id": "7GYzgXNdlRTM1jwCwleNvU",
-    "name": "King Africa Megamix",
-    "artist": "King Africa",
-    "year": "2000",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e021f6a4bf042bca388fcbaef75"
   },
   {
     "id": "4jRxEVNituPZObHbCSBZL3",
@@ -3010,13 +2458,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e023452d31d2ef8ce06f151a028"
   },
   {
-    "id": "5PkTujqwUcpoiH20ysOjS3",
-    "name": "Pau Que Nasce Torto / Melo Do Tchan - Medley",
-    "artist": "É O Tchan",
-    "year": "2004",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e020355514bc5f60fd3c89173b1"
-  },
-  {
     "id": "2lgXNpeyyDEnI0AriGkXS0",
     "name": "Danca da Manivela",
     "artist": "Axe Bahia",
@@ -3045,27 +2486,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e024f32e8e7d13904a5cd6692ba"
   },
   {
-    "id": "4vhva1ri3COQgLmlU1Zkv6",
-    "name": "Tapinha",
-    "artist": "Naldinho, bela",
-    "year": "2000",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e023eaf03ca6ce33a69e39b3a4f"
-  },
-  {
-    "id": "6JuDmQSbNcq2isx27yO7iC",
-    "name": "Tchu Tchuca",
-    "artist": "Bonde do Tigrão",
-    "year": "2000",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e023eaf03ca6ce33a69e39b3a4f"
-  },
-  {
-    "id": "107BCzLRTf3RETg9T7POg8",
-    "name": "Sacudindo a Jaca",
-    "artist": "Familia Abadá",
-    "year": "2010",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e027f0ad8c7bec6baa713909504"
-  },
-  {
     "id": "3wSpUP4TgZWDxAw5HOEmrB",
     "name": "Ou Dá Ou Desce",
     "artist": "Boquinha Da Garrafa",
@@ -3087,13 +2507,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e027c0782e56139d4ec95ef5b9a"
   },
   {
-    "id": "5uKnqGzXgmzlctR3rz8Edt",
-    "name": "Dança da Mãozinha - Ao Vivo",
-    "artist": "Tchakabum",
-    "year": "2004",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0239834781cfd941b7fc577926"
-  },
-  {
     "id": "2iFpKSUCN7zF0Wu4cUTw2Q",
     "name": "Mueve la Pompa",
     "artist": "Axe Bahia",
@@ -3101,25 +2514,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e027c0782e56139d4ec95ef5b9a"
   },
   {
-    "id": "6HGXaTo4YtyOQlSe9d8aja",
-    "name": "Mix Brasil",
-    "artist": "Porto Seguro",
-    "year": "2024",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02249e6d15a0adf781fe768b3d"
-  },
-  {
     "id": "6mx99rlPKCxJlAvhlTx0mt",
     "name": "Fim De Semana",
     "artist": "Netinho",
     "year": "1997",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02f0eb2cf2e85866fc180fbe40"
-  },
-  {
-    "id": "4C5EI8PXIVyFHUDBD16PdC",
-    "name": "Pererê / Citação Musical: Saci",
-    "artist": "Ivete Sangalo",
-    "year": "2000",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02a47e7852970c1bf860c05c5c"
   },
   {
     "id": "5HM1U16xQJ9IcaHCZkSeBL",
@@ -3213,13 +2612,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02227aaae82ae48821db8d7e34"
   },
   {
-    "id": "3k9dGCm2R2Y70e87aMHYC3",
-    "name": "Hablando a Tu Corazón",
-    "artist": "Charly García, Pedro Aznar",
-    "year": "1993",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0242542c948d51893462874c89"
-  },
-  {
     "id": "3gPVKjgQhnMdk0bz10jzKS",
     "name": "Vacaciones en el Más Allá",
     "artist": "Pedropiedra",
@@ -3234,13 +2626,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02e4b8ec3d2ffe1f77c7185d48"
   },
   {
-    "id": "6t7HHaRoBvEMqEs29qHpdt",
-    "name": "Bajan",
-    "artist": "Gustavo Cerati",
-    "year": "1993",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02a2ec3791d9fd51ad343cc885"
-  },
-  {
     "id": "7Dk43uYcLammTOb4kS7Q9g",
     "name": "Paseando Por Roma - Remasterizado 2007",
     "artist": "Soda Stereo",
@@ -3253,13 +2638,6 @@
     "artist": "Los Prisioneros",
     "year": "2006",
     "image_url": "https://i.scdn.co/image/ab67616d00001e02482fcc6754733049923bbab2"
-  },
-  {
-    "id": "1CwyfupBufLXfYdPr8LhDF",
-    "name": "Demasiada Presión - Remasterizado 2008",
-    "artist": "Los Fabulosos Cadillacs",
-    "year": "1990",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02f5aa9ad4c931b2e90e94f673"
   },
   {
     "id": "2PKkCGoCc4idF91R6RvFEN",
@@ -3302,20 +2680,6 @@
     "artist": "Los Fabulosos Cadillacs",
     "year": "1992",
     "image_url": "https://i.scdn.co/image/ab67616d00001e026f41a299791d5833d41d78f2"
-  },
-  {
-    "id": "3hWZ9vTXIEUffGVD73qIAb",
-    "name": "El Genio del Dub - Remasterizado 2008",
-    "artist": "Los Fabulosos Cadillacs",
-    "year": "1987",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02772623de3584fe5bb75252aa"
-  },
-  {
-    "id": "71dmuXNeiMCMgfrTFdS2QL",
-    "name": "Sin Cadenas",
-    "artist": "Los Pericos",
-    "year": "1998",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02116f159f027fd6bf4da9157c"
   },
   {
     "id": "0bhzdFuUaNH7QV3c2ZKGOK",
@@ -3402,13 +2766,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e028fd9b16eb6bdd20c95717258"
   },
   {
-    "id": "2PmoxtFwmuP8hnLCaV9wFW",
-    "name": "Con Suavidad",
-    "artist": "Los Prisioneros",
-    "year": "1990",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
-  },
-  {
     "id": "2PkTjm1QAJCZbJ9MqC4RqA",
     "name": "11 Y 6",
     "artist": "Fito Paez",
@@ -3416,25 +2773,11 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e02921417baf700cc9da1d43b80"
   },
   {
-    "id": "7IJC1qatyg2t8SZiwJRvID",
-    "name": "Un Misil En Mi Placard - MTV Unplugged",
-    "artist": "Soda Stereo",
-    "year": "1996",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e023875f29a2a8234ac7ef2706a"
-  },
-  {
     "id": "244nCwfi32MNrkALQi2qga",
     "name": "Corazones Rojos",
     "artist": "Los Prisioneros",
     "year": "1990",
     "image_url": "https://i.scdn.co/image/ab67616d00001e0298daeb6fc14ffafc7abaa4c6"
-  },
-  {
-    "id": "26180koFa4YfZ8U3Eu5atP",
-    "name": "La Primera Vez",
-    "artist": "Los Tres",
-    "year": "1991",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02c90c7ca59a3055ba78ae5d89"
   },
   {
     "id": "21KrrLkTtV6f1lRomT0LNl",
@@ -3458,13 +2801,6 @@
     "image_url": "https://i.scdn.co/image/ab67616d00001e029f1ca4f1f34bfee3ab2a272a"
   },
   {
-    "id": "1RawgF2MjsJpR7cRxvIaal",
-    "name": "Moizefala",
-    "artist": "Los Tres",
-    "year": "1995",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e0278310de37af0875569acc411"
-  },
-  {
     "id": "70EgRDKkzHbeSIL8EgbL2Z",
     "name": "Hojas de Te",
     "artist": "Los Tres",
@@ -3484,13 +2820,6 @@
     "artist": "Los Tres",
     "year": "1993",
     "image_url": "https://i.scdn.co/image/ab67616d00001e025751046ec855061a2f347960"
-  },
-  {
-    "id": "3J8UPLZhNFQi3o2qIvwLjY",
-    "name": "No Necesitamos Banderas",
-    "artist": "Los Prisioneros",
-    "year": "1984",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02a8ff3f9fe5b57f2e0bfd9e05"
   },
   {
     "id": "01mNrMDaDseSKzrTmRfqKa",
@@ -3554,13 +2883,6 @@
     "artist": "La Mosca",
     "year": "2000",
     "image_url": "https://i.scdn.co/image/ab67616d00001e0260fc79eea7acba5248619f82"
-  },
-  {
-    "id": "4bMZ60QNM6OEehI6b8RtS4",
-    "name": "Matador - Remasterizado 2008",
-    "artist": "Los Fabulosos Cadillacs",
-    "year": "2021",
-    "image_url": "https://i.scdn.co/image/ab67616d00001e02721cad4da1b767b70e8aa699"
   },
   {
     "id": "6Pur3hWy6Nzc27ilmsp5HA",
@@ -4492,69 +3814,1048 @@
     "artist": "Nicole",
     "year": "2001",
     "image_url": "https://i.scdn.co/image/ab67616d00001e025d4582d11a8d0c51567971c6"
+  },
+  {
+    "id": "1Tja3miBbbENpqIOAqGWXa",
+    "name": "Prófugos - Remasterizado 2007",
+    "artist": "Soda Stereo",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a6f5598c41e77ae78cab725"
+  },
+  {
+    "id": "7FJ9mYg8SPHUhFMtFJL3Bs",
+    "name": "Hacé Lo Que Quieras",
+    "artist": "Los Pericos",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027269ee3318b60a77aeb22c59"
+  },
+  {
+    "id": "6EjUn5quLcTVFBUGLGwGwA",
+    "name": "Waitin'",
+    "artist": "Los Pericos",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027269ee3318b60a77aeb22c59"
+  },
+  {
+    "id": "2l4XoFbVmED8pbRjcf77rH",
+    "name": "Amigo",
+    "artist": "Roberto Carlos",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020d4623d69c36c10836a3068c"
+  },
+  {
+    "id": "5IU4JO2cpa0wPK8oQWFfCr",
+    "name": "Un Beso Y Una Flor",
+    "artist": "Nino Bravo",
+    "year": "1976",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023df0bdac09b5ab00347ab7b2"
+  },
+  {
+    "id": "1j57JAIEWBcMFf51Et4gCW",
+    "name": "Un Cafe Para Platon",
+    "artist": "Fernando Ubiergo",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0269430f42c054a8ee8ae6e50a"
+  },
+  {
+    "id": "7wx1WRcxLovFDlhNe5leeX",
+    "name": "Y Volveré",
+    "artist": "Los Angeles Negros",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029af34c5825151dbb17fb16c7"
+  },
+  {
+    "id": "0csENJioyGcnIChZJymTDE",
+    "name": "Mi gran noche",
+    "artist": "Raphael",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b97e5175ffb28ec5fdea0efe"
+  },
+  {
+    "id": "7Jt37TtPmIdzdvOUuE8eka",
+    "name": "Mis Manos En Tu Cintura",
+    "artist": "Salvatore Adamo",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a76e4244a412b2f37b27f8cc"
+  },
+  {
+    "id": "21VWhRhjxCvtXUFcUeqnBL",
+    "name": "Tengo",
+    "artist": "Sandro",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0260eca78d5823500d665fbdad"
+  },
+  {
+    "id": "7Bewui7KtaMzROeteRitRz",
+    "name": "Mediterraneo",
+    "artist": "Joan Manuel Serrat",
+    "year": "1971",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fa6294475152f6d5a21a7f45"
+  },
+  {
+    "id": "2KIUDhvmBGVNJW76YtjJ6C",
+    "name": "Te He Prometido",
+    "artist": "Leo Dan",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02560b820e862292dbca9c9404"
+  },
+  {
+    "id": "59ZWNHCFaMoM1wOTlZ0E0k",
+    "name": "Caliente, caliente",
+    "artist": "Raffaella Carrà",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028fbcf17a042eaee697759829"
+  },
+  {
+    "id": "0pxvHF1GAvgaGHEglfCZDb",
+    "name": "Como Deseo Ser Tu Amor",
+    "artist": "Los Galos",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e023f43cf4aec2279c0d07fd852"
+  },
+  {
+    "id": "4kCx4BO3f4tjMjIyv8ko6G",
+    "name": "Fuiste Mía un Verano",
+    "artist": "Leonardo Favio",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0258224c79ab71c9aa5b23ddcd"
+  },
+  {
+    "id": "3wWUTEcjV4LtMJgncqL0eL",
+    "name": "Rosa Rosa",
+    "artist": "Sandro",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bbf6b281eed07837cffdb008"
+  },
+  {
+    "id": "11rsK9GDZ9UdWsxtDqnMmN",
+    "name": "Porque te vas",
+    "artist": "Jeanette",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025906c0ae73cb3e2e5d004a57"
+  },
+  {
+    "id": "7bA0d6jzxTTWIBE8o7n41k",
+    "name": "Eres Tú",
+    "artist": "Mocedades",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0204e4623173ddd0aa33fb6d9d"
+  },
+  {
+    "id": "04Xdk7F9HgyHBcAwO7KE3F",
+    "name": "Sera Porque Te Amo",
+    "artist": "Ricchi E Poveri",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02df242af1feadab5d937a488e"
+  },
+  {
+    "id": "0e80PhBZ6oJTTmBcUqAVp3",
+    "name": "El Tiempo En Las Bastillas",
+    "artist": "Fernando Ubiergo",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0269430f42c054a8ee8ae6e50a"
+  },
+  {
+    "id": "1nfJhA7Ug7Tj5NTCq2mJId",
+    "name": "Con una Pala y un Sombrero",
+    "artist": "Gervasio",
+    "year": "1989",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d75225a16df20fa91f091789"
+  },
+  {
+    "id": "4HfB46YTIChEV3Z3LoOFCD",
+    "name": "Tus Viejas Cartas",
+    "artist": "Los Enanitos Verdes",
+    "year": "1986",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c3d72bdf184c8ca79d8a1d0b"
+  },
+  {
+    "id": "4g6BF5KhQDIpwJuevv7bFa",
+    "name": "Guitarras Blancas",
+    "artist": "Los Enanitos Verdes",
+    "year": "1988",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02046b39956ade868d4c38110a"
+  },
+  {
+    "id": "2h0iSG7htO0V4IvuwbTBf3",
+    "name": "Entra en Mi Vida",
+    "artist": "Sin Bandera",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a1f3d1bb9473eb66a7b426cd"
+  },
+  {
+    "id": "072YgF7J2clpY8DsWOpEri",
+    "name": "Mientes Tan Bien",
+    "artist": "Sin Bandera",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0265ad331cf7c3f45284ca8a39"
+  },
+  {
+    "id": "2425UlXvkIkAEJAtAd8ROm",
+    "name": "Aunque no te pueda ver",
+    "artist": "Alex Ubago",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e6926a5359f4eef19a3e97a3"
+  },
+  {
+    "id": "50xvGsnNmO3k5EtaUBXRRr",
+    "name": "Suelta Mi Mano",
+    "artist": "Sin Bandera",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ca6b2c2ff5f4026021d741fe"
+  },
+  {
+    "id": "0wQCKR9OFjYu5Kzrk7WivJ",
+    "name": "Corazón partío",
+    "artist": "Alejandro Sanz",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4b093df6b9dccc604ab9155"
+  },
+  {
+    "id": "7nY8fkDi2zmlQQHGSN9U9m",
+    "name": "Mi soledad y yo",
+    "artist": "Alejandro Sanz",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f879e00e06da58237c0ce13a"
+  },
+  {
+    "id": "6kQYMqjobmB8MkWwa9OUyA",
+    "name": "Amiga mía",
+    "artist": "Alejandro Sanz",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4b093df6b9dccc604ab9155"
+  },
+  {
+    "id": "1DmlUpnkg4N1VWquSoffF1",
+    "name": "Y, ¿Si fuera ella?",
+    "artist": "Alejandro Sanz",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f4b093df6b9dccc604ab9155"
+  },
+  {
+    "id": "2lEYLfuDQ86c8WDCB98Uy5",
+    "name": "Golpes Bajos",
+    "artist": "Paolo Meneguzzi",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b3cf7100cf72e2f21da1089f"
+  },
+  {
+    "id": "4vEA7fIH5e25z2Xi7AvT7V",
+    "name": "Un Condenado Te Amo",
+    "artist": "Paolo Meneguzzi",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab6742d3000053b74f3991163ddf1a658a6b7386"
+  },
+  {
+    "id": "2f0Ft2XdvNSMSY5TUlZgEz",
+    "name": "Saturno",
+    "artist": "Pablo Alborán",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e34a5d392e3acd4d2d5974c8"
+  },
+  {
+    "id": "4xOH4JowajfqHegIJ07EJV",
+    "name": "El Problema",
+    "artist": "Ricardo Arjona",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f50610925dccd6802ceadac5"
+  },
+  {
+    "id": "7J6IYudWsxHy3stN5aMKSN",
+    "name": "Fuiste Tú",
+    "artist": "Ricardo Arjona, Gaby Moreno",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e8c6e03075842dcd17447364"
+  },
+  {
+    "id": "005Dlt8Xaz3DkaXiRJgdiS",
+    "name": "Historia de Taxi",
+    "artist": "Ricardo Arjona",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0298bf0a6f6828a3ee131d5a02"
+  },
+  {
+    "id": "7wNrk2vc0GUUNBFggJzEsI",
+    "name": "Mujeres",
+    "artist": "Ricardo Arjona",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ab497e0fae9d1c8ef2e7a165"
+  },
+  {
+    "id": "2VSGzQqy9nqJefcYGJNWst",
+    "name": "Tanto la Queria",
+    "artist": "Andy & Lucas",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0248c1508e54cdb893af59665f"
+  },
+  {
+    "id": "1EZypwk0xcj64ZLAglhLs2",
+    "name": "La Cosa Mas Bella",
+    "artist": "Eros Ramazzotti",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0282275cd567e80f83c921fccd"
+  },
+  {
+    "id": "2cSXotAohYx0EWCNljCzs7",
+    "name": "Otra Como Tu",
+    "artist": "Eros Ramazzotti",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c8729fbeebb389680f1e6ee5"
+  },
+  {
+    "id": "31mchidzPyBLBQqBeKwl2m",
+    "name": "En el Silencio Negro de la Noche",
+    "artist": "Alexandre Pires",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d1549e8e6b65de9e6b4c6d24"
+  },
+  {
+    "id": "49OMJ1prsRA7ZYgrAjz70c",
+    "name": "More Than A Woman - From \\\"Saturday Night Fever\\\" Soundtrack",
+    "artist": "Bee Gees",
+    "year": "1979",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0252038992fc6d7868f31d23b7"
+  },
+  {
+    "id": "1gVgkQFOKa8Wc1HYsJtPdH",
+    "name": "More Than Words",
+    "artist": "Extreme",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fb16b9b69eb891027654bcb1"
+  },
+  {
+    "id": "5c1QJAiC3773EwiZLwHf5x",
+    "name": "Again",
+    "artist": "Lenny Kravitz",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0281bb674330f0276e88bd0722"
+  },
+  {
+    "id": "4LxDdYU3x9tyDxy3CghqdC",
+    "name": "Sunrise",
+    "artist": "Simply Red",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0217a3d8e105d4f872fc66893d"
+  },
+  {
+    "id": "75CgD6l7K4qMzZrn4CbZqz",
+    "name": "Stars",
+    "artist": "Simply Red",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020e767887e304020cdbbe25e8"
+  },
+  {
+    "id": "6VnpKLtfNH4Dk09YSGPSyR",
+    "name": "It Ain't Over 'Til It's Over",
+    "artist": "Lenny Kravitz",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02bfc19627a4a3a604c0a195e5"
+  },
+  {
+    "id": "67VCwDaAzwcqCL31H72xwS",
+    "name": "Somos Lo Que Fue",
+    "artist": "Jesse & Joy",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0256f41de4b571bc3d820c9f81"
+  },
+  {
+    "id": "57Mw1rxBk1U1TvhGMHj6ON",
+    "name": "Tal Vez",
+    "artist": "Marta Sánchez",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026ba05644ec6425f23d19dd31"
+  },
+  {
+    "id": "6yyrsrci6u2nreFlhXSy3J",
+    "name": "Tus Ojos",
+    "artist": "Los Cafres",
+    "year": "1997",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0246a888765544d2f977c5dc21"
+  },
+  {
+    "id": "3ri9fLG89OdSpjxheYxU7S",
+    "name": "Me Muero",
+    "artist": "La Quinta Estacion",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0221af408fba4ba3aa98d8c606"
+  },
+  {
+    "id": "2plbrEY59IikOBgBGLjaoe",
+    "name": "Die With A Smile",
+    "artist": "Lady Gaga, Bruno Mars",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0282ea2e9e1858aa012c57cd45"
+  },
+  {
+    "id": "5A44iIZenvd56WXWCO9K5K",
+    "name": "No Necesito Nada",
+    "artist": "No Te Va Gustar",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024f810f1e550db9a473138b4c"
+  },
+  {
+    "id": "0vXKNdPKnNqojeHM696Q88",
+    "name": "Me Lo Merezco",
+    "artist": "ELENA ROSE",
+    "year": "2024",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0252008f3b8d71a07ca9616e2a"
+  },
+  {
+    "id": "2h5MjaqDZmazfJGyOe48Y0",
+    "name": "Ni Tan Novios, Ni Tan Amigos",
+    "artist": "Pedro Capó",
+    "year": "2022",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022b5cace650dada67de5acb11"
+  },
+  {
+    "id": "4675yUu8AUbE72T94BkLCD",
+    "name": "Beautiful",
+    "artist": "Snoop Dogg, Pharrell Williams, Uncle Charlie Wilson",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02616e1083a3de098f82352019"
+  },
+  {
+    "id": "3WkibOpDF7cQ5xntM1epyf",
+    "name": "It Wasn't Me",
+    "artist": "Shaggy, Rik Rok",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029449f9491c364d28a9668e17"
+  },
+  {
+    "id": "1OzDyg6a1lsukiBwArG7zI",
+    "name": "Para Empezar",
+    "artist": "Leonel García",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c9408579d6cd78a1e9704164"
+  },
+  {
+    "id": "1CgmY8fVN7kstVDZmsdM5k",
+    "name": "P.Y.T. (Pretty Young Thing)",
+    "artist": "Michael Jackson",
+    "year": "1982",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0232a7d87248d1b75463483df5"
+  },
+  {
+    "id": "2EqlS6tkEnglzr7tkKAAYD",
+    "name": "Come Together - Remastered 2009",
+    "artist": "The Beatles",
+    "year": "1969",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02dc30583ba717007b00cceb25"
+  },
+  {
+    "id": "2DTQUOfYJAjdo7utgjnU4u",
+    "name": "Baker Street",
+    "artist": "Undercover",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0281f3f720305379713c1b3c9a"
+  },
+  {
+    "id": "3PkvYP6223QO3xlW2THd1x",
+    "name": "Would I Lie To You?",
+    "artist": "Charles & Eddie",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0289b7e43727abe4600a56855f"
+  },
+  {
+    "id": "4ghIubUMtWcZBT3ILMwMRe",
+    "name": "Te Vas de Mi",
+    "artist": "Tata Barahona",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0280edc6961de7aabac5f9a970"
+  },
+  {
+    "id": "3MFa9idQuY4iJLWsZl3tIQ",
+    "name": "Young Hearts Run Free",
+    "artist": "Candi Staton",
+    "year": "1976",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ea04468e11c67890666d2b34"
+  },
+  {
+    "id": "1NwDWbpg9dPH12xBd2ibrv",
+    "name": "Holler",
+    "artist": "Spice Girls",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e9abe405c4503cb4cf0d2265"
+  },
+  {
+    "id": "3VCKdfJAL8DTDlwZw5O6Ik",
+    "name": "Los Dinosaurios",
+    "artist": "Charly García",
+    "year": "1983",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b14842a87b833bc0a9339f60"
+  },
+  {
+    "id": "4YEU9N2XAE0DfUwxWI5ijA",
+    "name": "Todo se transforma",
+    "artist": "Jorge Drexler",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02057def248fcaa6439a4079f7"
+  },
+  {
+    "id": "4Xunts6NLofGZCFEICTDTg",
+    "name": "A Primera Vista",
+    "artist": "Pedro Aznar",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fa84e45920d5c30531274aae"
+  },
+  {
+    "id": "6Vz7vzOpCwKeSQlfViibuY",
+    "name": "Crazy",
+    "artist": "Seal",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028814f05bfdc9e7d534d516e3"
+  },
+  {
+    "id": "7IJuVH1YPmWEKemtZigmHK",
+    "name": "A Esa",
+    "artist": "Pimpinela",
+    "year": "1983",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e025d996d94380b296bb036506d"
+  },
+  {
+    "id": "6aPoVnA9UDncMyKgTAicsO",
+    "name": "La Guitarra",
+    "artist": "Los Auténticos Decadentes",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0207281a095262c35ef36daef3"
+  },
+  {
+    "id": "2bvO1KXbUd4vySCWGNqIIa",
+    "name": "Por Amarte Así",
+    "artist": "Cristian Castro",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e90d715a99627e2293bf11e8"
+  },
+  {
+    "id": "3Ewdz8ZnGmWBeAvB9gkFHK",
+    "name": "Bella Señora",
+    "artist": "Emmanuel",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02200003eb8f024da07e177bcc"
+  },
+  {
+    "id": "7kT8GFH03WvZmqsGTa9pho",
+    "name": "Quién te quiere como yo",
+    "artist": "Carlos Baute",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026511116927a11cb8579c1a7c"
+  },
+  {
+    "id": "3ljr9ATeLs2BY9gNp7vm62",
+    "name": "Corazón En La Maleta",
+    "artist": "Luis Fonsi",
+    "year": "2014",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0229035ea37892b23fa78beafe"
+  },
+  {
+    "id": "35fC3Wq3slX4OBfyvBVmHm",
+    "name": "Samba Pa Ti",
+    "artist": "Santana",
+    "year": "1970",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02283cccda1ee115b8f44f1c8b"
+  },
+  {
+    "id": "6ljWmeDCoqgIFOVKVmKEmu",
+    "name": "Como Tu Mujer",
+    "artist": "Rocío Dúrcal",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02c8e428508bab97d009d939f3"
+  },
+  {
+    "id": "0M6KY0x5u65ybXHZ3IAega",
+    "name": "Qué Vida la Mía",
+    "artist": "Reik",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02ec2e96b6a618b3c2eb6a14e0"
+  },
+  {
+    "id": "68drjp77R32xEkzP1vxlF6",
+    "name": "El Bombón",
+    "artist": "Los Palmeras",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b06815002913341f6d2a86a5"
+  },
+  {
+    "id": "5sQGo3fB2NoFalyy4uZjiu",
+    "name": "Ojalá",
+    "artist": "Silvio Rodríguez",
+    "year": "1978",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02524e56c2cc65b709d457ea7c"
+  },
+  {
+    "id": "6JBmgTmULFG8AMGxkioKY5",
+    "name": "Dímelo",
+    "artist": "Marc Anthony",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0269bd959bda044497d14f44b3"
+  },
+  {
+    "id": "5CrGr84BzO78tyP7soQgbo",
+    "name": "Pecado Original",
+    "artist": "Ana Gabriel",
+    "year": "1987",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024390fa033229501a79ff19b8"
+  },
+  {
+    "id": "3iB8eciGU9vZkaDYkz7Ir9",
+    "name": "Bamboléo",
+    "artist": "Gipsy Kings",
+    "year": "1987",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026e7cb1429534f0d21133b714"
+  },
+  {
+    "id": "1Y7q2zwCBjt9zgIHZ0Ku7J",
+    "name": "¿Quieres Ser Mi Amante?",
+    "artist": "Camilo Sesto",
+    "year": "1974",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0235b8ea5ddfb053135e5b3ecd"
+  },
+  {
+    "id": "3fRIuTih8bzc0vtY9fHhvF",
+    "name": "Talento De Televisión",
+    "artist": "Willie Colón",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029b9eb783c20af41d7011f9c2"
+  },
+  {
+    "id": "0u4N6w5lBw5xMrzJitRWUo",
+    "name": "Corazón Sin Cara",
+    "artist": "Prince Royce",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a484690118ec2c7a2e2ae124"
+  },
+  {
+    "id": "0WK8NzEKfSZ9mqOlaBpdfm",
+    "name": "Ritmo de la Noche (Classic Version)",
+    "artist": "The Sacados",
+    "year": "2018",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02abee7dda4e7590454630a690"
+  },
+  {
+    "id": "4UOt0ObZ4Oqi7LSU1Gzzkq",
+    "name": "Por Una Cabeza",
+    "artist": "Carlos Gardel",
+    "year": "1974",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e079d78953165a78b99fd6f4"
+  },
+  {
+    "id": "6snQUV9V5XHaLL1S0KoxlJ",
+    "name": "Sopa de Caracol",
+    "artist": "Banda Blanca",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028275536d50c54dd1014039e5"
+  },
+  {
+    "id": "4Egb5xP6cniUx0kgZd5zLB",
+    "name": "Soy Yo",
+    "artist": "Bomba Estéreo",
+    "year": "2015",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a5b1ec7837ccce7aed577c6e"
+  },
+  {
+    "id": "2SEYkDv8jqEVMpppKoG3mY",
+    "name": "Me Gusta Todo De Ti",
+    "artist": "Noche de Brujas",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b8beb4d547af791bc74195df"
+  },
+  {
+    "id": "6Tnnk7MAnZiDx67DJN2hnx",
+    "name": "Mi gran noche",
+    "artist": "Raphael",
+    "year": "1967",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029f4d22d79b6ad54bcfdee79a"
+  },
+  {
+    "id": "0UoAcG1vxtFjes7rZz8Js0",
+    "name": "Burbujas de Amor",
+    "artist": "Juan Luis Guerra 4.40",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a6218a7656bdbbc83359dfc2"
+  },
+  {
+    "id": "1eCie6lwjb4crxeAvkRaSi",
+    "name": "Y Nos Dieron las Diez",
+    "artist": "Joaquín Sabina",
+    "year": "1992",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02446be1376d50b50cd6f9c76e"
+  },
+  {
+    "id": "4Gf68vwxa69hCiXmJ1jvgj",
+    "name": "Azúcar Amargo",
+    "artist": "Fey",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a641c92c6bfb66f360626381"
+  },
+  {
+    "id": "66iygyOSvvoQQsKJ1vEXfT",
+    "name": "Tú de Qué Vas",
+    "artist": "Franco De Vita",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e61c36e2c29c574079b7c5b9"
+  },
+  {
+    "id": "15eXfjBk8M8L0aKJXe5YnG",
+    "name": "Bésame",
+    "artist": "Ricardo Montaner",
+    "year": "2001",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a3298290f3bb31ef179e9861"
+  },
+  {
+    "id": "0JAGODD5w6MeYQzA9lV6Zm",
+    "name": "Yo No Soy Esa Mujer",
+    "artist": "Paulina Rubio",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e022f202886104bddfdb1b94010"
+  },
+  {
+    "id": "1Ev18ptTlc3CBQMmKsIfjY",
+    "name": "Nada Fue Un Error",
+    "artist": "Coti, Andrés Calamaro",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02f68e7098acffc8eae48ee6c3"
+  },
+  {
+    "id": "3GUyiFEglEm9rSToOf5YZW",
+    "name": "Maldita Primavera",
+    "artist": "Yuri",
+    "year": "2007",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029b54f876774681798556a795"
+  },
+  {
+    "id": "3JdRjSY0KcTbFD6fHIu0Qc",
+    "name": "Mujer Contra Mujer",
+    "artist": "Mecano",
+    "year": "1988",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021507d322b86de7f01c22131b"
+  },
+  {
+    "id": "5kxol5m6MfiJgahqyzbDRH",
+    "name": "Tan Enamorados",
+    "artist": "Ricardo Montaner",
+    "year": "1990",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028bd6b0c903003688dcbe191f"
+  },
+  {
+    "id": "1lcaG7worZLgdGuniOfGje",
+    "name": "Fruta Fresca",
+    "artist": "Carlos Vives",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e024a27a644e5a9238511847224"
+  },
+  {
+    "id": "4CPjs4JMzHiT5qascaDxgr",
+    "name": "El Venao",
+    "artist": "Los Cantantes",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0206db8f1fc411195a40f0896a"
+  },
+  {
+    "id": "4OjJAGDDZTLlTNeOMBl7UM",
+    "name": "Volare (Nel Blu di Pinto di Blu)",
+    "artist": "Gipsy Kings",
+    "year": "1989",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e029c90ed4b52bdb183c60669ad"
+  },
+  {
+    "id": "6lZ2Qk3WcmrG4iDmaEqpvH",
+    "name": "Él Me Mintió",
+    "artist": "Amanda Miguel",
+    "year": "1981",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02b5b81ce0c06b5d18e46ac01a"
+  },
+  {
+    "id": "2aEeghgUcnu75tzcolFMfs",
+    "name": "La Bamba - Single Version",
+    "artist": "Ritchie Valens",
+    "year": "1959",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027723fdc89d8e25e65aa6730d"
+  },
+  {
+    "id": "7aSxNjoVoAwNL7HDAKwGtC",
+    "name": "¿Y Cómo Es Él?",
+    "artist": "José Luis Perales",
+    "year": "1982",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e021bacf2c6e66f49967293636a"
+  },
+  {
+    "id": "2FSYfKAApea3U42phhBOIc",
+    "name": "Bye Bye",
+    "artist": "Vilma Palma e Vampiros",
+    "year": "1991",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020457ded975a6693ce8fc4392"
+  },
+  {
+    "id": "5YyetAy34sgROhslaW3BZc",
+    "name": "Frijolero",
+    "artist": "Molotov",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02fee079615e41899b497a7dda"
+  },
+  {
+    "id": "5PycBIeabfvX3n9ILG7Vrv",
+    "name": "Propuesta Indecente",
+    "artist": "Romeo Santos",
+    "year": "2014",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e0e4b48b060715c9aa7fca18"
+  },
+  {
+    "id": "1hbWtHgRDG25DkmxE4I28V",
+    "name": "Puedes Contar Conmigo",
+    "artist": "La Oreja de Van Gogh",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02820f6e4afa04594a671e484f"
+  },
+  {
+    "id": "4zsDA31stWMtLveU61hejd",
+    "name": "Algo Contigo",
+    "artist": "Vicentico",
+    "year": "2003",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0234e63caa064cfc524f0afda4"
+  },
+  {
+    "id": "5EhzE6HJaCcLFrf5rPqvpk",
+    "name": "Mientes",
+    "artist": "Camila",
+    "year": "2010",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02d46baecb11453061ea9fa795"
+  },
+  {
+    "id": "4NUt1fcnO9aQAELBgXq3Kr",
+    "name": "Me Dediqué a Perderte",
+    "artist": "Alejandro Fernández",
+    "year": "2004",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026c9b377e0e3a5b1d6ffad86e"
+  },
+  {
+    "id": "6QJ2p2iiDtdQpFPv5Izx1H",
+    "name": "Pero Me Acuerdo de Tí",
+    "artist": "Christina Aguilera",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0236f7a57c3bbcdada7d00f4db"
+  },
+  {
+    "id": "0WajUW5XINeraP2w0F3F8E",
+    "name": "Don",
+    "artist": "Miranda!",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0241ca8a8fdfcce2d6ff7f2d05"
+  },
+  {
+    "id": "0dMq39FmD9YLiGwpqO3fHf",
+    "name": "Wepa",
+    "artist": "Gloria Estefan",
+    "year": "2011",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02e4fef503abd07ff8f9a0aedf"
+  },
+  {
+    "id": "4OyzSXRSadNQt5EMwASdap",
+    "name": "Todo Cambió",
+    "artist": "Camila",
+    "year": "2006",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e027e0721f90f91d37de250788f"
+  },
+  {
+    "id": "6x4tKaOzfNJpEJHySoiJcs",
+    "name": "Mambo No. 5 (a Little Bit of...)",
+    "artist": "Lou Bega",
+    "year": "1999",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02cf505191afa6a1978418fdf8"
+  },
+  {
+    "id": "41LiGcvaTkXHyPjfsxKvWv",
+    "name": "Mi Tierra",
+    "artist": "Gloria Estefan",
+    "year": "1993",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0296e3f3e349f6f63db6fe6e70"
+  },
+  {
+    "id": "5yKQTwznar5I75UyYJ9CnR",
+    "name": "Pies Descalzos, Sueños Blancos",
+    "artist": "Shakira",
+    "year": "1995",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02021b9779a9dbaa6a976edb2d"
+  },
+  {
+    "id": "0ylZTq7l4Oij4dHhu9at7n",
+    "name": "Tratar de Estar Mejor",
+    "artist": "Diego Torres",
+    "year": "1994",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0294956717b003f3e8c2284704"
+  },
+  {
+    "id": "09QfIIP4NUx4A3thmovb2o",
+    "name": "Perfecta",
+    "artist": "Miranda!",
+    "year": "2008",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0241ca8a8fdfcce2d6ff7f2d05"
+  },
+  {
+    "id": "5qOOJibHjeGx0rhzL20JSc",
+    "name": "Media Naranja",
+    "artist": "Fey",
+    "year": "2005",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028f3d69527fd46b5e517e2394"
+  },
+  {
+    "id": "0stIFBwUeaH8qpFe9aPl6w",
+    "name": "Me Cuesta Tanto Olvidarte",
+    "artist": "Mecano",
+    "year": "1998",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02a10f5f16b750ec7435d01aa8"
+  },
+  {
+    "id": "6msmEaWFyJfrNDKQgab5tv",
+    "name": "Tu Boca",
+    "artist": "Cabas",
+    "year": "2002",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0277705ee56550314f3d8f7ea5"
+  },
+  {
+    "id": "1vV2FBKYvu6sJDqzSCNgbI",
+    "name": "Hablar de Ti",
+    "artist": "Gepe",
+    "year": "2017",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e026286b8b0b9bfb5f91392692c"
+  },
+  {
+    "id": "6mOZfn6CVXsX1Tt0l3thm3",
+    "name": "Sin documentos",
+    "artist": "Los Rodriguez",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e020320739a960dd4821b2aeaf1"
+  },
+  {
+    "id": "5XWfwjzFNl2pTB737fx7qr",
+    "name": "El Gran Varón",
+    "artist": "Willie Colón",
+    "year": "1989",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0210f6d644b06f0c01aafd6006"
+  },
+  {
+    "id": "3reCcj2BzaDnnrlnZ0aq2X",
+    "name": "Entre tú y mil mares",
+    "artist": "Laura Pausini",
+    "year": "2000",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e0214ad238f844dde9bf4c14693"
+  },
+  {
+    "id": "1tDox1AbPPsJIiGHigMOO9",
+    "name": "Mi enfermedad - Versión 96",
+    "artist": "Los Rodriguez",
+    "year": "1996",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e02587d40ceb482f0151403fe1d"
+  },
+  {
+    "id": "5ZhOj63NAF9lynDbRTlq6B",
+    "name": "Cosas De La Vida - Remastered 2021",
+    "artist": "Eros Ramazzotti",
+    "year": "2021",
+    "image_url": "https://i.scdn.co/image/ab67616d00001e028503007e80561108a540ab61"
   }
 ];
 
-        // Plantillas de desafíos que se integran con las canciones de forma aleatoria
-        const plantillasDesafios = [
-            "🎤 **¡Imitación Extrema!** Imita el tono de voz, gestos o pose más famosa de **{artist}** mientras suena el tema.",
-            "🧠 **Trivia del Artista:** ¿Quién en la mesa puede nombrar otra canción famosa de **{artist}**? Si nadie lo hace, el que sacó la carta gana 1 punto.",
-            "🤫 **Tarareo Silencioso:** Tararea la melodía de **{artist}** con la boca cerrada durante 10 segundos. Si tu equipo la adivina, ¡colocas gratis!",
-            "🎭 **Trivia del Intérprete:** ¿De qué país o nacionalidad es el artista **{artist}**? El Host verificará tu respuesta al revelar la carta.",
-            "🎶 **Sigue la Letra:** Cuando empiece la canción, ¡debes cantar la letra y seguir cantándola a capela durante 5 segundos cuando el Host pause la música!",
-            "💃 **Ronda de Baile:** ¡Debes inventar y bailar una coreografía exprés de 5 segundos que encaje perfecto con el estilo de **{artist}**!",
-            "🕒 **Adivinanza a Ciegas:** ¡Intenta colocar esta carta en tu línea de tiempo por el nombre del artista, **{artist}**, sin escuchar el audio! Si aciertas, vale por doble."
+        // Palabras para el desafío Palabra Mágica
+        const palabrasMagicas = [
+            "CORAZÓN", "AMOR", "BESO", "LUNA", "FUEGO", "CANTAR", "LLORAR", "NOCHE", "CALLE", 
+            "AMIGO", "DOLOR", "MENTIRA", "QUERER", "VIDA", "VIENTO", "CIELO", "AGUA", "FELIZ", 
+            "TIEMPO", "SOLEDAD", "SOL", "MAR", "PIEL", "OJOS", "VIVIR", "BAILAR", "SUEÑO", "DULCE"
         ];
 
-        // Cartas de Desafío Puro (15% de probabilidad de salir directamente)
-        const cartasDesafioPuro = [
+        // Roster de Trivias de Carretera
+        const trivias = [
             {
-                icon: "💥",
-                title: "¡ROBO DE CARTA!",
-                desc: "Elige a un oponente. Si logras cantar o silbar un trozo de una canción que pertenezca al mismo año que su última carta, ¡se la robas y la sumas a tu tablero!"
+                q: "¿Cuál es el verdadero nombre del exitoso artista puertorriqueño Bad Bunny?",
+                a: "Benito Martínez", b: "Carlos Efrén", c: "Juan Carlos",
+                ans: "A) Benito Martínez"
             },
             {
-                icon: "⚔️",
-                title: "¡DUELO MUSICAL!",
-                desc: "Elige a un rival. El Host reproducirá una canción cualquiera en secreto y ustedes competirán. El primero en silbar y adivinar el nombre o artista se queda con la carta."
+                q: "¿En qué década se lanzó originalmente el icónico éxito mundial 'Bohemian Rhapsody' de Queen?",
+                a: "Década de los 60s", b: "Década de los 70s (1975)", c: "Década de los 80s",
+                ans: "B) Década de los 70s (1975)"
             },
             {
-                icon: "🃏",
-                title: "CARTA COMODÍN",
-                desc: "¡Estás de suerte! Puedes ubicar esta carta de Desafío directamente en tu línea de tiempo. Cuenta como un comodín válido para rellenar tus años vacíos."
+                q: "¿Qué mítica banda argentina de rock latino lideró el compositor y vocalista Gustavo Cerati?",
+                a: "Enanitos Verdes", b: "Soda Stereo", c: "Los Fabulosos Cadillacs",
+                ans: "B) Soda Stereo"
             },
             {
-                icon: "🔄",
-                title: "EL REBOTE",
-                desc: "Quédate con esta carta. Cuando un rival intente colocar su próxima carta en su tablero, puedes usarla para 'rebotar' su turno: si adivinas tú el año, la carta es tuya."
+                q: "Luis Miguel, uno de los cantautores más importantes de habla hispana, es conocido mundialmente como:",
+                a: "El Sol de México", b: "El Rey del Bolero", c: "El Príncipe de la Canción",
+                ans: "A) El Sol de México"
             },
             {
-                icon: "👥",
-                title: "TRIVIA COLECTIVA",
-                desc: "Todos los jugadores (excepto tú) compiten. Quien adivine el año exacto de la siguiente canción primero ganará un punto de robo. ¡Rápido!"
+                q: "¿Qué famosa artista colombiana interpreta mundialmente los éxitos 'Hips Don't Lie' y 'Waka Waka'?",
+                a: "Karol G", b: "Shakira", c: "Greeicy",
+                ans: "B) Shakira"
+            },
+            {
+                q: "¿Cuál de estos álbumes del cantante estadounidense Michael Jackson es el disco más vendido de la historia?",
+                a: "Bad", b: "Thriller", c: "Off the Wall",
+                ans: "B) Thriller"
+            },
+            {
+                q: "¿Qué agrupación mexicana es famosa por temas legendarios como 'Rayando el sol' o 'Clavado en un bar'?",
+                a: "Café Tacvba", b: "Maná", c: "Molotov",
+                ans: "B) Maná"
+            },
+            {
+                q: "La canción urbana 'Despacito', que rompió récords históricos en 2017, es cantada por Luis Fonsi junto a:",
+                a: "Daddy Yankee", b: "Don Omar", c: "J Balvin",
+                ans: "A) Daddy Yankee"
+            },
+            {
+                q: "¿Quién es considerado de forma unánime a nivel mundial como 'El Rey del Rock and Roll'?",
+                a: "Chuck Berry", b: "Elvis Presley", c: "Freddie Mercury",
+                ans: "B) Elvis Presley"
+            },
+            {
+                q: "¿Qué grupo pop originario de Suecia ganó el festival de Eurovisión en 1974 con 'Waterloo'?",
+                a: "ABBA", b: "Roxette", c: "Ace of Base",
+                ans: "A) ABBA"
+            }
+        ];
+
+        // Plantillas de subastas y negociaciones (Palabras Prohibidas / Quién da más)
+        const pujas = [
+            {
+                title: "🔥 QUIÉN DA MÁS - POP LATINO",
+                desc: "El Host inicia una subasta rápida en la mesa: '¿Cuántos artistas de Pop Latino en español puedes nombrar en 15 segundos sin repetir?'. Los participantes pujan por turnos (ej: 'Yo 5', 'Yo 8', 'Yo 10'). El mejor postor tiene 15 segundos para lograrlo. ¡Si lo logra avanza 2 casillas; si falla retrocede 1!"
+            },
+            {
+                title: "🔥 QUIÉN DA MÁS - ROCK LATINO",
+                desc: "El Host inicia la subasta: '¿Cuántas bandas de Rock en Español puedes nombrar en 15 segundos?'. Las bandas pujan por ganar el reto. El mejor postor debe realizar el listado. Éxito = avanza 2 espacios en el tablero. Fracaso = retrocede 1."
+            },
+            {
+                title: "🤫 PALABRAS PROHIBIDAS: EL MENTIROSO",
+                desc: "El jugador activo tiene 30 segundos para contar una anécdota real o inventada relacionada con conciertos. Durante su relato NO puede pronunciar las palabras 'MÚSICA', 'CANTAR' o 'CANCIÓN'. El resto de participantes debe juzgar si es VERDAD o MENTIRA. ¡Si logras engañarlos o hablar limpio, avanzas 2 espacios!"
             }
         ];
 
         let activeDeck = [];
         let playedHistory = [];
-        let currentItem = null; // Puede ser un track (canción) o un pure-challenge (desafío)
+        let currentItem = null;
 
-        // Inicializar juego leyendo de localStorage para no perder la partida
+        // Variables del temporizador interactivo
+        let timerSeconds = 20;
+        let timerInterval = null;
+        let timerRunning = false;
+
         window.addEventListener('load', () => {
             cargarPartida();
             actualizarInterfaz();
-        }).catch(err => console.log(err));
+        });
 
         function guardarPartida() {
-            localStorage.setItem('hitster_active_deck', JSON.stringify(activeDeck));
-            localStorage.setItem('hitster_played_history', JSON.stringify(playedHistory));
-            localStorage.setItem('hitster_current_item', JSON.stringify(currentItem));
+            localStorage.setItem('lagira_active_deck', JSON.stringify(activeDeck));
+            localStorage.setItem('lagira_played_history', JSON.stringify(playedHistory));
+            localStorage.setItem('lagira_current_item', JSON.stringify(currentItem));
         }
 
         function cargarPartida() {
-            const storedDeck = localStorage.getItem('hitster_active_deck');
-            const storedHistory = localStorage.getItem('hitster_played_history');
-            const storedCurrent = localStorage.getItem('hitster_current_item');
+            const storedDeck = localStorage.getItem('lagira_active_deck');
+            const storedHistory = localStorage.getItem('lagira_played_history');
+            const storedCurrent = localStorage.getItem('lagira_current_item');
 
             if (storedDeck && storedHistory) {
                 activeDeck = JSON.parse(storedDeck);
@@ -4566,28 +4867,101 @@
         }
 
         function reiniciarMazo() {
-            // Crear el mazo mezclando canciones con cartas de desafíos puros
             let tempDeck = [];
             
-            // 1. Agregar canciones
-            baseTracks.forEach(track => {
-                tempDeck.push({
-                    type: "song",
-                    data: track
-                });
-            });
-
-            // 2. Agregar cartas de desafío puro intercaladas (aprox. 15% del tamaño total)
-            const numChallengesToInject = Math.max(5, Math.floor(baseTracks.length * 0.15));
-            for (let i = 0; i < numChallengesToInject; i++) {
-                const randomPureChallenge = cartasDesafioPuro[Math.floor(Math.random() * cartasDesafioPuro.length)];
-                tempDeck.push({
-                    type: "challenge",
-                    data: randomPureChallenge
-                });
+            // 1. Barajar y distribuir canciones en subtipos
+            let shuffledTracks = [...baseTracks];
+            for (let i = shuffledTracks.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledTracks[i], shuffledTracks[j]] = [shuffledTracks[j], shuffledTracks[i]];
             }
 
-            // 3. Mezclar mazo usando Fisher-Yates
+            shuffledTracks.forEach(track => {
+                const rand = Math.random();
+                if (rand < 0.60) {
+                    // Canción normal
+                    tempDeck.push({
+                        type: "song",
+                        subtype: "normal",
+                        data: track
+                    });
+                } else if (rand < 0.75) {
+                    // QR+ Racha
+                    tempDeck.push({
+                        type: "song",
+                        subtype: "racha",
+                        data: track
+                    });
+                } else if (rand < 0.87) {
+                    // Desafío Tararea
+                    tempDeck.push({
+                        type: "song",
+                        subtype: "tararea",
+                        data: track
+                    });
+                } else {
+                    // Desafío Continúa
+                    tempDeck.push({
+                        type: "song",
+                        subtype: "continua",
+                        data: track
+                    });
+                }
+            });
+
+            // 2. Agregar desafíos puros (sin código QR) distribuidos uniformemente
+            const numPureChallenges = Math.max(10, Math.floor(baseTracks.length * 0.12));
+            for (let i = 0; i < numPureChallenges; i++) {
+                const randType = Math.random();
+                if (randType < 0.35) {
+                    const word = palabrasMagicas[Math.floor(Math.random() * palabrasMagicas.length)];
+                    tempDeck.push({
+                        type: "challenge_pure",
+                        subtype: "palabra_magica",
+                        data: {
+                            icon: "✨",
+                            title: "PALABRA MÁGICA",
+                            desc: `¡Duelo de Bandas! La palabra elegida en carretera es: <strong style="color:var(--accent-gold); font-size:1.3rem;">${word}</strong>.<br><br>El primer jugador en cantar un fragmento de una canción real que contenga esta palabra avanza <strong>2 espacios</strong>.`
+                        }
+                    });
+                } else if (randType < 0.70) {
+                    const trivia = trivias[Math.floor(Math.random() * trivias.length)];
+                    tempDeck.push({
+                        type: "challenge_pure",
+                        subtype: "trivia",
+                        data: {
+                            icon: "🧠",
+                            title: "TRIVIA DE CARRETERA",
+                            desc: `<strong>PREGUNTA:</strong> ${trivia.q}<br><br><strong>A)</strong> ${trivia.a}<br><strong>B)</strong> ${trivia.b}<br><strong>C)</strong> ${trivia.c}`,
+                            answer: trivia.ans
+                        }
+                    });
+                } else {
+                    const puja = pujas[Math.floor(Math.random() * pujas.length)];
+                    tempDeck.push({
+                        type: "challenge_pure",
+                        subtype: "puja",
+                        data: {
+                            icon: puja.icon,
+                            title: puja.title,
+                            desc: puja.desc
+                        }
+                    });
+                }
+            }
+
+            // 3. Agregar EXACTAMENTE una Carta Reversa
+            tempDeck.push({
+                type: "challenge_pure",
+                subtype: "reversa",
+                data: {
+                    icon: "🔄",
+                    title: "CARTA REVERSA",
+                    desc: "¡Desperfecto mecánico en ruta! La correa de distribución de tu Tour Bus se ha roto. Retrocede <strong>3 espacios</strong> en el tablero de inmediato."
+                }
+            });
+
+            // 4. Mezclar mazo completo final (Fisher-Yates)
             for (let i = tempDeck.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [tempDeck[i], tempDeck[j]] = [tempDeck[j], tempDeck[i]];
@@ -4601,37 +4975,25 @@
         }
 
         function confirmarReinicio() {
-            if (confirm("¿Estás seguro de que quieres reiniciar el mazo? Se volverán a mezclar todas las canciones y se añadirán nuevos desafíos.")) {
+            if (confirm("¿Seguro que quieres reiniciar? Volverá a mezclarse todo el mazo incluyendo los desafíos.")) {
                 reiniciarMazo();
             }
         }
 
         function sacarCarta() {
             if (activeDeck.length === 0) {
-                alert("🎉 ¡Mazo terminado! Has jugado todas las canciones y desafíos. Presiona 'Reiniciar mazo' para comenzar otra partida.");
+                alert("🎉 ¡La Gira ha terminado! Se han jugado todas las cartas del mazo. Reinicia para arrancar un nuevo tour.");
                 return;
             }
 
-            // Ocultar respuesta previa
+            // Reset del temporizador de tararear
+            detenerTimer();
+
             document.getElementById('answer-container').style.display = 'none';
             document.getElementById('btn-reveal').innerText = "👁️ VER RESPUESTA";
 
-            // Sacar elemento del mazo
             currentItem = activeDeck.shift();
             playedHistory.push(currentItem);
-
-            // Si es canción, decidir si lleva un desafío dinámico (35% de probabilidad)
-            if (currentItem.type === "song") {
-                const runChallenge = Math.random() < 0.35;
-                if (runChallenge) {
-                    const randomTemplate = plantillasDesafios[Math.floor(Math.random() * plantillasDesafios.length)];
-                    // Reemplazar marcador de artista de manera segura
-                    const rawArtist = currentItem.data.artist;
-                    currentItem.challenge = randomTemplate.replace("{artist}", rawArtist);
-                } else {
-                    currentItem.challenge = null;
-                }
-            }
 
             guardarPartida();
             actualizarInterfaz();
@@ -4650,17 +5012,59 @@
             }
         }
 
-        function markdownToHtml(text) {
-            if (!text) return "";
-            // Reemplazo simple para simular negritas de Markdown **texto**
-            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        /* --- CONTROL DEL TEMPORIZADOR --- */
+        function toggleTimer() {
+            const btn = document.getElementById('timer-ctrl-btn');
+            if (timerRunning) {
+                detenerTimer();
+            } else {
+                timerRunning = true;
+                btn.innerText = "Pausar";
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    document.getElementById('timer-display').innerText = timerSeconds;
+                    
+                    if (timerSeconds <= 5) {
+                        document.getElementById('timer-display').classList.add('warning');
+                    }
+                    
+                    if (timerSeconds <= 0) {
+                        detenerTimer();
+                        alert("⏰ ¡TIEMPO TERMINADO! Su equipo no adivinó a tiempo.");
+                    }
+                }, 1000);
+            }
+        }
+
+        function detenerTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            timerRunning = false;
+            timerSeconds = 20;
+            const display = document.getElementById('timer-display');
+            if (display) {
+                display.innerText = "20";
+                display.classList.remove('warning');
+            }
+            const btn = document.getElementById('timer-ctrl-btn');
+            if (btn) btn.innerText = "Iniciar";
+        }
+
+        /* --- MODAL CONTROL --- */
+        function abrirDesafioFinal() {
+            document.getElementById('modal-final').style.display = 'flex';
+        }
+
+        function cerrarDesafioFinal() {
+            document.getElementById('modal-final').style.display = 'none';
         }
 
         function actualizarInterfaz() {
-            const totalItems = baseTracks.length + Math.max(5, Math.floor(baseTracks.length * 0.15));
+            const total = baseTracks.length + Math.max(10, Math.floor(baseTracks.length * 0.12)) + 1;
             const remaining = activeDeck.length;
-            
-            document.getElementById('deck-counter').innerText = `CARTAS RESTANTES: ${remaining} / ${totalItems}`;
+            document.getElementById('deck-counter').innerText = `CARTAS RESTANTES: ${remaining} / ${total}`;
 
             const placeholder = document.getElementById('placeholder-text');
             const songContainer = document.getElementById('song-card-container');
@@ -4668,34 +5072,69 @@
             const qrImg = document.getElementById('qr-img-element');
             const songChallengeBox = document.getElementById('song-challenge-box');
             const songChallengeText = document.getElementById('song-challenge-text');
+            const challengeTag = document.getElementById('challenge-tag-element');
+            const timerContainer = document.getElementById('tararea-timer');
+            const cardHeaderBadge = document.getElementById('card-header-badge');
             
             const btnReveal = document.getElementById('btn-reveal');
             const cardCanvas = document.getElementById('card-canvas');
 
             // Reset de clases
-            cardCanvas.classList.remove('active-song', 'active-challenge');
+            cardCanvas.classList.remove('active-song', 'active-challenge', 'active-racha', 'active-reversa');
 
             if (currentItem) {
                 placeholder.style.display = 'none';
 
                 if (currentItem.type === "song") {
-                    // VISTA CANCIÓN
                     songContainer.style.display = 'block';
                     pureChallengeContainer.style.display = 'none';
                     btnReveal.style.display = 'block';
-                    cardCanvas.classList.add('active-song');
 
-                    // Cargar QR
+                    // Cargar QR apuntando a tu reproductor de "La Gira"
                     const songId = currentItem.data.id;
                     const targetUrl = `https://monoconbeston.github.io/reproductor-hitster/?id=${songId}`;
-                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(targetUrl)}`;
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(targetUrl)}`;
 
-                    // Mostrar desafío integrado si aplica
-                    if (currentItem.challenge) {
-                        songChallengeBox.style.display = 'block';
-                        songChallengeText.innerHTML = markdownToHtml(currentItem.challenge);
-                    } else {
+                    // Gestionar subtipos
+                    if (currentItem.subtype === "normal") {
+                        cardCanvas.classList.add('active-song');
+                        cardHeaderBadge.innerText = "CARTA CANCIONERA";
+                        cardHeaderBadge.style.color = "var(--accent-blue)";
                         songChallengeBox.style.display = 'none';
+                        timerContainer.style.display = 'none';
+                    } 
+                    else if (currentItem.subtype === "racha") {
+                        cardCanvas.classList.add('active-racha');
+                        cardHeaderBadge.innerText = "CARTA RACHA ➕";
+                        cardHeaderBadge.style.color = "var(--accent-gold)";
+                        
+                        songChallengeBox.style.display = 'block';
+                        songChallengeBox.className = "challenge-box box-racha";
+                        challengeTag.innerText = "➕ REGLA RACHA";
+                        songChallengeText.innerHTML = "¡Respuesta correcta te da un turno extra! Juega la siguiente carta inmediatamente.";
+                        timerContainer.style.display = 'none';
+                    } 
+                    else if (currentItem.subtype === "tararea") {
+                        cardCanvas.classList.add('active-song');
+                        cardHeaderBadge.innerText = "DESAFÍO TARAREA";
+                        cardHeaderBadge.style.color = "var(--accent-blue)";
+
+                        songChallengeBox.style.display = 'block';
+                        songChallengeBox.className = "challenge-box box-tararea";
+                        challengeTag.innerText = "🤫 REGLA TARAREA";
+                        songChallengeText.innerHTML = "Escucha el tema de forma secreta en el reproductor (puedes usar audífonos) y tararea la melodía. Tu equipo tiene <strong>20 segundos</strong> para adivinar el Nombre o Artista.";
+                        timerContainer.style.display = 'flex';
+                    } 
+                    else if (currentItem.subtype === "continua") {
+                        cardCanvas.classList.add('active-song');
+                        cardHeaderBadge.innerText = "CONTINÚA LA CANCIÓN";
+                        cardHeaderBadge.style.color = "var(--accent-pink)";
+
+                        songChallengeBox.style.display = 'block';
+                        songChallengeBox.className = "challenge-box box-continua";
+                        challengeTag.innerText = "🎤 REGLA CANTAR";
+                        songChallengeText.innerHTML = "El Host reproduce el tema y debe pausarlo en mitad del coro. ¡El participante activo debe seguir cantando la letra durante <strong>5 segundos</strong> para avanzar 3 espacios!";
+                        timerContainer.style.display = 'none';
                     }
 
                     // Cargar datos ocultos para el Host
@@ -4711,19 +5150,31 @@
                         coverImg.style.display = 'none';
                     }
 
-                } else if (currentItem.type === "challenge") {
-                    // VISTA DESAFÍO PURO
+                } else if (currentItem.type === "challenge_pure") {
                     songContainer.style.display = 'none';
                     pureChallengeContainer.style.display = 'block';
-                    btnReveal.style.display = 'none'; // No hay respuesta para ocultar en desafíos puros
-                    cardCanvas.classList.add('active-challenge');
+                    btnReveal.style.display = 'none';
+
+                    if (currentItem.subtype === "reversa") {
+                        cardCanvas.classList.add('active-reversa');
+                    } else {
+                        cardCanvas.classList.add('active-challenge');
+                    }
 
                     document.getElementById('pure-challenge-icon').innerText = currentItem.data.icon;
                     document.getElementById('pure-challenge-title').innerText = currentItem.data.title;
-                    document.getElementById('pure-challenge-desc').innerText = currentItem.data.desc;
+                    document.getElementById('pure-challenge-desc').innerHTML = currentItem.data.desc;
+
+                    // Si es trivia, añadir la respuesta secreta detrás de un botón en la misma interfaz
+                    if (currentItem.subtype === "trivia") {
+                        btnReveal.style.display = 'block';
+                        document.getElementById('song-title').innerText = "Respuesta Correcta:";
+                        document.getElementById('song-artist').innerText = currentItem.data.answer;
+                        document.getElementById('song-year').innerText = "";
+                        document.getElementById('song-cover').style.display = 'none';
+                    }
                 }
             } else {
-                // ESTADO INICIAL VACÍO
                 placeholder.style.display = 'block';
                 songContainer.style.display = 'none';
                 pureChallengeContainer.style.display = 'none';
