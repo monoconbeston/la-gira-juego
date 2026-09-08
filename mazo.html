@@ -5067,21 +5067,30 @@
         });
 
         function guardarPartida() {
-            localStorage.setItem('lagira_active_deck', JSON.stringify(activeDeck));
-            localStorage.setItem('lagira_played_history', JSON.stringify(playedHistory));
-            localStorage.setItem('lagira_current_item', JSON.stringify(currentItem));
+            try {
+                localStorage.setItem('lagira_active_deck', JSON.stringify(activeDeck));
+                localStorage.setItem('lagira_played_history', JSON.stringify(playedHistory));
+                localStorage.setItem('lagira_current_item', JSON.stringify(currentItem));
+            } catch (e) {
+                console.warn("No se pudo guardar la partida en localStorage:", e);
+            }
         }
 
         function cargarPartida() {
-            const storedDeck = localStorage.getItem('lagira_active_deck');
-            const storedHistory = localStorage.getItem('lagira_played_history');
-            const storedCurrent = localStorage.getItem('lagira_current_item');
+            try {
+                const storedDeck = localStorage.getItem('lagira_active_deck');
+                const storedHistory = localStorage.getItem('lagira_played_history');
+                const storedCurrent = localStorage.getItem('lagira_current_item');
 
-            if (storedDeck && storedHistory) {
-                activeDeck = JSON.parse(storedDeck);
-                playedHistory = JSON.parse(storedHistory);
-                currentItem = storedCurrent ? JSON.parse(storedCurrent) : null;
-            } else {
+                if (storedDeck && storedHistory) {
+                    activeDeck = JSON.parse(storedDeck);
+                    playedHistory = JSON.parse(storedHistory);
+                    currentItem = storedCurrent ? JSON.parse(storedCurrent) : null;
+                } else {
+                    reiniciarMazo();
+                }
+            } catch (e) {
+                console.warn("No se pudo cargar la partida desde localStorage, reiniciando mazo:", e);
                 reiniciarMazo();
             }
         }
@@ -5219,11 +5228,34 @@
                 [tempDeck[i], tempDeck[j]] = [tempDeck[j], tempDeck[i]];
             }
 
+            // 5. Asegurar que las primeras 4 cartas sean canciones con QR (type === "song") y no desafíos puros
+            let songCount = 0;
+            for (let i = 0; i < tempDeck.length; i++) {
+                if (tempDeck[i].type === "song") {
+                    if (songCount < 4) {
+                        if (i >= 4) {
+                            for (let targetIdx = 0; targetIdx < 4; targetIdx++) {
+                                if (tempDeck[targetIdx].type !== "song") {
+                                    let temp = tempDeck[targetIdx];
+                                    tempDeck[targetIdx] = tempDeck[i];
+                                    tempDeck[i] = temp;
+                                    break;
+                                }
+                            }
+                        }
+                        songCount++;
+                    }
+                }
+                if (songCount === 4) break;
+            }
+
             activeDeck = tempDeck;
             playedHistory = [];
             currentItem = null;
             guardarPartida();
-            actualizarInterfaz();
+            
+            // Recargar la página para limpiar limpiamente el estado de iframe, música, temporizadores y variables
+            window.location.reload();
         }
 
         function confirmarReinicio() {
