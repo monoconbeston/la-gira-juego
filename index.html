@@ -3,360 +3,498 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>La Gira: Aventura Musical</title>
+    <title>La Gira: Aventura Musical - Reproductor</title>
     
-    <!-- Configuración para que se coma como App Móvil (PWA) -->
+    <!-- Configuración para que se comporte como App Móvil (PWA) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="La Gira App">
     <meta name="theme-color" content="#0d0c15">
     
     <!-- Manifiesto de App en línea para instalación directa -->
-    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22La%20Gira%3A%20Aventura%20Musical%22%2C%22short_name%22%3A%22La%20Gira%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230 d0c15%22%2C%22theme_color%22%3A%22%23ff0055%22%2C%22icons%22%3B%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F3050%2F3050181.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22La%20Gira%3A%20Aventura%20Musical%22%2C%22short_name%22%3A%22La%20Gira%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d0c15%22%2C%22theme_color%22%3A%22%23ffd700%22%2C%22icons%22%3B%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F3050%2F3050181.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
 
     <!-- Librería del Escáner QR de código abierto -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        :raíz {
-            --bg-color: #0d0c15;
-            --card-bg: #151226;
+        :root {
+            --bg-color: #06050b;
+            --card-bg: #0f0d1a;
             --accent-pink: #ff0055;
-            --accent-purple: #9d4edd;
+            --accent-purple: #822faf;
             --accent-gold: #ffb703;
-            --color-texto: #ffffff;
-            --texto silenciado: #a49fc6;
-            --success-color: #1db954;
+            --accent-neon-blue: #00f0ff;
+            --text-color: #ffffff;
+            --text-muted: #8b85b4;
+            --success-color: #00f5d4;
         }
 
-        cuerpo {
-            familia de fuentes: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color de fondo: var(--bg-color);
-            imagen de fondo: degradado radial(círculo en la parte superior, #1a1235 0%, #0d0c15 100%);
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(130, 47, 175, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 85, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at top, #141126 0%, #06050b 100%);
             color: var(--text-color);
-            margen: 0;
-            relleno: 0;
-            pantalla: flexible;
-            flex-direction: columna;
-            alinear-elementos: centro;
-            justificar-contenido: centro;
-            altura mínima: 100vh;
-            selección del usuario: ninguna;
-            -webkit-user-select: ninguno;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        .contenedor {
-            ancho: 92%;
-            ancho máximo: 410px;
-            alineación de texto: centro;
-            fondo: var(--card-bg);
-            relleno: 25px;
-            radio de borde: 28px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            borde: 1px sólido rgba(255, 255, 255, 0.08);
-            box-size: border-box;
+        .container {
+            width: 92%;
+            max-width: 410px;
+            text-align: center;
+            background: linear-gradient(145deg, #131024 0%, #0d0b1a 100%);
+            padding: 25px;
+            border-radius: 32px;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.7),
+                0 0 30px rgba(130, 47, 175, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efecto de Luces Neón de Carretera de Fondo */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 0, 85, 0.08) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         /* --- CABECERA DE LA APP --- */
-        .encabezado {
-            margen inferior: 20px;
+        .header {
+            margin-bottom: 22px;
+            position: relative;
+            z-index: 2;
         }
 
-        .logo-contenedor {
+        .logo-container {
             display: inline-flex;
-            alinear-elementos: centro;
-            justificar-contenido: centro;
-            tamaño de fuente: 2,2rem;
-            margen inferior: 5px;
-            animación: rebote 2s infinito alternado;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 0 10px rgba(255, 183, 3, 0.4));
+            animation: bounce 2s infinite alternate;
         }
 
         h1 {
-            tamaño de fuente: 1,6rem;
-            margen: 0;
-            grosor de fuente: 800;
-            espaciado entre letras: 0,5px;
-            fondo: gradiente lineal(135 grados, #fff 0%, var(--accent-pink) 50%, var(--accent-purple) 100%);
-            -webkit-background-clip: texto;
-            -webkit-text-fill-color: transparente;
-            text-shadow: 0 4px 10px rgba(255, 0, 85, 0.2);
+            font-size: 2rem;
+            margin: 0;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #ffffff 10%, var(--accent-gold) 50%, var(--accent-pink) 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 15px rgba(255, 183, 3, 0.2);
+            text-transform: uppercase;
         }
 
-        .subtítulo {
-            color: var(--text-muted);
-            tamaño de fuente: 0,85rem;
-            margen superior: 5px;
-            grosor de fuente: 500;
-            espaciado entre letras: 1px;
-            transformación de texto: mayúsculas;
+        .subtitle {
+            color: var(--accent-neon-blue);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
         }
 
-        /* --- ACORDEÓN DE REGLAS / PUNTUACIÓN --- */
-        .barra-de-reglas {
-            color de fondo: rgba(255, 255, 255, 0.04);
-            borde: 1px sólido rgba(255, 255, 255, 0.08);
-            radio de borde: 14px;
-            relleno: 10px 15px;
-            margen inferior: 20px;
-            tamaño de fuente: 0,8rem;
-            pantalla: flexible;
-            justificar-contenido: espacio-alrededor;
-            alinear-elementos: centro;
+        /* --- MARCADOR DE REGLAS (Atmósfera de Tablero de Control de Bus) --- */
+        .rules-bar {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(130, 47, 175, 0.3);
+            border-radius: 16px;
+            padding: 12px 15px;
+            margin-bottom: 22px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 2;
         }
 
-        .elemento-regla {
-            pantalla: flexible;
-            flex-direction: columna;
-            alinear-elementos: centro;
+        .rule-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .puntos-de-regla {
-            tamaño de fuente: 1rem;
-            grosor de fuente: 800;
+        .rule-points {
+            font-size: 1.1rem;
+            font-weight: 900;
             color: var(--accent-gold);
+            text-shadow: 0 0 6px rgba(255, 183, 3, 0.5);
         }
 
-        .regla-etiqueta {
+        .rule-label {
             color: var(--text-muted);
-            tamaño de fuente: 0,65rem;
-            transformación de texto: mayúsculas;
-            grosor de fuente: negrita;
-            margen superior: 2px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-top: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Separador vertical del tablero */
+        .rule-divider {
+            width: 1px;
+            height: 25px;
+            background-color: rgba(130, 47, 175, 0.3);
         }
 
         /* --- VISTA ESCÁNER --- */
-        #vista-escáner {
-            mostrar: ninguno;
+        #scanner-view {
+            display: none;
+            position: relative;
+            z-index: 2;
         }
 
-        #lector {
-            ancho: 100%;
-            fondo: #000;
-            radio de borde: 20px;
-            desbordamiento: oculto;
-            borde: 2px sólido var(--accent-pink);
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+        #reader {
+            width: 100%;
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 3px dashed var(--accent-pink);
+            box-shadow: 
+                0 0 30px rgba(255, 0, 85, 0.4),
+                inset 0 0 20px rgba(0,0,0,0.8);
+            position: relative;
         }
 
-        /* --- REPRODUCTOR VISTA --- */
+        /* --- VISTA REPRODUCTOR --- */
         #player-view {
-            mostrar: ninguno;
-            animación: fadeIn 0.4s ease;
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 2;
         }
 
-        /* Animación del Vinilo */
+        /* --- NUEVO DISCO / NEUMÁTICO DE TOUR BUS DE GIRA --- */
         .vinyl-wrapper {
-            posición: relativa;
-            ancho: 150px;
-            altura: 150px;
-            margen: 0 auto 20px auto;
+            position: relative;
+            width: 170px;
+            height: 170px;
+            margin: 0 auto 25px auto;
         }
 
-        .vinilo {
-            ancho: 100%;
-            altura: 100%;
-            fondo: gradiente radial(círculo, #000 30%, #1a1a1a 31%, #2c2c2c 50%, #1a1a1a 68%, #000 70%);
-            radio de borde: 50%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-            pantalla: flexible;
-            alinear-elementos: centro;
-            justificar-contenido: centro;
-            animación: giro de 3,5 s lineal infinito;
+        .vinyl {
+            width: 100%;
+            height: 100%;
+            /* Diseño híbrido: Disco de Vinilo de Oro con banda de neumático retro */
+            background: 
+                radial-gradient(circle, 
+                    #151226 15%, 
+                    #05050a 16%, 
+                    #111 25%, 
+                    #222 35%, 
+                    #111 40%, 
+                    var(--accent-gold) 41%, 
+                    #000 44%, 
+                    var(--accent-gold) 45%, 
+                    #151226 49%, 
+                    #333 70%, 
+                    #111 75%, 
+                    #05050a 82%, 
+                    #222 88%, 
+                    #05050a 100%);
+            border-radius: 50%;
+            border: 5px solid var(--accent-gold);
+            box-shadow: 
+                0 15px 35px rgba(0,0,0,0.8),
+                0 0 25px rgba(255, 183, 3, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: spin 3.5s linear infinite;
+            position: relative;
         }
 
-        .vinilo-centro {
-            ancho: 35%;
-            altura: 35%;
-            color de fondo: var(--accent-pink);
-            imagen de fondo: degradado radial(círculo, var(--accent-gold) 20%, var(--accent-pink) 60%);
-            radio de borde: 50%;
-            borde: 4px sólido #000;
+        /* Rayos cromados de la llanta/vinilo */
+        .vinyl::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 10%,
+                rgba(255, 255, 255, 0.15) 25%,
+                transparent 40%,
+                transparent 60%,
+                rgba(255, 255, 255, 0.15) 75%,
+                transparent 90%
+            );
+            pointer-events: none;
+        }
+
+        .vinyl-center {
+            width: 32%;
+            height: 32%;
+            background-color: var(--accent-pink);
+            background-image: radial-gradient(circle, var(--accent-gold) 20%, var(--accent-pink) 60%, var(--accent-purple) 100%);
+            border-radius: 50%;
+            border: 4px solid #06050b;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            z-index: 3;
+            position: relative;
+        }
+
+        /* Centro con el icono del rayo de la gira */
+        .vinyl-center::after {
+            content: '⚡';
+            font-size: 0.95rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
         }
 
         /* Contenedor del Reproductor de Spotify con Máscara */
         .spotify-container {
-            posición: relativa;
-            ancho: 100%;
-            altura: 80px;
-            color de fondo: #282828;
-            radio de borde: 14px;
-            desbordamiento: oculto;
-            margen superior: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            position: relative;
+            width: 100%;
+            height: 80px;
+            background-color: #121212;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.5),
+                0 0 15px rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.15);
         }
 
         .spotify-iframe {
-            ancho: 100%;
-            altura: 80px;
-            borde: ninguno;
+            width: 100%;
+            height: 80px;
+            border: none;
         }
 
         /* MÁSCARA MÁGICA: Oculta los datos para que no se arruine la sorpresa */
         .cover-mask {
-            posición: absoluta;
-            superior: 0;
-            izquierda: 0;
-            ancho: calc(100% - 130px); /* Tapa todo menos el play de Spotify */
-            altura: 100%;
-            color de fondo: #282828;
-            pantalla: flexible;
-            alinear-elementos: centro;
-            relleno izquierdo: 20px;
-            box-size: border-box;
-            índice z: 10;
-            eventos de puntero: ninguno;
-            transición: opacidad 0,3 s facilidad;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: calc(100% - 130px); /* Tapa todo menos el play de Spotify */
+            height: 100%;
+            background: linear-gradient(135deg, #16151f 0%, #0d0c15 100%);
+            display: flex;
+            align-items: center;
+            padding-left: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            border-right: 2px solid var(--accent-pink);
         }
 
         .mask-text {
-            color: var(--accent-pink);
-            grosor de fuente: negrita;
-            tamaño de fuente: 0,85rem;
-            espaciado entre letras: 1px;
-            transformación de texto: mayúsculas;
-            animación: pulso 2s infinito;
+            color: var(--accent-gold);
+            font-weight: 900;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            animation: pulse 1.8s infinite;
+            text-shadow: 0 0 8px rgba(255, 183, 3, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         /* --- BOTÓN DE REVELAR SECRETO --- */
         .secret-reveal-btn {
-            color de fondo: rgba(255, 255, 255, 0.05);
-            color: var(--accent-purple);
-            borde: 1px sólido rgba(157, 78, 221, 0.3);
-            radio de borde: 10px;
-            relleno: 8px 15px;
-            tamaño de fuente: 0,75rem;
-            grosor de fuente: negrita;
-            cursor: puntero;
-            margen superior: 12px;
-            transición: todos 0,2 s de facilidad;
-            transformación de texto: mayúsculas;
+            background-color: rgba(130, 47, 175, 0.15);
+            color: var(--accent-neon-blue);
+            border: 1.5px solid rgba(0, 240, 255, 0.4);
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
         }
 
         .secret-reveal-btn:active {
-            color de fondo: rgba(157, 78, 221, 0.1);
-            transformar: escala(0,97);
+            background-color: rgba(0, 240, 255, 0.15);
+            transform: scale(0.96);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
         /* --- BOTÓN DE SIGUIENTE RONDA --- */
         .btn-scan-next {
-            fondo: gradiente lineal(135 grados, var(--accent-pink) 0%, var(--accent-purple) 100%);
-            color: blanco;
-            borde: ninguno;
-            relleno: 14px 28px;
-            tamaño de fuente: 1rem;
-            grosor de fuente: negrita;
-            radio de borde: 50px;
-            cursor: puntero;
-            ancho: 100%;
-            margen superior: 25px;
-            box-shadow: 0 6px 20px rgba(255, 0, 85, 0.3);
-            transición: todos 0,2 s de facilidad;
-            transformación de texto: mayúsculas;
-            espaciado entre letras: 0,5px;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-purple) 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 25px;
+            box-shadow: 
+                0 6px 20px rgba(255, 0, 85, 0.4),
+                0 0 15px rgba(130, 47, 175, 0.2);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
         }
 
         .btn-scan-next:active {
-            transformar: escala(0,97);
-            box-shadow: 0 2px 8px rgba(255, 0, 85, 0.1);
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(255, 0, 85, 0.2);
         }
 
         @keyframes spin {
-            100% { transformar: rotar(360 grados); }
+            100% { transform: rotate(360deg); }
         }
 
         @keyframes pulse {
-            0%, 100% { opacidad: 0,6; }
-            50% { opacidad: 1; }
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
         }
 
-        @keyframes rebote {
-            de { transformar: traducirY(0); }
-            a { transformar: traducirY(-4px); }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
         }
 
         @keyframes fadeIn {
-            desde { opacidad: 0; transformar: traducirY(10px); }
-            a { opacidad: 1; transformar: traducirY(0); }
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* --- VISTA DE AUTORIZACIÓN DE SPOTIFY --- */
         #auth-view {
-            mostrar: ninguno;
-            flex-direction: columna;
-            alinear-elementos: centro;
-            justificar-contenido: centro;
-            animación: fadeIn 0.3s ease;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+            z-index: 2;
         }
 
-        .tarjeta-de-autenticación {
-            fondo: rgba(29, 185, 84, 0.1);
-            borde: 2px sólido var(--accent-color);
-            radio de borde: 16px;
-            relleno: 20px;
-            margen inferior: 20px;
-            box-size: border-box;
+        .auth-card {
+            background: rgba(255, 183, 3, 0.08);
+            border: 2px solid var(--accent-gold);
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 0 20px rgba(255, 183, 3, 0.1);
         }
 
         .auth-icon {
-            tamaño de fuente: 3rem;
-            margen inferior: 10px;
-            animación: pulso 1,5 s infinito;
+            font-size: 3.2rem;
+            margin-bottom: 12px;
+            animation: pulse 1.5s infinite;
         }
 
         .auth-title {
-            tamaño de fuente: 1,2rem;
-            grosor de fuente: negrita;
-            color: var(--accent-color);
-            margen inferior: 10px;
-            transformación de texto: mayúsculas;
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .instrucciones-autenticación {
-            tamaño de fuente: 0,9rem;
-            interlineado: 1,4;
+        .auth-instructions {
+            font-size: 0.85rem;
+            line-height: 1.5;
             color: #ffffff;
-            margen inferior: 15px;
-            alineación de texto: izquierda;
+            margin-bottom: 15px;
+            text-align: left;
         }
 
         .url-box {
-            fondo: #000;
-            borde: 1px sólido rgba(255,255,255,0.1);
-            relleno: 10px;
-            radio de borde: 8px;
-            familia de fuentes: monoespacio;
-            tamaño de fuente: 0,75rem;
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.75rem;
             word-break: break-all;
-            Selección del usuario: todos;
-            -webkit-user-select: todos;
-            color: var(--text-muted);
-            margen inferior: 15px;
-            altura máxima: 80px;
-            desbordamiento-y: automático;
+            user-select: all;
+            -webkit-user-select: all;
+            color: var(--accent-neon-blue);
+            margin-bottom: 15px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        /* Estilo general para botones comunes */
+        .btn {
+            background-color: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
         }
 
     </style>
 </head>
-<cuerpo>
+<body>
 
     <div class="container">
-        <!-- CABECERA -->
+        <!-- CABECERA DE LA APP (Oficial de La Gira) -->
         <div class="header">
-            <div class="logo-container">🚌🎶</div>
+            <div class="logo-container">🚌📻</div>
             <h1>LA GIRA</h1>
-            <div class="subtitle" id="game-status">Aventura Musical</div>
+            <div class="subtitle" id="game-status">Sintonizador Oficial</div>
         </div>
 
-        <!-- MARCADOR DE REGLAS (Ayuda rápida) -->
+        <!-- MARCADOR DE REGLAS (Atmósfera de Tablero de Control de Bus) -->
         <div class="rules-bar">
             <div class="rule-item">
                 <span class="rule-points">3 pts</span>
-                <span class="rule-label">Nom+Art+Can</span>
+                <span class="rule-label">Nom+Art+Año</span>
             </div>
+            <div class="rule-divider"></div>
             <div class="rule-item">
                 <span class="rule-points">2 pts</span>
                 <span class="rule-label">2 Datos</span>
             </div>
+            <div class="rule-divider"></div>
             <div class="rule-item">
                 <span class="rule-points">1 pt</span>
                 <span class="rule-label">1 Dato</span>
@@ -370,12 +508,12 @@
                 <div class="auth-icon">🔑</div>
                 <div class="auth-title">¡Código de Gira Generado!</div>
                 <div class="auth-instructions">
-                    Ha iniciado sesión con éxito. Para activar el mazo en tu Mac, copia la dirección completa de esta página (URL) y pega en la terminal.
+                    Has iniciado sesión con éxito en Spotify. Para activar el mazo en tu Mac, copia la dirección completa de esta página (URL) y pégala en la terminal.
                 </div>
                 <div class="url-box" id="url-text-box">Cargando enlace...</div>
-                <button class="btn" onclick="copiarUrlAlPortapapeles()" style="margin-top: 5px;">📋 COPIAR ENLACE GIGANTE</button>
+                <button class="btn" onclick="copiarUrlAlPortapapeles()" style="margin-top: 5px; width: 100%; background-color: var(--accent-pink);">📋 COPIAR ENLACE GIGANTE</button>
             </div>
-            <button class="btn" onclick="omitirAutorizacion()" style="background-color: #2e2e3e; color: white; margin-top: 10px; box-shadow: none;">Ir al Escáner normal</button>
+            <button class="btn" onclick="omitirAutorizacion()" style="background-color: #241f3e; color: white; margin-top: 10px; width: 100%; box-shadow: none; border: 1px solid rgba(255,255,255,0.1);">Omitir e ir al Escáner</button>
         </div>
 
         <!-- VISTA DE ESCANEO -->
@@ -397,46 +535,45 @@
 
             <!-- Botón opcional para tarareo / escucha secreta -->
             <button class="secret-reveal-btn" id="btn-secret-reveal" onclick="toggleSecretReveal()">
-                🕵️ Revelar para Tararear/Cantar
+                🕵️ MODO SECRETO: VER CANCIÓN
             </button>
 
-            <botón class="btn-scan-next" onclick="activarEscaneoNuevo()">📷 ESCANEAR SIGUIENTE</botón>
+            <button class="btn-scan-next" onclick="activarEscaneoNuevo()">📷 ESCANEAR SIGUIENTE QR</button>
         </div>
     </div>
 
-    <script {isRevealed=false}>
+    <script>
         let html5QrCode;
         const config = { fps: 12, qrbox: { width: 230, height: 230 } };
         let isRevealed = false;
 
-        
         // Al iniciar la web
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const songId = urlParams.get('id');
             const spotifyCode = urlParams.get('code');
 
-            si (código de Spotify) {
+            if (spotifyCode) {
                 // Si detectamos el código de Spotify, mostramos la pantalla de copia y NO abrimos la cámara
-                mostrarPantallaAutorización();
+                mostrarPantallaAutorizacion();
             } else if (songId) {
                 // Si la abren directamente con una canción desde el escáner del sistema móvil
                 mostrarReproductor(songId);
-            } demás {
-                // Si la abre vacía (como una aplicación instalada), inicia la cámara interna automáticamente
+            } else {
+                // Si la abren vacía (como una app instalada), iniciar la cámara interna automáticamente
                 activarEscaneoNuevo();
             }
             
             // Registrar mini service-worker para compatibilidad PWA de instalación
-            if ('serviceWorker' en el navegador) {
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
                     self.addEventListener('install', e => self.skipWaiting());
                     self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-                `), { ámbito: './' });
+                `), { scope: './' });
             }
         });
 
-        function mostrarPantallaAutorización() {
+        function mostrarPantallaAutorizacion() {
             document.getElementById('player-view').style.display = 'none';
             document.getElementById('scanner-view').style.display = 'none';
             document.getElementById('auth-view').style.display = 'flex';
@@ -446,27 +583,27 @@
             document.getElementById('url-text-box').innerText = window.location.href;
         }
 
-        función copiarUrlAlPortapapeles() {
+        function copiarUrlAlPortapapeles() {
             const urlText = window.location.href;
-            navegador.clipboard.writeText(urlText).then(() => {
+            navigator.clipboard.writeText(urlText).then(() => {
                 alert("¡Enlace copiado al portapapeles! Pégalo en tu terminal de Mac.");
             }).catch(err => {
                 // Fallback manual si clipboard falla
-                const rango = document.createRange();
-                rango.selectNode(document.getElementById('url-text-box'));
-                ventana.getSelection().removeAllRanges();
-                ventana.getSelection().addRange(range);
-                document.execCommand("copiar");
+                const range = document.createRange();
+                range.selectNode(document.getElementById('url-text-box'));
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand("copy");
                 alert("Seleccionado. Copia el texto manualmente si no se copió.");
             });
         }
 
-        function omitirAutorización() {
+        function omitirAutorizacion() {
             document.getElementById('auth-view').style.display = 'none';
             activarEscaneoNuevo();
         }
 
-        función activarEscaneoNuevo() {
+        function activarEscaneoNuevo() {
             // Limpiar parámetro ID de la URL sin borrar el resto de cosas si no es ID
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('id')) {
@@ -476,20 +613,20 @@
                 window.history.replaceState({}, document.title, newPath);
             }
 
-            isRevealed = falso;
+            isRevealed = false;
 
             document.getElementById('player-view').style.display = 'none';
             document.getElementById('scanner-view').style.display = 'block';
             document.getElementById('game-status').innerText = 'Apunta al QR de una carta';
 
-            si (!html5QrCode) {
+            if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
 
             // Iniciar escaneo usando la cámara trasera
             html5QrCode.start(
-                { facingMode: "environment" },
-                configuración,
+                { facingMode: "environment" }, 
+                config,
                 onQrSuccess,
                 onQrError
             ).catch(err => {
@@ -498,75 +635,81 @@
             });
         }
 
-        función onQrSuccess(decodedText) {
-            intentar {
-                const url = nueva URL(texto decodificado);
+        function onQrSuccess(decodedText) {
+            try {
+                const url = new URL(decodedText);
                 const songId = url.searchParams.get('id');
 
-                si (songId) {
+                if (songId) {
                     html5QrCode.stop().then(() => {
                         mostrarReproductor(songId);
                     }).catch(err => {
-                        console.error("Error al apagar la cámara:", err);
+                        console.error("Error al apagar cámara:", err);
                         mostrarReproductor(songId);
                     });
-                } demás {
-                    alert("El QR escaneado no contiene un ID de canción válida.");
+                } else {
+                    alert("El QR escaneado no contiene un ID de canción válido.");
                 }
-            } capturar (e) {
+            } catch (e) {
                 alert("Código QR no válido. Escanea una carta de La Gira.");
             }
         }
 
-        función onQrError(errorMessage) {
+        function onQrError(errorMessage) {
             // Se ignora para no inundar la consola
         }
 
         function mostrarReproductor(songId) {
             document.getElementById('scanner-view').style.display = 'none';
             document.getElementById('player-view').style.display = 'block';
-            document.getElementById('game-status').innerText = '🚌 ¡GIRA EN MARCHA!';
+            document.getElementById('game-status').innerText = '📻 ¡RADIO GIRA SONANDO!';
 
             document.getElementById('spotify-player-target').innerHTML = `
                 <div class="spotify-container">
-                    <iframe class="spotify-iframe"
-                        src="https://open.spotify.com/embed/track/${songId}?utm_source=generator&theme=0"
-                        permitir="reproducción automática; escritura en el portapapeles; medios cifrados; pantalla completa; imagen en imagen"
-                        cargando="perezoso">
+                    <iframe class="spotify-iframe" 
+                        src="https://open.spotify.com/embed/track/${songId}?utm_source=generator&theme=0" 
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                        loading="lazy">
                     </iframe>
                     <div class="cover-mask" id="spotify-mask">
-                        <span class="mask-text">🎵 Escuchando...</span>
+                        <span class="mask-text">🚌 Gira Sonando...</span>
                     </div>
                 </div>
             `;
             
             // Restablecer botón de revelación
             const btnReveal = document.getElementById('btn-secret-reveal');
-            btnReveal.innerText = "🕵️ Revelar para Tararear/Cantar";
-            btnReveal.style.color = "var(--accent-purple)";
+            btnReveal.innerText = "🕵️ MODO SECRETO: VER CANCIÓN";
+            btnReveal.style.color = "var(--accent-neon-blue)";
+            btnReveal.style.borderColor = "rgba(0, 240, 255, 0.4)";
+            btnReveal.style.backgroundColor = "rgba(130, 47, 175, 0.15)";
         }
 
-        función toggleSecretReveal() {
+        function toggleSecretReveal() {
             const mask = document.getElementById('spotify-mask');
             const btnReveal = document.getElementById('btn-secret-reveal');
 
-            si (!máscara) regresar;
+            if (!mask) return;
 
-            si (!isRevealed) {
-                const confirmacion = confirm("⚠️ ¿Aseguraste que los otros jugadores no están mirando tu pantalla?");
-                si (confirmación) {
-                    opacidad de máscara = '0';
-                    mask.style.pointerEvents = 'ninguno';
-                    btnReveal.innerText = "🔒 Ocultar datos de canción";
-                    btnReveal.style.color = "var(--acento-rosa)";
-                    isRevealed = verdadero;
+            if (!isRevealed) {
+                const confirmacion = confirm("⚠️ ¿Te aseguraste de que el resto de las bandas no están mirando tu pantalla?");
+                if (confirmacion) {
+                    mask.style.opacity = '0';
+                    mask.style.pointerEvents = 'none';
+                    btnReveal.innerText = "🔒 MODO SURGIDO: OCULTAR DATOS";
+                    btnReveal.style.color = "var(--accent-pink)";
+                    btnReveal.style.borderColor = "var(--accent-pink)";
+                    btnReveal.style.backgroundColor = "rgba(255, 0, 85, 0.1)";
+                    isRevealed = true;
                 }
-            } demás {
-                opacidad.estilo.máscara = '1';
-                mask.style.pointerEvents = 'ninguno';
-                btnReveal.innerText = "🕵️ Revelar para Tararear/Cantar";
-                btnReveal.style.color = "var(--accent-purple)";
-                isRevealed = falso;
+            } else {
+                mask.style.opacity = '1';
+                mask.style.pointerEvents = 'none';
+                btnReveal.innerText = "🕵️ MODO SECRETO: VER CANCIÓN";
+                btnReveal.style.color = "var(--accent-neon-blue)";
+                btnReveal.style.borderColor = "rgba(0, 240, 255, 0.4)";
+                btnReveal.style.backgroundColor = "rgba(130, 47, 175, 0.15)";
+                isRevealed = false;
             }
         }
     </script>
