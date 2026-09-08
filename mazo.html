@@ -5165,7 +5165,7 @@
                         data: {
                             icon: "✨",
                             title: "PALABRA MÁGICA",
-                            desc: `¡Duelo de Bandas! La palabra elegida en carretera es: <strong style="color:var(--accent-gold); font-size:1.3rem;">\${word}</strong>.<br><br>Quien sacó la carta elige a su contendor de la mesa y parte cantando un fragmento de canción real que la contenga. Se van turnando en la mesa. ¡El ganador de la racha avanza <strong>2 espacios</strong> y el perdedor retrocede <strong>1 espacio</strong> en el tablero de inmediato!`
+                            desc: `¡Duelo de Bandas! La palabra elegida en carretera es: <strong style="color:var(--accent-gold); font-size:1.3rem;">${word}</strong>.<br><br>Quien sacó la carta elige a su contendor de la mesa y parte cantando un fragmento de canción real que la contenga. Se van turnando en la mesa. ¡El ganador de la racha avanza <strong>2 espacios</strong> y el perdedor retrocede <strong>1 espacio</strong> en el tablero de inmediato!`
                         }
                     });
                 } else if (randType < 0.85) { // 60% Trivia de Carretera (Aumentado 10%, antes era de 0.30 a 0.80 = 50%)
@@ -5179,8 +5179,8 @@
                         subtype: "trivia",
                         data: {
                             icon: "🧠",
-                            title: `TRIVIA DE CARRETERA [\${trivia.diff}]`,
-                            desc: `<strong>PREGUNTA:</strong> \${trivia.q}<br><br><strong>A)</strong> \${trivia.a}<br><strong>B)</strong> \${trivia.b}<br><strong>C)</strong> \${trivia.c}<br><strong>D)</strong> \${trivia.d}<br><br><span style="color:var(--accent-gold); font-weight:bold;">🏆 REGLA: ¡Si acierta avanza 1 espacio, si falla no avanza!</span>`,
+                            title: trivia.diff ? `TRIVIA DE CARRETERA [${trivia.diff}]` : "TRIVIA DE CARRETERA",
+                            desc: `<strong>PREGUNTA:</strong> ${trivia.q}<br><br><strong>A)</strong> ${trivia.a}<br><strong>B)</strong> ${trivia.b}<br><strong>C)</strong> ${trivia.c}<br><strong>D)</strong> ${trivia.d}<br><br><span style="color:var(--accent-gold); font-weight:bold;">🏆 REGLA: ¡Si acierta avanza 1 espacio, si falla no avanza!</span>`,
                             answer: trivia.ans
                         }
                     });
