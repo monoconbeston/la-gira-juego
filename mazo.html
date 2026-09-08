@@ -4763,80 +4763,292 @@
         ];
 
         // Roster de Trivias de Carretera
+        // Roster de Trivias de Carretera con Dificultades
+        // Roster de 50 Trivias de Carretera
         const trivias = [
             {
-                q: "¿Cuál es el verdadero nombre del exitoso artista puertorriqueño Bad Bunny?",
-                a: "Benito Martínez", b: "Carlos Efrén", c: "Juan Carlos",
-                ans: "A) Benito Martínez"
+                q: "¿Quién fue el vocalista principal de Soda Stereo?",
+                a: "Charly García", b: "Gustavo Cerati", c: "Fito Páez", d: "Andrés Calamaro",
+                ans: "B) Gustavo Cerati"
             },
             {
-                q: "¿En qué década se lanzó originalmente el icónico éxito mundial 'Bohemian Rhapsody' de Queen?",
-                a: "Década de los 60s", b: "Década de los 70s (1975)", c: "Década de los 80s",
-                ans: "B) Década de los 70s (1975)"
+                q: "¿De qué país es originaria la banda Café Tacvba?",
+                a: "Argentina", b: "Chile", c: "México", d: "Colombia",
+                ans: "C) México"
             },
             {
-                q: "¿Qué mítica banda argentina de rock latino lideró el compositor y vocalista Gustavo Cerati?",
-                a: "Enanitos Verdes", b: "Soda Stereo", c: "Los Fabulosos Cadillacs",
-                ans: "B) Soda Stereo"
+                q: "¿Qué banda interpreta la canción 'Lamento Boliviano'?",
+                a: "Enanitos Verdes", b: "Hombres G", c: "Los Prisioneros", d: "Caifanes",
+                ans: "A) Enanitos Verdes"
             },
             {
-                q: "Luis Miguel, uno de los cantautores más importantes de habla hispana, es conocido mundialmente como:",
-                a: "El Sol de México", b: "El Rey del Bolero", c: "El Príncipe de la Canción",
-                ans: "A) El Sol de México"
+                q: "¿Quién canta el clásico 'Tren al sur'?",
+                a: "La Ley", b: "Los Tres", c: "Los Prisioneros", d: "Lucybell",
+                ans: "C) Los Prisioneros"
             },
             {
-                q: "¿Qué famosa artista colombiana interpreta mundialmente los éxitos 'Hips Don't Lie' y 'Waka Waka'?",
-                a: "Karol G", b: "Shakira", c: "Greeicy",
-                ans: "B) Shakira"
+                q: "¿A qué banda argentina pertenece la canción 'Matador'?",
+                a: "Los Auténticos Decadentes", b: "Los Fabulosos Cadillacs", c: "Los Pericos", d: "Bersuit Vergarabat",
+                ans: "B) Los Fabulosos Cadillacs"
             },
             {
-                q: "¿Cuál de estos álbumes del cantante estadounidense Michael Jackson es el disco más vendido de la historia?",
-                a: "Bad", b: "Thriller", c: "Off the Wall",
-                ans: "B) Thriller"
+                q: "¿Qué grupo español canta 'Entre dos tierras'?",
+                a: "Héroes del Silencio", b: "Mecano", c: "La Unión", d: "El Último de la Fila",
+                ans: "A) Héroes del Silencio"
             },
             {
-                q: "¿Qué agrupación mexicana es famosa por temas legendarios como 'Rayando el sol' o 'Clavado en un bar'?",
-                a: "Café Tacvba", b: "Maná", c: "Molotov",
-                ans: "B) Maná"
+                q: "¿Cuál de estos cantantes es considerado el 'padre del rock nacional argentino'?",
+                a: "Luis Alberto Spinetta", b: "Charly García", c: "Pappo", d: "Litto Nebbia",
+                ans: "A) Luis Alberto Spinetta"
             },
             {
-                q: "La canción urbana 'Despacito', que rompió récords históricos en 2017, es cantada por Luis Fonsi junto a:",
-                a: "Daddy Yankee", b: "Don Omar", c: "J Balvin",
-                ans: "A) Daddy Yankee"
+                q: "¿Quién fue el cantante principal de la banda Queen?",
+                a: "David Bowie", b: "Mick Jagger", c: "Freddie Mercury", d: "Robert Plant",
+                ans: "C) Freddie Mercury"
             },
             {
-                q: "¿Quién es considerado de forma unánime a nivel mundial como 'El Rey del Rock and Roll'?",
-                a: "Chuck Berry", b: "Elvis Presley", c: "Freddie Mercury",
-                ans: "B) Elvis Presley"
+                q: "¿Qué banda canta el legendario tema 'Stairway to Heaven'?",
+                a: "The Rolling Stones", b: "Led Zeppelin", c: "The Who", d: "Black Sabbath",
+                ans: "B) Led Zeppelin"
             },
             {
-                q: "¿Qué grupo pop originario de Suecia ganó el festival de Eurovisión en 1974 con 'Waterloo'?",
-                a: "ABBA", b: "Roxette", c: "Ace of Base",
-                ans: "A) ABBA"
+                q: "¿Cuál fue el álbum más vendido de Pink Floyd?",
+                a: "The Wall", b: "Animals", c: "The Dark Side of the Moon", d: "Wish You Were Here",
+                ans: "C) The Dark Side of the Moon"
+            },
+            {
+                q: "¿A qué músico se le conoce como 'The Boss' (El Jefe)?",
+                a: "Bruce Springsteen", b: "Bob Dylan", c: "Eric Clapton", d: "Tom Petty",
+                ans: "A) Bruce Springsteen"
+            },
+            {
+                q: "¿A qué banda de grunge pertenece 'Smells Like Teen Spirit'?",
+                a: "Pearl Jam", b: "Nirvana", c: "Soundgarden", d: "Alice in Chains",
+                ans: "B) Nirvana"
+            },
+            {
+                q: "¿Qué grupo canta 'Hotel California'?",
+                a: "The Doors", b: "The Eagles", c: "Fleetwood Mac", d: "The Byrds",
+                ans: "B) The Eagles"
+            },
+            {
+                q: "¿Cuál de estos músicos fue miembro de The Beatles?",
+                a: "Eric Clapton", b: "Elton John", c: "George Harrison", d: "Mick Jagger",
+                ans: "C) George Harrison"
+            },
+            {
+                q: "¿Quién es conocida mundialmente como la 'Reina del Pop'?",
+                a: "Britney Spears", b: "Madonna", c: "Lady Gaga", d: "Christina Aguilera",
+                ans: "B) Madonna"
+            },
+            {
+                q: "¿Qué artista lanzó el exitoso álbum 'Thriller'?",
+                a: "Prince", b: "Stevie Wonder", c: "Michael Jackson", d: "Lionel Richie",
+                ans: "C) Michael Jackson"
+            },
+            {
+                q: "¿De qué país es originaria Shakira?",
+                a: "Colombia", b: "Puerto Rico", c: "España", d: "México",
+                ans: "A) Colombia"
+            },
+            {
+                q: "¿Quién interpreta la exitosa canción 'Toxic'?",
+                a: "Christina Aguilera", b: "Britney Spears", c: "Avril Lavigne", d: "Gwen Stefani",
+                ans: "B) Britney Spears"
+            },
+            {
+                q: "¿Qué cantante pop lanzó el álbum '1989'?",
+                a: "Taylor Swift", b: "Katy Perry", c: "Ariana Grande", d: "Miley Cyrus",
+                ans: "A) Taylor Swift"
+            },
+            {
+                q: "¿Qué famoso grupo femenino británico canta 'Wannabe'?",
+                a: "TLC", b: "Destiny's Child", c: "Spice Girls", d: "Pussycat Dolls",
+                ans: "C) Spice Girls"
+            },
+            {
+                q: "¿Quién interpreta el hit mundial 'Shape of You'?",
+                a: "Justin Bieber", b: "Ed Sheeran", c: "Shawn Mendes", d: "Bruno Mars",
+                ans: "B) Ed Sheeran"
+            },
+            {
+                q: "¿Quién es considerado el 'Big Boss' del reguetón?",
+                a: "Don Omar", b: "Daddy Yankee", c: "Tego Calderón", d: "Wisin",
+                ans: "B) Daddy Yankee"
+            },
+            {
+                q: "¿Qué artista puertorriqueño canta 'Safaera'?",
+                a: "Bad Bunny", b: "J Balvin", c: "Ozuna", d: "Anuel AA",
+                ans: "A) Bad Bunny"
+            },
+            {
+                q: "¿Con quién canta Luis Fonsi el éxito 'Despacito'?",
+                a: "Nicky Jam", b: "Maluma", c: "Daddy Yankee", d: "Ricky Martin",
+                ans: "C) Daddy Yankee"
+            },
+            {
+                q: "¿Qué cantante femenina es conocida popularmente como 'La Bichota'?",
+                a: "Becky G", b: "Karol G", c: "Natti Natasha", d: "Rosalía",
+                ans: "B) Karol G"
+            },
+            {
+                q: "¿De qué país es originario el reguetonero J Balvin?",
+                a: "Colombia", b: "Puerto Rico", c: "Venezuela", d: "República Dominicana",
+                ans: "A) Colombia"
+            },
+            {
+                q: "¿Qué icónico dúo canta 'Atrévete-te-te'?",
+                a: "Wisin & Yandel", b: "Calle 13", c: "Zion & Lennox", d: "Plan B",
+                ans: "B) Calle 13"
+            },
+            {
+                q: "¿Quién interpreta 'Danza Kuduro' junto a Lucenzo?",
+                a: "Don Omar", b: "Daddy Yankee", c: "Pitbull", d: "Yandel",
+                ans: "A) Don Omar"
+            },
+            {
+                q: "¿Quién es el intérprete de la icónica balada 'El Triste'?",
+                a: "Juan Gabriel", b: "Luis Miguel", c: "José José", d: "Camilo Sesto",
+                ans: "C) José José"
+            },
+            {
+                q: "¿Qué cantante español interpreta 'Corazón Partío'?",
+                a: "Alejandro Sanz", b: "Julio Iglesias", c: "Miguel Bosé", d: "Raphael",
+                ans: "A) Alejandro Sanz"
+            },
+            {
+                q: "¿A qué cantante se le conoce como el 'Sol de México'?",
+                a: "Vicente Fernández", b: "Cristian Castro", c: "Luis Miguel", d: "Alejandro Fernández",
+                ans: "C) Luis Miguel"
+            },
+            {
+                q: "¿Qué artista interpreta el éxito romántico 'Querida'?",
+                a: "Marco Antonio Solís", b: "Juan Gabriel", c: "Raphael", d: "Emmanuel",
+                ans: "B) Juan Gabriel"
+            },
+            {
+                q: "¿Quién interpreta 'My Heart Will Go On', tema de Titanic?",
+                a: "Céline Dion", b: "Whitney Houston", c: "Mariah Carey", d: "Barbra Streisand",
+                ans: "A) Céline Dion"
+            },
+            {
+                q: "¿Qué baladista italiano canta 'La cosa más bella'?",
+                a: "Andrea Bocelli", b: "Laura Pausini", c: "Eros Ramazzotti", d: "Tiziano Ferro",
+                ans: "C) Eros Ramazzotti"
+            },
+            {
+                q: "¿Quién popularizó mundialmente la balada 'I Will Always Love You' en los 90?",
+                a: "Aretha Franklin", b: "Whitney Houston", c: "Diana Ross", d: "Tina Turner",
+                ans: "B) Whitney Houston"
+            },
+            {
+                q: "¿De qué país es originaria la banda de rock U2?",
+                a: "Inglaterra", b: "Irlanda", c: "Escocia", d: "Gales",
+                ans: "B) Irlanda"
+            },
+            {
+                q: "¿Qué banda toca la famosa canción 'Yellow Submarine'?",
+                a: "The Beatles", b: "The Beach Boys", c: "The Kinks", d: "The Rolling Stones",
+                ans: "A) The Beatles"
+            },
+            {
+                q: "¿Qué banda es conocida por el himno 'Don't Stop Believin''?",
+                a: "Queen", b: "Journey", c: "Aerosmith", d: "Bon Jovi",
+                ans: "B) Journey"
+            },
+            {
+                q: "¿Qué grupo británico canta el clásico 'Wonderwall'?",
+                a: "Blur", b: "Radiohead", c: "Oasis", d: "Coldplay",
+                ans: "C) Oasis"
+            },
+            {
+                q: "¿Cuál de estas famosas bandas pertenece al género K-Pop?",
+                a: "BTS", b: "One Direction", c: "Jonas Brothers", d: "5 Seconds of Summer",
+                ans: "A) BTS"
+            },
+            {
+                q: "¿Qué exitosa banda interpreta la canción 'Viva la Vida'?",
+                a: "Maroon 5", b: "Imagine Dragons", c: "Coldplay", d: "U2",
+                ans: "C) Coldplay"
+            },
+            {
+                q: "¿Qué banda de hard rock toca 'Sweet Child O' Mine'?",
+                a: "Mötley Crüe", b: "Guns N' Roses", c: "AC/DC", d: "Metallica",
+                ans: "B) Guns N' Roses"
+            },
+            {
+                q: "¿Quién cantó el éxito 'Rehab'?",
+                a: "Adele", b: "Amy Winehouse", c: "Duffy", d: "Joss Stone",
+                ans: "B) Amy Winehouse"
+            },
+            {
+                q: "¿Qué artista es mundialmente conocido por 'Purple Rain'?",
+                a: "Prince", b: "Lenny Kravitz", c: "Michael Jackson", d: "Lionel Richie",
+                ans: "A) Prince"
+            },
+            {
+                q: "¿Quién es el intérprete principal del hit 'Uptown Funk'?",
+                a: "The Weeknd", b: "Justin Timberlake", c: "Bruno Mars", d: "Pharrell Williams",
+                ans: "C) Bruno Mars"
+            },
+            {
+                q: "¿Qué solista británica canta 'Rolling in the Deep'?",
+                a: "Florence Welch", b: "Sia", c: "Adele", d: "Sam Smith",
+                ans: "C) Adele"
+            },
+            {
+                q: "¿Quién canta la exitosa canción retro 'Blinding Lights'?",
+                a: "Post Malone", b: "The Weeknd", c: "Harry Styles", d: "Drake",
+                ans: "B) The Weeknd"
+            },
+            {
+                q: "¿Quién es la cantante e intérprete de 'Single Ladies'?",
+                a: "Rihanna", b: "Beyoncé", c: "Alicia Keys", d: "Ciara",
+                ans: "B) Beyoncé"
+            },
+            {
+                q: "¿Qué legendario solista cantaba 'Space Oddity'?",
+                a: "David Bowie", b: "Elton John", c: "Lou Reed", d: "Iggy Pop",
+                ans: "A) David Bowie"
+            },
+            {
+                q: "¿Qué solista pop canta 'Watermelon Sugar'?",
+                a: "Shawn Mendes", b: "Charlie Puth", c: "Harry Styles", d: "Justin Bieber",
+                ans: "C) Harry Styles"
             }
         ];
 
         // Plantillas de subastas y negociaciones (¡Quién da más!)
         const pujas = [
             {
-                title: "🔥 ¡QUIÉN DA MÁS! - ESTILO POP",
-                icon: "🎸",
-                desc: "Estilo musical de carretera: <strong style='color:var(--accent-gold);'>POP / DANCE</strong>.<br><br>Quien sacó la carta elige a su contrincante y propone cuántos artistas o bandas de este estilo puede nombrar en 15 segundos. Su contrincante debe superar el número o desafiarlo. Se puja en la mesa. Quien se quede con la puja más alta debe cumplirlos. Gana quien cumpla la regla (avanza 2 espacios), o el desafiante si el otro falla (el perdedor retrocede 1 espacio)."
+                title: "🔥 ¡QUIÉN DA MÁS! - POP & DANCE",
+                icon: "🕺",
+                desc: "Estilo de música: <strong style='color:var(--accent-gold);'>POP & DANCE</strong>.<br><br>El participante activo elige un contrincante de la mesa. El Manager propone este estilo.<br><br>El participante debe proponer cuántas bandas o artistas de Pop/Dance puede nombrar sin repetir. El contrincante puede aceptar o desafiarlo con un número mayor. Se pujan números mayores en la mesa por turnos hasta que uno decida dejar cantar al otro con la última oferta.<br><br><strong>🏆 GANADOR:</strong> Quien cumpla el reto de forma exitosa avanza <strong>2 espacios</strong>; el perdedor retrocede <strong>1 espacio</strong> en el tablero."
             },
             {
-                title: "🔥 ¡QUIÉN DA MÁS! - ESTILO ROCK / METAL",
+                title: "🔥 ¡QUIÉN DA MÁS! - ROCK & METAL",
                 icon: "⚡",
-                desc: "Estilo musical de carretera: <strong style='color:var(--accent-gold);'>ROCK / METAL</strong>.<br><br>Quien sacó la carta elige a su contrincante y propone cuántos artistas o bandas de este estilo puede nombrar en 15 segundos. Su contrincante debe superar el número o desafiarlo. Se puja en la mesa. Quien se quede con la puja más alta debe cumplirlos. Gana quien cumpla la regla (avanza 2 espacios), o el desafiante si el otro falla (el perdedor retrocede 1 espacio)."
+                desc: "Estilo de música: <strong style='color:var(--accent-gold);'>ROCK & METAL</strong>.<br><br>El participante activo elige un contrincante de la mesa. El Manager propone este estilo.<br><br>El participante debe proponer cuántas bandas o artistas de Rock/Metal puede nombrar sin repetir. El contrincante puede aceptar o desafiarlo con un número mayor. Se pujan números mayores en la mesa por turnos hasta que uno decida dejar cantar al otro con la última oferta.<br><br><strong>🏆 GANADOR:</strong> Quien cumpla el reto de forma exitosa avanza <strong>2 espacios</strong>; el perdedor retrocede <strong>1 espacio</strong> en el tablero."
             },
             {
-                title: "🔥 ¡QUIÉN DA MÁS! - MÚSICA URBANA",
+                title: "🔥 ¡QUIÉN DA MÁS! - MÚSICA URBANA & REGGAETON",
                 icon: "🎤",
-                desc: "Estilo musical de carretera: <strong style='color:var(--accent-gold);'>MÚSICA URBANA / REGGAETON</strong>.<br><br>Quien sacó la carta elige a su contrincante y propone cuántos artistas o bandas de este estilo puede nombrar en 15 segundos. Su contrincante debe superar el número o desafiarlo. Se puja en la mesa. Quien se quede con la puja más alta debe cumplirlos. Gana quien cumpla la regla (avanza 2 espacios), o el desafiante si el otro falla (el perdedor retrocede 1 espacio)."
+                desc: "Estilo de música: <strong style='color:var(--accent-gold);'>URBANO & REGGAETON</strong>.<br><br>El participante activo elige un contrincante de la mesa. El Manager propone este estilo.<br><br>El participante debe proponer cuántas bandas o artistas de Música Urbana/Reggaeton puede nombrar sin repetir. El contrincante puede aceptar o desafiarlo con un número mayor. Se pujan números mayores en la mesa por turnos hasta que uno decida dejar cantar al otro con la última oferta.<br><br><strong>🏆 GANADOR:</strong> Quien cumpla el reto de forma exitosa avanza <strong>2 espacios</strong>; el perdedor retrocede <strong>1 espacio</strong> en el tablero."
             },
             {
-                title: "🔥 ¡QUIÉN DA MÁS! - ROMÁNTICO / BALADAS",
+                title: "🔥 ¡QUIÉN DA MÁS! - ROMÁNTICOS & BALADAS",
                 icon: "💖",
-                desc: "Estilo musical de carretera: <strong style='color:var(--accent-gold);'>MÚSICA ROMÁNTICA / BALADAS</strong>.<br><br>Quien sacó la carta elige a su contrincante y propone cuántos artistas o bandas de este estilo puede nombrar en 15 segundos. Su contrincante debe superar el número o desafiarlo. Se puja en la mesa. Quien se quede con la puja más alta debe cumplirlos. Gana quien cumpla la regla (avanza 2 espacios), o el desafiante si el otro falla (el perdedor retrocede 1 espacio)."
+                desc: "Estilo de música: <strong style='color:var(--accent-gold);'>ROMÁNTICOS & BALADAS</strong>.<br><br>El participante activo elige un contrincante de la mesa. El Manager propone este estilo.<br><br>El participante debe proponer cuántas bandas o artistas Románticos/Baladas puede nombrar sin repetir. El contrincante puede aceptar o desafiarlo con un número mayor. Se pujan números mayores en la mesa por turnos hasta que uno decida dejar cantar al otro con la última oferta.<br><br><strong>🏆 GANADOR:</strong> Quien cumpla el reto de forma exitosa avanza <strong>2 espacios</strong>; el perdedor retrocede <strong>1 espacio</strong> en el tablero."
+            },
+            {
+                title: "🔥 ¡QUIÉN DA MÁS! - GRANDES CLÁSICOS (80s y 90s)",
+                icon: "📻",
+                desc: "Estilo de música: <strong style='color:var(--accent-gold);'>GRANDES CLÁSICOS (80s y 90s)</strong>.<br><br>El participante activo elige un contrincante de la mesa. El Manager propone este estilo.<br><br>El participante debe proponer cuántas bandas o artistas de los 80s o 90s puede nombrar sin repetir. El contrincante puede aceptar o desafiarlo con un número mayor. Se pujan números mayores en la mesa por turnos hasta que uno decida dejar cantar al otro con la última oferta.<br><br><strong>🏆 GANADOR:</strong> Quien cumpla el reto de forma exitosa avanza <strong>2 espacios</strong>; el perdedor retrocede <strong>1 espacio</strong> en el tablero."
+            },
+            {
+                title: "🔥 ¡QUIÉN DA MÁS! - MÚSICA EN ESPAÑOL",
+                icon: "🔥",
+                desc: "Estilo de música: <strong style='color:var(--accent-gold);'>MÚSICA EN ESPAÑOL (LATINA)</strong>.<br><br>El participante activo elige un contrincante de la mesa. El Manager propone este estilo.<br><br>El participante debe proponer cuántas bandas o artistas latinos en español puede nombrar sin repetir. El contrincante puede aceptar o desafiarlo con un número mayor. Se pujan números mayores en la mesa por turnos hasta que uno decida dejar cantar al otro con la última oferta.<br><br><strong>🏆 GANADOR:</strong> Quien cumpla el reto de forma exitosa avanza <strong>2 espacios</strong>; el perdedor retrocede <strong>1 espacio</strong> en el tablero."
             }
         ];
 
@@ -4894,21 +5106,21 @@
                         data: track
                     });
                 } else if (rand < 0.88) {
-                    // QR+ Racha
+                    // QR+ Racha (8%)
                     tempDeck.push({
                         type: "song",
                         subtype: "racha",
                         data: track
                     });
                 } else if (rand < 0.95) {
-                    // Desafío Tararea
+                    // Desafío Tararea (7%)
                     tempDeck.push({
                         type: "song",
                         subtype: "tararea",
                         data: track
                     });
                 } else {
-                    // Desafío Continúa
+                    // Desafío Continúa (5%)
                     tempDeck.push({
                         type: "song",
                         subtype: "continua",
@@ -4917,35 +5129,67 @@
                 }
             });
 
-            // 2. Agregar desafíos puros (sin código QR) distribuidos uniformemente
+            // 2. Inicializar pools barajadas para evitar repeticiones de desafíos puros
+            let poolPalabras = [...palabrasMagicas];
+            let poolTrivias = [...trivias];
+            let poolPujas = [...pujas];
+
+            function shufflePool(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+            }
+
+            shufflePool(poolPalabras);
+            shufflePool(poolTrivias);
+            shufflePool(poolPujas);
+
+            let idxPalabra = 0;
+            let idxTrivia = 0;
+            let idxPuja = 0;
+
+            // 3. Agregar desafíos puros (sin código QR) distribuidos uniformemente
             const numPureChallenges = Math.max(10, Math.floor(baseTracks.length * 0.12));
             for (let i = 0; i < numPureChallenges; i++) {
                 const randType = Math.random();
-                if (randType < 0.30) {
-                    const word = palabrasMagicas[Math.floor(Math.random() * palabrasMagicas.length)];
+                if (randType < 0.25) { // 25% Palabra Mágica
+                    if (idxPalabra >= poolPalabras.length) {
+                        shufflePool(poolPalabras);
+                        idxPalabra = 0;
+                    }
+                    const word = poolPalabras[idxPalabra++];
                     tempDeck.push({
                         type: "challenge_pure",
                         subtype: "palabra_magica",
                         data: {
                             icon: "✨",
                             title: "PALABRA MÁGICA",
-                            desc: `¡Duelo de Bandas! La palabra elegida en carretera es: <strong style="color:var(--accent-gold); font-size:1.3rem;">${word}</strong>.<br><br>Quien sacó la carta elige a su contendor y parte cantando un fragmento de canción real que la contenga. Se van turnando en la mesa. ¡El ganador de la racha avanza <strong>2 espacios</strong> y el perdedor retrocede <strong>1 espacio</strong>!`
+                            desc: `¡Duelo de Bandas! La palabra elegida en carretera es: <strong style="color:var(--accent-gold); font-size:1.3rem;">\${word}</strong>.<br><br>Quien sacó la carta elige a su contendor de la mesa y parte cantando un fragmento de canción real que la contenga. Se van turnando en la mesa. ¡El ganador de la racha avanza <strong>2 espacios</strong> y el perdedor retrocede <strong>1 espacio</strong> en el tablero de inmediato!`
                         }
                     });
-                } else if (randType < 0.80) {
-                    const trivia = trivias[Math.floor(Math.random() * trivias.length)];
+                } else if (randType < 0.85) { // 60% Trivia de Carretera (Aumentado 10%, antes era de 0.30 a 0.80 = 50%)
+                    if (idxTrivia >= poolTrivias.length) {
+                        shufflePool(poolTrivias);
+                        idxTrivia = 0;
+                    }
+                    const trivia = poolTrivias[idxTrivia++];
                     tempDeck.push({
                         type: "challenge_pure",
                         subtype: "trivia",
                         data: {
                             icon: "🧠",
-                            title: "TRIVIA DE CARRETERA",
-                            desc: `<strong>PREGUNTA:</strong> ${trivia.q}<br><br><strong>A)</strong> ${trivia.a}<br><strong>B)</strong> ${trivia.b}<br><strong>C)</strong> ${trivia.c}<br><br><span style="color:var(--accent-gold); font-weight:bold;">🏆 REGLA: ¡Si acierta avanza 1 espacio, si falla no avanza!</span>`,
+                            title: `TRIVIA DE CARRETERA [\${trivia.diff}]`,
+                            desc: `<strong>PREGUNTA:</strong> \${trivia.q}<br><br><strong>A)</strong> \${trivia.a}<br><strong>B)</strong> \${trivia.b}<br><strong>C)</strong> \${trivia.c}<br><strong>D)</strong> \${trivia.d}<br><br><span style="color:var(--accent-gold); font-weight:bold;">🏆 REGLA: ¡Si acierta avanza 1 espacio, si falla no avanza!</span>`,
                             answer: trivia.ans
                         }
                     });
-                } else {
-                    const puja = pujas[Math.floor(Math.random() * pujas.length)];
+                } else { // 15% Pujas / Quién da más
+                    if (idxPuja >= poolPujas.length) {
+                        shufflePool(poolPujas);
+                        idxPuja = 0;
+                    }
+                    const puja = poolPujas[idxPuja++];
                     tempDeck.push({
                         type: "challenge_pure",
                         subtype: "puja",
