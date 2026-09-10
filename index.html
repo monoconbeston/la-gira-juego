@@ -5189,16 +5189,20 @@
                 [shuffledTracks[i], shuffledTracks[j]] = [shuffledTracks[j], shuffledTracks[i]];
             }
 
-            shuffledTracks.forEach(track => {
-                const rand = Math.random();
-                if (rand < 0.65) {
-                    tempDeck.push({ type: "song", subtype: "normal", data: track });
-                } else if (rand < 0.75) {
+            shuffledTracks.forEach((track, idx) => {
+                // 20% garantizado de canciones son QR+ (1 de cada 5 canciones)
+                const isQRPlus = (idx % 5 === 2);
+                if (isQRPlus) {
                     tempDeck.push({ type: "song", subtype: "qrplus", data: track });
-                } else if (rand < 0.95) {
-                    tempDeck.push({ type: "challenge_pure", subtype: "desafio_rutinario", data: track });
                 } else {
-                    tempDeck.push({ type: "challenge_pure", subtype: "reversa", data: { title: "CARTA REVERSA", desc: "¡Desperfecto mecánico! Retrocede 3 espacios." } });
+                    const rand = Math.random();
+                    if (rand < 0.75) {
+                        tempDeck.push({ type: "song", subtype: "normal", data: track });
+                    } else if (rand < 0.93) {
+                        tempDeck.push({ type: "challenge_pure", subtype: "desafio_rutinario", data: track });
+                    } else {
+                        tempDeck.push({ type: "challenge_pure", subtype: "reversa", data: { title: "CARTA REVERSA", desc: "¡Desperfecto mecánico! Retrocede 3 espacios." } });
+                    }
                 }
             });
 
@@ -5310,13 +5314,16 @@
 
                 const songId = currentItem.data.id;
                 const targetUrl = window.location.href.split('?')[0].split('#')[0] + "?id=" + songId;
+                const instructionText = isQRPlus 
+                    ? "✨ ¡BONO CARTA QR+! Escanea para reproducir. ¡Si aciertas ganas +1 PT EXTRA!"
+                    : "Apunta con el lector QR para reproducir en Spotify";
                 
                 cardBody.innerHTML = `
                     <div class="qr-image-container">
                         <img id="qr-img-element" src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(targetUrl)}" alt="QR Song">
                     </div>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">
-                        Apunta con el lector QR para reproducir en Spotify
+                    <p style="color: ${isQRPlus ? 'var(--accent-gold)' : 'var(--text-muted)'}; font-size: 0.82rem; font-weight: ${isQRPlus ? '800' : 'normal'}; margin-top: 8px;">
+                        ${instructionText}
                     </p>
                 `;
 
@@ -5330,7 +5337,7 @@
                 cardBody.innerHTML = `
                     <div class="reversa-icon">🔄</div>
                     <div class="reversa-title">¡DESPERFECTO EN RUTA!</div>
-                    <div class="reversa-desc">La correa de distribución de tu Tour Bus se ha roto. Retrocede <strong>3 espacios</strong> de inmediato.</div>
+                    <div class="reversa-desc">La correa de distribución de tu Bus de Gira se ha roto. Retrocede <strong>3 espacios</strong> de inmediato.</div>
                 `;
             } else {
                 mainCard.classList.add("active-desafio");
@@ -5482,24 +5489,63 @@
                     </p>
                 `;
             } else if (cat === 'continua') {
+                const track = baseTracks[Math.floor(Math.random() * baseTracks.length)];
+                const targetUrl = window.location.href.split('?')[0].split('#')[0] + "?id=" + (track ? track.id : '1');
+                const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(targetUrl);
+                
                 html = `
-                    <div style="font-size: 2.5rem; margin-bottom: 5px;">⏸️</div>
-                    <div class="modal-title">CONTINÚA LA CANCIÓN</div>
-                    <p style="font-size: 0.85rem; color: #fff; margin-bottom: 10px;">
-                        El Manager pausará la canción en mitad del coro.
+                    <div style="font-size: 2.2rem; margin-bottom: 2px;">⏸️</div>
+                    <div class="modal-title" style="color: var(--accent-green);">CONTINÚA LA CANCIÓN</div>
+                    <p style="font-size: 0.8rem; color: #fff; margin-bottom: 8px;">
+                        El Manager escanea este código QR con la cámara para sonar la canción en Spotify. ¡Pausa a mitad del coro y el jugador debe cantar durante 5 segundos!
                     </p>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
-                        ¡Quien sacó la carta debe seguir cantando la letra exacta durante <strong>5 segundos</strong>! Si lo logra avanza <strong>1 espacio</strong>.
+                    
+                    <div style="background: #ffffff; padding: 10px; border-radius: 16px; display: inline-block; margin: 8px 0; border: 3px solid var(--accent-green); box-shadow: 0 0 15px rgba(0,245,212,0.3);">
+                        <img src="${qrSrc}" alt="QR Continúa" style="width: 160px; height: 160px; display: block;">
+                    </div>
+                    <p style="font-size: 0.72rem; color: var(--accent-neon-blue); font-weight: 800; margin-top: 2px; margin-bottom: 8px;">
+                        📱 Escanea el QR para escuchar la canción
                     </p>
+
+                    <button class="btn" style="background: rgba(0,245,212,0.15); color: var(--accent-green); border: 1px solid var(--accent-green); margin: 6px 0;" onclick="document.getElementById('resp-continua').style.display='block'">
+                        👁️ VER CANCIÓN OCULTA
+                    </button>
+
+                    <div id="resp-continua" style="display: none; background: rgba(0,245,212,0.1); border: 1px solid var(--accent-green); padding: 10px; border-radius: 12px; margin-top: 6px; text-align: center;">
+                        <div style="font-size: 0.95rem; font-weight: 900; color: #ffffff;">${track ? track.name : ''}</div>
+                        <div style="font-size: 0.85rem; color: var(--accent-green); font-weight: 800;">${track ? track.artist : ''} (${track ? track.year : ''})</div>
+                    </div>
                 `;
             } else if (cat === 'tararea') {
+                const track = baseTracks[Math.floor(Math.random() * baseTracks.length)];
+                const targetUrl = window.location.href.split('?')[0].split('#')[0] + "?id=" + (track ? track.id : '1');
+                const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(targetUrl);
+
                 html = `
-                    <div style="font-size: 2.5rem; margin-bottom: 5px;">🗣️</div>
-                    <div class="modal-title">DESAFÍO TARAREA</div>
-                    <p style="font-size: 0.85rem; color: #fff;">Escucha el tema con audífonos y tararea la melodía.</p>
-                    <div class="timer-display" id="timer-num">20</div>
-                    <button class="btn" style="background: var(--accent-gold); color: #000; margin-bottom: 10px;" onclick="iniciarConteo(20)">⏱️ INICIAR 20s</button>
-                    <p style="font-size: 0.8rem; color: var(--text-muted);">Tu equipo tiene 20 segundos para adivinar el Nombre o Artista.</p>
+                    <div style="font-size: 2.2rem; margin-bottom: 2px;">🗣️</div>
+                    <div class="modal-title" style="color: var(--accent-gold);">DESAFÍO TARAREA</div>
+                    <p style="font-size: 0.8rem; color: #fff; margin-bottom: 8px;">
+                        Escanea discretamente este código QR para escuchar la canción en secreto y tararear la melodía:
+                    </p>
+
+                    <div style="background: #ffffff; padding: 10px; border-radius: 16px; display: inline-block; margin: 8px 0; border: 3px solid var(--accent-gold); box-shadow: 0 0 15px rgba(255,183,3,0.3);">
+                        <img src="${qrSrc}" alt="QR Tararea" style="width: 160px; height: 160px; display: block;">
+                    </div>
+                    <p style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; margin-top: 2px; margin-bottom: 8px;">
+                        🎧 Escanea en secreto para escuchar y tararear
+                    </p>
+
+                    <div class="timer-display" id="timer-num" style="margin: 6px auto 4px auto;">20</div>
+                    <button class="btn" style="background: var(--accent-gold); color: #000; margin-bottom: 8px; font-weight: 900;" onclick="iniciarConteo(20)">⏱️ INICIAR 20s</button>
+                    
+                    <button class="btn" style="background: rgba(255,183,3,0.15); color: var(--accent-gold); border: 1px solid var(--accent-gold); margin-bottom: 6px;" onclick="document.getElementById('resp-tararea').style.display='block'">
+                        👁️ VER RESPUESTA
+                    </button>
+
+                    <div id="resp-tararea" style="display: none; background: rgba(255,183,3,0.1); border: 1px solid var(--accent-gold); padding: 10px; border-radius: 12px; margin-top: 6px; text-align: center;">
+                        <div style="font-size: 0.95rem; font-weight: 900; color: #ffffff;">${track ? track.name : ''}</div>
+                        <div style="font-size: 0.85rem; color: var(--accent-gold); font-weight: 800;">${track ? track.artist : ''} (${track ? track.year : ''})</div>
+                    </div>
                 `;
             } else if (cat === 'trivia') {
                 const t = trivias[Math.floor(Math.random() * trivias.length)];
