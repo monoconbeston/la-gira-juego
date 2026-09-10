@@ -5189,24 +5189,43 @@
                 [shuffledTracks[i], shuffledTracks[j]] = [shuffledTracks[j], shuffledTracks[i]];
             }
 
-            shuffledTracks.forEach((track, idx) => {
-                // 20% garantizado de canciones son QR+ (1 de cada 5 canciones)
-                const isQRPlus = (idx % 5 === 2);
-                if (isQRPlus) {
-                    tempDeck.push({ type: "song", subtype: "qrplus", data: track });
+            shuffledTracks.forEach((track) => {
+                const rand = Math.random();
+                if (rand < 0.85) {
+                    // Canción con QR (85% del mazo total)
+                    const isQRPlus = Math.random() < 0.12; // EXACTAMENTE 12% de probabilidad QR+
+                    tempDeck.push({
+                        type: "song",
+                        subtype: isQRPlus ? "qrplus" : "normal",
+                        data: track
+                    });
                 } else {
-                    const rand = Math.random();
-                    if (rand < 0.75) {
-                        tempDeck.push({ type: "song", subtype: "normal", data: track });
-                    } else if (rand < 0.93) {
-                        tempDeck.push({ type: "challenge_pure", subtype: "desafio_rutinario", data: track });
-                    } else {
-                        tempDeck.push({ type: "challenge_pure", subtype: "reversa", data: { title: "CARTA REVERSA", desc: "¡Desperfecto mecánico! Retrocede 3 espacios." } });
-                    }
+                    // Carta Desafío rutinario (15% del mazo total)
+                    tempDeck.push({
+                        type: "challenge_pure",
+                        subtype: "desafio_rutinario",
+                        data: track
+                    });
                 }
             });
 
-            // Garantizar que las primeras 4 cartas sean canciones con QR
+            // Agregar EXACTAMENTE UNA Carta Reversa (Desperfecto en Ruta) por partida
+            tempDeck.push({
+                type: "challenge_pure",
+                subtype: "reversa",
+                data: {
+                    title: "CARTA REVERSA",
+                    desc: "¡Desperfecto mecánico en ruta! La correa de distribución de tu Bus de Gira se ha roto. Retrocede <strong>3 espacios</strong> de inmediato."
+                }
+            });
+
+            // Mezclar mazo completo final (Fisher-Yates) para distribuir la Carta Reversa aleatoriamente
+            for (let i = tempDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tempDeck[i], tempDeck[j]] = [tempDeck[j], tempDeck[i]];
+            }
+
+            // Garantizar que las primeras 4 cartas sean canciones con QR (type === "song") y nunca desafíos ni Reversa
             let songCount = 0;
             for (let i = 0; i < tempDeck.length; i++) {
                 if (tempDeck[i].type === "song") {
