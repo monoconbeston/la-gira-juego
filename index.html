@@ -823,20 +823,23 @@
 
     <!-- MODAL 3: HEADLINER (7 PTS) -->
     <div class="modal-overlay" id="modal-headliner">
-        <div class="modal-content">
-            <div class="modal-title">👑 PRUEBA FINAL: HEADLINER</div>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-                Para consagrarte como el Headliner de La Gira, debes sumar al menos <strong>7 de 9 puntos</strong> acumulados en 3 canciones consecutivas.
+        <div class="modal-content" style="max-width: 410px; position: relative;">
+            <div id="headliner-dynamic-content"></div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CONFIRMAR SALIDA DE HEADLINER -->
+    <div class="modal-overlay" id="modal-headliner-confirm-exit" style="z-index: 1000;">
+        <div class="modal-content" style="max-width: 360px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 5px;">⚠️</div>
+            <div class="modal-title" style="color: var(--accent-orange); font-size: 1.1rem;">HEADLINER ESTÁ EN CURSO</div>
+            <p style="font-size: 0.82rem; color: #fff; line-height: 1.4; margin: 12px 0;">
+                Si sales ahora, la prueba final se cancelará y perderás el progreso de este intento.
             </p>
-
-            <div id="headliner-songs-list" style="text-align: left; margin-bottom: 15px;"></div>
-
-            <div style="background: rgba(255,183,3,0.1); border: 1px solid var(--accent-gold); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
-                PUNTAJE TOTAL: <span id="headliner-total-pts" style="font-size: 1.4rem; font-weight: 900; color: var(--accent-gold);">0</span> / 9 PTS
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                <button class="btn" style="background: var(--accent-purple); color: #fff;" onclick="cerrarConfirmarSalidaHeadliner()">▶️ CONTINUAR HEADLINER</button>
+                <button class="btn btn-secondary" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.4);" onclick="confirmarSalidaHeadliner()">❌ SALIR Y CANCELAR</button>
             </div>
-
-            <button class="btn btn-headliner" onclick="generarCartasHeadliner()" style="margin-bottom: 8px;">🎲 GENERAR 3 CANCIONES</button>
-            <button class="btn btn-secondary" onclick="cerrarModalHeadliner()">VOLVER AL JUEGO</button>
         </div>
     </div>
 
@@ -5107,6 +5110,8 @@
         // INICIALIZACIÓN NAVEGACIÓN
         window.addEventListener('load', () => {
             cargarPartida();
+            cargarHeadlinerState();
+            cargarEstadoDesafios();
 
             const urlParams = new URLSearchParams(window.location.search);
             const songId = urlParams.get('id');
@@ -5276,7 +5281,7 @@
             ruletaBox.style.display = 'flex';
 
             const ruletaTitle = document.getElementById('ruleta-title');
-            const animOptions = ["💽 CANCIÓN", "✨ QR+ BONO", "🔄 REVERSA"];
+            const animOptions = ["💽 CANCIÓN", "🔥 DESAFÍO", "✨ QR+ BONO", "🔄 REVERSA"];
             let step = 0;
             
             const interval = setInterval(() => {
@@ -5284,20 +5289,34 @@
                 step++;
             }, 100);
 
+            // Sorteo principal de una sola decisión aleatoria
+            const eligibleCategories = getEligibleChallengeCategories();
+            const allowChallenge = (eligibleCategories.length > 0);
+            const randOutcome = Math.random();
+
+            // 25% de probabilidad de Desafío si existen categorías con contenido
+            const isChallengeOutcome = allowChallenge && (randOutcome < 0.25);
+
             setTimeout(() => {
                 clearInterval(interval);
-                currentItem = activeDeck.shift();
-                playedHistory.push(currentItem);
-                guardarPartida();
-
                 ruletaBox.style.display = 'none';
                 cardContent.style.display = 'block';
                 isSpinning = false;
-                actualizarInterfazMazo();
+
+                if (isChallengeOutcome) {
+                    // El resultado es DESAFÍO: ¡No se consume ninguna canción de activeDeck ni disminuye el contador!
+                    lanzarDesafioAleatorio();
+                } else {
+                    // El resultado es Canción / QR+ / Reversa de activeDeck
+                    currentItem = activeDeck.shift();
+                    playedHistory.push(currentItem);
+                    guardarPartida();
+                    actualizarInterfazMazo();
+                }
             }, 1200);
         }
 
-        function actualizarInterfazMazo() {
+        function actualizarInterfazMazo()unction actualizarInterfazMazo() {
             document.getElementById('cartas-count').innerText = activeDeck.length;
             const mainCard = document.getElementById('main-card');
             const badge = document.getElementById('card-type-badge');
@@ -5492,88 +5511,303 @@
             if (timerInterval) clearInterval(timerInterval);
         }
 
-        function seleccionarDesafioPorCategoria(cat) {
-            cerrarModalDesafios();
-            const detailContent = document.getElementById('challenge-detail-content');
-            let html = "";
+        // ==============================================================================
+        // SISTEMA DE DESAFÍOS Y NAVEGACIÓN ALEATORIA / MANUAL (MODIFICACIONES 01)
+        // ==============================================================================
+        const challengeCategoryWeights = {
+            palabraMagica: 1,
+            continuaCancion: 1,
+            tararea: 1,
+            trivia: 1,
+            palabrasProhibidas: 1,
+            mentiroso: 1
+        };
 
-            if (cat === 'palabra') {
-                const word = palabrasMagicas[Math.floor(Math.random() * palabrasMagicas.length)];
-                html = `
-                    <div style="font-size: 2.5rem; margin-bottom: 5px;">🎤</div>
-                    <div class="modal-title">PALABRA MÁGICA</div>
+        const categoryMeta = {
+            palabraMagica: { id: 'palabraMagica', name: 'PALABRA MÁGICA', icon: '🎤', color: 'var(--accent-gold)' },
+            continuaCancion: { id: 'continuaCancion', name: 'CONTINÚA LA CANCIÓN', icon: '⏸️', color: 'var(--accent-green)' },
+            tararea: { id: 'tararea', name: 'DESAFÍO TARAREA', icon: '🗣️', color: 'var(--accent-gold)' },
+            trivia: { id: 'trivia', name: 'TRIVIA DE CARRETERA', icon: '❓', color: 'var(--accent-purple)' },
+            palabrasProhibidas: { id: 'palabrasProhibidas', name: 'PALABRAS PROHIBIDAS', icon: '🚫', color: 'var(--accent-pink)' },
+            mentiroso: { id: 'mentiroso', name: 'QUIÉN DA MÁS', icon: '🤥', color: 'var(--accent-orange)' }
+        };
+
+        const categoryAliasMap = {
+            palabra: 'palabraMagica',
+            palabraMagica: 'palabraMagica',
+            continua: 'continuaCancion',
+            continuaCancion: 'continuaCancion',
+            tararea: 'tararea',
+            trivia: 'trivia',
+            prohibidas: 'palabrasProhibidas',
+            palabrasProhibidas: 'palabrasProhibidas',
+            mentiroso: 'mentiroso'
+        };
+
+        let challengeStore = {
+            completed: {},
+            pending: {},
+            lastServedPending: {}
+        };
+
+        function cargarEstadoDesafios() {
+            try {
+                const stored = localStorage.getItem('lagira_challenge_store');
+                if (stored) {
+                    challengeStore = JSON.parse(stored);
+                }
+            } catch(e) {
+                console.warn('Error al cargar estado de desafíos:', e);
+            }
+            if (!challengeStore.completed) challengeStore.completed = {};
+            if (!challengeStore.pending) challengeStore.pending = {};
+            if (!challengeStore.lastServedPending) challengeStore.lastServedPending = {};
+        }
+
+        function guardarEstadoDesafios() {
+            try {
+                localStorage.setItem('lagira_challenge_store', JSON.stringify(challengeStore));
+            } catch(e) {
+                console.warn('Error al guardar estado de desafíos:', e);
+            }
+        }
+
+        function getItemsForCategory(catKey) {
+            const canonicalKey = categoryAliasMap[catKey] || catKey;
+            let items = [];
+
+            if (canonicalKey === 'palabraMagica') {
+                items = palabrasMagicas.map((w, idx) => ({
+                    id: 'pm_' + idx,
+                    type: 'palabraMagica',
+                    word: w
+                }));
+            } else if (canonicalKey === 'continuaCancion') {
+                items = baseTracks.map((t) => ({
+                    id: 'cont_' + t.id,
+                    type: 'continuaCancion',
+                    track: t
+                }));
+            } else if (canonicalKey === 'tararea') {
+                items = baseTracks.map((t) => ({
+                    id: 'tar_' + t.id,
+                    type: 'tararea',
+                    track: t
+                }));
+            } else if (canonicalKey === 'trivia') {
+                items = trivias.map((t, idx) => ({
+                    id: 'triv_' + idx,
+                    type: 'trivia',
+                    trivia: t
+                }));
+            } else if (canonicalKey === 'palabrasProhibidas') {
+                items = baseTracks.map((t) => ({
+                    id: 'proh_' + t.id,
+                    type: 'palabrasProhibidas',
+                    track: t
+                }));
+            } else if (canonicalKey === 'mentiroso') {
+                items = pujas.map((p, idx) => ({
+                    id: 'puja_' + idx,
+                    type: 'mentiroso',
+                    puja: p
+                }));
+            }
+            return items;
+        }
+
+        function getAvailableItemsForCategory(catKey) {
+            const canonicalKey = categoryAliasMap[catKey] || catKey;
+            const allItems = getItemsForCategory(canonicalKey);
+            
+            const uncompleted = allItems.filter(item => !challengeStore.completed[item.id]);
+            const newItems = uncompleted.filter(item => !challengeStore.pending[item.id]);
+            const pendingItems = uncompleted.filter(item => challengeStore.pending[item.id]);
+
+            return { canonicalKey, allItems, uncompleted, newItems, pendingItems };
+        }
+
+        function getEligibleChallengeCategories() {
+            const eligible = [];
+            for (const key in challengeCategoryWeights) {
+                const weight = challengeCategoryWeights[key] || 0;
+                if (weight > 0) {
+                    const { uncompleted } = getAvailableItemsForCategory(key);
+                    if (uncompleted.length > 0) {
+                        eligible.push(key);
+                    }
+                }
+            }
+            return eligible;
+        }
+
+        function selectRandomChallengeCategory() {
+            const eligible = getEligibleChallengeCategories();
+            if (eligible.length === 0) return null;
+
+            let totalWeight = 0;
+            eligible.forEach(key => {
+                totalWeight += (challengeCategoryWeights[key] || 1);
+            });
+
+            let rand = Math.random() * totalWeight;
+            for (let i = 0; i < eligible.length; i++) {
+                const key = eligible[i];
+                const weight = challengeCategoryWeights[key] || 1;
+                if (rand < weight) {
+                    return key;
+                }
+                rand -= weight;
+            }
+            return eligible[0];
+        }
+
+        function selectChallengeFromCategory(catKey) {
+            const { canonicalKey, newItems, pendingItems } = getAvailableItemsForCategory(catKey);
+
+            let chosenItem = null;
+            let isNew = true;
+
+            if (newItems.length > 0) {
+                chosenItem = newItems[Math.floor(Math.random() * newItems.length)];
+                isNew = true;
+            } else if (pendingItems.length > 0) {
+                let pool = pendingItems;
+                const lastServed = challengeStore.lastServedPending[canonicalKey];
+                if (pendingItems.length > 1 && lastServed) {
+                    pool = pendingItems.filter(item => item.id !== lastServed);
+                }
+                chosenItem = pool[Math.floor(Math.random() * pool.length)];
+                isNew = false;
+            }
+
+            if (!chosenItem) return null;
+
+            return {
+                categoryKey: canonicalKey,
+                item: chosenItem,
+                isNew: isNew
+            };
+        }
+
+        function selectRandomChallenge(catKeyInput = null) {
+            let targetCatKey = null;
+
+            if (catKeyInput) {
+                targetCatKey = categoryAliasMap[catKeyInput] || catKeyInput;
+                const { uncompleted } = getAvailableItemsForCategory(targetCatKey);
+                if (uncompleted.length === 0) {
+                    targetCatKey = selectRandomChallengeCategory();
+                }
+            } else {
+                targetCatKey = selectRandomChallengeCategory();
+            }
+
+            if (!targetCatKey) return null;
+
+            return selectChallengeFromCategory(targetCatKey);
+        }
+
+        function registerChallengeResult(catKey, challengeId, result) {
+            const canonicalKey = categoryAliasMap[catKey] || catKey;
+
+            if (result === 'correct') {
+                challengeStore.completed[challengeId] = true;
+                delete challengeStore.pending[challengeId];
+            } else {
+                if (!challengeStore.completed[challengeId]) {
+                    challengeStore.pending[challengeId] = true;
+                }
+                challengeStore.lastServedPending[canonicalKey] = challengeId;
+            }
+            guardarEstadoDesafios();
+        }
+
+        let currentActiveChallenge = null;
+
+        function renderChallengeModal(challengeData, isAutomatic = false) {
+            if (!challengeData) {
+                alert("🎉 ¡NO QUEDAN DESAFÍOS DISPONIBLES EN ESTA CATEGORÍA!");
+                return;
+            }
+
+            currentActiveChallenge = challengeData;
+            const catMeta = categoryMeta[challengeData.categoryKey] || { name: 'DESAFÍO', icon: '🎭', color: 'var(--accent-pink)' };
+            const item = challengeData.item;
+            const detailContent = document.getElementById('challenge-detail-content');
+
+            let titleTag = isAutomatic ? "⚡ DESAFÍO SORPRESA" : "🎯 DESAFÍO SELECCIONADO";
+            let html = `
+                <div style="display:inline-block; background:rgba(255,255,255,0.08); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:900; color:${catMeta.color}; margin-bottom:8px; border:1px solid ${catMeta.color}; letter-spacing:1px;">
+                    ${titleTag}
+                </div>
+                <div style="font-size: 2.2rem; margin-bottom: 2px;">${catMeta.icon}</div>
+                <div class="modal-title" style="color: ${catMeta.color};">${catMeta.name}</div>
+            `;
+
+            if (challengeData.categoryKey === 'palabraMagica') {
+                html += `
                     <p style="font-size: 0.85rem; color: #fff;">La palabra elegida en carretera es:</p>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: var(--accent-gold); margin: 12px 0;">"${word}"</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: var(--accent-gold); margin: 12px 0;">"${item.word}"</div>
                     <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
                         Elige un rival. Por turnos, canten un fragmento de canción real que contenga la palabra. ¡El ganador avanza <strong>2 espacios</strong>!
                     </p>
                 `;
-            } else if (cat === 'continua') {
-                const track = baseTracks[Math.floor(Math.random() * baseTracks.length)];
+            } else if (challengeData.categoryKey === 'continuaCancion') {
+                const track = item.track;
                 const targetUrl = window.location.href.split('?')[0].split('#')[0] + "?id=" + (track ? track.id : '1');
                 const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(targetUrl);
-                
-                html = `
-                    <div style="font-size: 2.2rem; margin-bottom: 2px;">⏸️</div>
-                    <div class="modal-title" style="color: var(--accent-green);">CONTINÚA LA CANCIÓN</div>
+                const coverImgUrl = (track && track.image_url) ? track.image_url : "";
+
+                html += `
                     <p style="font-size: 0.8rem; color: #fff; margin-bottom: 8px;">
-                        El Manager escanea este código QR con la cámara para sonar la canción en Spotify. ¡Pausa a mitad del coro y el jugador debe cantar durante 5 segundos!
+                        El Manager escanea este código QR con la cámara para hacer sonar la canción en Spotify. ¡Pausa a mitad del coro y el jugador debe cantar durante 5 segundos!
                     </p>
-                    
                     <div style="background: #ffffff; padding: 10px; border-radius: 16px; display: inline-block; margin: 8px 0; border: 3px solid var(--accent-green); box-shadow: 0 0 15px rgba(0,245,212,0.3);">
                         <img src="${qrSrc}" alt="QR Continúa" style="width: 160px; height: 160px; display: block;">
                     </div>
                     <p style="font-size: 0.72rem; color: var(--accent-neon-blue); font-weight: 800; margin-top: 2px; margin-bottom: 8px;">
                         📱 Escanea el QR para escuchar la canción
                     </p>
-
                     <button class="btn" style="background: rgba(0,245,212,0.15); color: var(--accent-green); border: 1px solid var(--accent-green); margin: 6px 0;" onclick="document.getElementById('resp-continua').style.display='block'">
                         👁️ VER CANCIÓN OCULTA
                     </button>
-
                     <div id="resp-continua" style="display: none; background: rgba(0,245,212,0.1); border: 1px solid var(--accent-green); padding: 10px; border-radius: 12px; margin-top: 6px; text-align: center;">
-                        ${track && track.image_url ? `<img src="${track.image_url}" style="width: 90px; height: 90px; border-radius: 10px; border: 2px solid var(--accent-green); margin-bottom: 6px; object-fit: cover; display: inline-block;">` : ''}
+                        ${coverImgUrl ? `<img src="${coverImgUrl}" style="width:70px; height:70px; border-radius:8px; margin-bottom:6px; border:1px solid var(--accent-green);" alt="Cover">` : ''}
                         <div style="font-size: 0.95rem; font-weight: 900; color: #ffffff;">${track ? track.name : ''}</div>
                         <div style="font-size: 0.85rem; color: var(--accent-green); font-weight: 800;">${track ? track.artist : ''} (${track ? track.year : ''})</div>
                     </div>
                 `;
-            } else if (cat === 'tararea') {
-                const track = baseTracks[Math.floor(Math.random() * baseTracks.length)];
+            } else if (challengeData.categoryKey === 'tararea') {
+                const track = item.track;
                 const targetUrl = window.location.href.split('?')[0].split('#')[0] + "?id=" + (track ? track.id : '1');
                 const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(targetUrl);
+                const coverImgUrl = (track && track.image_url) ? track.image_url : "";
 
-                html = `
-                    <div style="font-size: 2.2rem; margin-bottom: 2px;">🗣️</div>
-                    <div class="modal-title" style="color: var(--accent-gold);">DESAFÍO TARAREA</div>
+                html += `
                     <p style="font-size: 0.8rem; color: #fff; margin-bottom: 8px;">
                         Escanea discretamente este código QR para escuchar la canción en secreto y tararear la melodía:
                     </p>
-
                     <div style="background: #ffffff; padding: 10px; border-radius: 16px; display: inline-block; margin: 8px 0; border: 3px solid var(--accent-gold); box-shadow: 0 0 15px rgba(255,183,3,0.3);">
                         <img src="${qrSrc}" alt="QR Tararea" style="width: 160px; height: 160px; display: block;">
                     </div>
                     <p style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; margin-top: 2px; margin-bottom: 8px;">
                         🎧 Escanea en secreto para escuchar y tararear
                     </p>
-
                     <div class="timer-display" id="timer-num" style="margin: 6px auto 4px auto;">20</div>
                     <button class="btn" style="background: var(--accent-gold); color: #000; margin-bottom: 8px; font-weight: 900;" onclick="iniciarConteo(20)">⏱️ INICIAR 20s</button>
-                    
                     <button class="btn" style="background: rgba(255,183,3,0.15); color: var(--accent-gold); border: 1px solid var(--accent-gold); margin-bottom: 6px;" onclick="document.getElementById('resp-tararea').style.display='block'">
                         👁️ VER RESPUESTA
                     </button>
-
                     <div id="resp-tararea" style="display: none; background: rgba(255,183,3,0.1); border: 1px solid var(--accent-gold); padding: 10px; border-radius: 12px; margin-top: 6px; text-align: center;">
-                        ${track && track.image_url ? `<img src="${track.image_url}" style="width: 90px; height: 90px; border-radius: 10px; border: 2px solid var(--accent-gold); margin-bottom: 6px; object-fit: cover; display: inline-block;">` : ''}
+                        ${coverImgUrl ? `<img src="${coverImgUrl}" style="width:70px; height:70px; border-radius:8px; margin-bottom:6px; border:1px solid var(--accent-gold);" alt="Cover">` : ''}
                         <div style="font-size: 0.95rem; font-weight: 900; color: #ffffff;">${track ? track.name : ''}</div>
                         <div style="font-size: 0.85rem; color: var(--accent-gold); font-weight: 800;">${track ? track.artist : ''} (${track ? track.year : ''})</div>
                     </div>
                 `;
-            } else if (cat === 'trivia') {
-                const t = trivias[Math.floor(Math.random() * trivias.length)];
-                html = `
-                    <div style="font-size: 2.5rem; margin-bottom: 5px;">❓</div>
-                    <div class="modal-title">TRIVIA DE CARRETERA</div>
+            } else if (challengeData.categoryKey === 'trivia') {
+                const t = item.trivia;
+                html += `
                     <div style="font-size: 0.92rem; font-weight: 800; color: #fff; margin: 10px 0; text-align: left;">
                         ${t.q}
                     </div>
@@ -5588,65 +5822,451 @@
                         ${t.ans}
                     </div>
                 `;
-            } else if (cat === 'prohibidas') {
-                html = `
-                    <div style="font-size: 2.5rem; margin-bottom: 5px;">🚫</div>
-                    <div class="modal-title">PALABRAS PROHIBIDAS</div>
-                    <p style="font-size: 0.85rem; color: #fff;">Describe la canción o artista sin decir: <strong>CANCION, CANTANTE, DISCO, AÑO</strong>.</p>
-                    <div class="timer-display" id="timer-num">20</div>
+            } else if (challengeData.categoryKey === 'palabrasProhibidas') {
+                const track = item.track;
+                html += `
+                    <p style="font-size: 0.85rem; color: #fff; margin-bottom: 6px;">
+                        Describe la canción o artista sin decir: <strong>CANCION, CANTANTE, DISCO, AÑO</strong>.
+                    </p>
+                    ${track ? `<div style="background:rgba(255,0,85,0.1); border:1px solid var(--accent-pink); padding:8px; border-radius:12px; margin:8px 0; color:#fff; font-weight:800; font-size:0.9rem;">TEMA A DESCRIBIR: "${track.name}" - ${track.artist}</div>` : ''}
+                    <div class="timer-display" id="timer-num" style="margin: 6px auto 4px auto;">20</div>
                     <button class="btn" style="background: var(--accent-gold); color: #000; margin-bottom: 10px;" onclick="iniciarConteo(20)">⏱️ INICIAR 20s</button>
                 `;
-            } else if (cat === 'mentiroso') {
-                const p = pujas[Math.floor(Math.random() * pujas.length)];
-                html = `
-                    <div style="font-size: 2.5rem; margin-bottom: 5px;">${p.icon}</div>
-                    <div class="modal-title">${p.title}</div>
-                    <p style="font-size: 0.85rem; color: #fff; line-height: 1.4; margin-top: 10px;">${p.desc}</p>
+            } else if (challengeData.categoryKey === 'mentiroso') {
+                const p = item.puja;
+                html += `
+                    <p style="font-size: 0.88rem; font-weight: 900; color: var(--accent-orange); margin-top: 6px;">${p.title}</p>
+                    <p style="font-size: 0.85rem; color: #fff; line-height: 1.4; margin-top: 6px;">${p.desc}</p>
                 `;
             }
+
+            html += `
+                <div style="display: flex; gap: 8px; margin-top: 15px;">
+                    <button class="btn" style="background: var(--accent-green); color: #000; font-weight: 900; flex: 1;" onclick="resolverDesafio('${challengeData.categoryKey}', '${item.id}', 'correct')">
+                        ✅ CORRECTO
+                    </button>
+                    <button class="btn" style="background: rgba(255, 51, 0, 0.2); color: #ff6666; border: 1px solid #ff3300; font-weight: 900; flex: 1;" onclick="resolverDesafio('${challengeData.categoryKey}', '${item.id}', 'incorrect')">
+                        ❌ INCORRECTO
+                    </button>
+                </div>
+            `;
 
             detailContent.innerHTML = html;
             document.getElementById('modal-detalle-desafio').style.display = 'flex';
         }
 
-        function iniciarConteo(segs) {
-            if (timerInterval) clearInterval(timerInterval);
-            let left = segs;
-            const el = document.getElementById('timer-num');
-            if (el) el.innerText = left;
-            timerInterval = setInterval(() => {
-                left--;
-                if (el) el.innerText = left;
-                if (left <= 0) {
-                    clearInterval(timerInterval);
-                    alert("⏰ ¡TIEMPO AGOTADO!");
-                }
-            }, 1000);
+        function resolverDesafio(catKey, itemId, result) {
+            registerChallengeResult(catKey, itemId, result);
+            cerrarModalDetalle();
         }
 
-        /* HEADLINER LOGIC */
-        function abrirModalHeadliner() {
-            document.getElementById('modal-headliner').style.display = 'flex';
+        function lanzarDesafioAleatorio() {
+            const challengeData = selectRandomChallenge(null);
+            if (!challengeData) {
+                alert("🎉 ¡NO QUEDAN DESAFÍOS DISPONIBLES!");
+                return;
+            }
+            renderChallengeModal(challengeData, true);
         }
+
+        function seleccionarDesafioPorCategoria(catKeyInput) {
+            cerrarModalDesafios();
+            const challengeData = selectRandomChallenge(catKeyInput);
+            if (!challengeData) {
+                alert("🎉 ¡No quedan desafíos disponibles en esta categoría!");
+                return;
+            }
+            renderChallengeModal(challengeData, false);
+        }
+
+        /* ==========================================================================
+           HEADLINER LOGIC - MODIFICACIONES 02
+           ========================================================================== */
+        let headlinerState = {
+            status: "not_started", // "not_started" | "in_progress" | "won" | "lost"
+            songs: [], // Array of 3 objects: { track: {...}, revealed: false, confirmed: false, selectedScore: null, confirmedScore: 0 }
+            currentSongIndex: 0,
+            totalScore: 0,
+            tempSelectedScore: null
+        };
+
+        function guardarHeadlinerState() {
+            try {
+                localStorage.setItem('lagira_headliner_state', JSON.stringify(headlinerState));
+            } catch (e) {
+                console.warn("Error guardando headlinerState:", e);
+            }
+        }
+
+        function cargarHeadlinerState() {
+            try {
+                const stored = localStorage.getItem('lagira_headliner_state');
+                if (stored) {
+                    headlinerState = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.warn("Error cargando headlinerState:", e);
+            }
+        }
+
+        function abrirModalHeadliner() {
+            cargarHeadlinerState();
+            document.getElementById('modal-headliner').style.display = 'flex';
+            renderHeadliner();
+        }
+
+        function intentarCerrarHeadliner() {
+            if (headlinerState.status === "in_progress") {
+                document.getElementById('modal-headliner-confirm-exit').style.display = 'flex';
+            } else {
+                cerrarModalHeadliner();
+            }
+        }
+
+        function cerrarConfirmarSalidaHeadliner() {
+            document.getElementById('modal-headliner-confirm-exit').style.display = 'none';
+        }
+
+        function confirmarSalidaHeadliner() {
+            document.getElementById('modal-headliner-confirm-exit').style.display = 'none';
+            if (headlinerState.songs && headlinerState.songs.length > 0) {
+                headlinerState.songs.forEach((item, idx) => {
+                    if (idx <= headlinerState.currentSongIndex && item.track) {
+                        const exists = playedHistory.some(h => h.data && h.data.id === item.track.id);
+                        if (!exists) {
+                            playedHistory.push({ type: "song", subtype: "normal", data: item.track });
+                        }
+                    }
+                });
+                guardarPartida();
+            }
+
+            headlinerState = {
+                status: "not_started",
+                songs: [],
+                currentSongIndex: 0,
+                totalScore: 0,
+                tempSelectedScore: null
+            };
+            guardarHeadlinerState();
+            cerrarModalHeadliner();
+        }
+
         function cerrarModalHeadliner() {
             document.getElementById('modal-headliner').style.display = 'none';
         }
 
-        function generarCartasHeadliner() {
-            const list = document.getElementById('headliner-songs-list');
-            const shuffled = [...baseTracks].sort(() => 0.5 - Math.random()).slice(0, 3);
+        function iniciarNuevoHeadliner() {
+            let usedIds = new Set(playedHistory.map(h => h.data ? h.data.id : null).filter(Boolean));
+            let availableUnused = baseTracks.filter(t => !usedIds.has(t.id));
+
+            let selectedTracks = [];
             
-            let html = "";
-            shuffled.forEach((track, idx) => {
-                html += `
-                    <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); padding: 10px; border-radius: 12px; margin-bottom: 8px;">
-                        <div style="font-weight: 800; color: var(--accent-gold); font-size: 0.85rem;">CANCIÓN #${idx+1}: ${track.name}</div>
-                        <div style="font-size: 0.78rem; color: #fff;">${track.artist} (${track.year})</div>
-                    </div>
-                `;
-            });
-            list.innerHTML = html;
+            if (availableUnused.length >= 3) {
+                let shuffled = [...availableUnused].sort(() => 0.5 - Math.random());
+                selectedTracks = shuffled.slice(0, 3);
+            } else {
+                selectedTracks = [...availableUnused];
+                let usedTracksOrder = playedHistory.map(h => h.data).filter(Boolean);
+                let selectedIds = new Set(selectedTracks.map(t => t.id));
+                
+                for (let track of usedTracksOrder) {
+                    if (!selectedIds.has(track.id)) {
+                        selectedTracks.push(track);
+                        selectedIds.add(track.id);
+                        if (selectedTracks.length === 3) break;
+                    }
+                }
+
+                if (selectedTracks.length < 3) {
+                    for (let track of baseTracks) {
+                        if (!selectedIds.has(track.id)) {
+                            selectedTracks.push(track);
+                            selectedIds.add(track.id);
+                            if (selectedTracks.length === 3) break;
+                        }
+                    }
+                }
+            }
+
+            headlinerState = {
+                status: "in_progress",
+                songs: selectedTracks.map(t => ({
+                    track: t,
+                    revealed: false,
+                    confirmed: false,
+                    selectedScore: null,
+                    confirmedScore: 0
+                })),
+                currentSongIndex: 0,
+                totalScore: 0,
+                tempSelectedScore: null
+            };
+
+            if (headlinerState.songs[0] && headlinerState.songs[0].track) {
+                const firstTrack = headlinerState.songs[0].track;
+                const exists = playedHistory.some(h => h.data && h.data.id === firstTrack.id);
+                if (!exists) {
+                    playedHistory.push({ type: "song", subtype: "normal", data: firstTrack });
+                    guardarPartida();
+                }
+            }
+
+            guardarHeadlinerState();
+            renderHeadliner();
         }
-    </script>
+
+        function renderHeadliner() {
+            const container = document.getElementById('headliner-dynamic-content');
+            if (!container) return;
+
+            if (headlinerState.status === "not_started") {
+                container.innerHTML = `
+                    <div style="font-size: 2.8rem; margin-bottom: 5px; filter: drop-shadow(0 0 10px var(--accent-gold));">👑</div>
+                    <div class="modal-title" style="font-size: 1.4rem;">PRUEBA FINAL: HEADLINER</div>
+                    <p style="font-size: 0.88rem; color: #ffffff; line-height: 1.5; margin: 15px 0;">
+                        Para convertirse en Headliner de <strong>La Gira</strong>, deben conseguir al menos <strong>7 de 9 puntos</strong> acumulados en 3 canciones consecutivas.
+                    </p>
+                    <div style="background: rgba(255, 183, 3, 0.08); border: 1px solid var(--accent-gold); padding: 12px; border-radius: 16px; margin-bottom: 20px; text-align: left; font-size: 0.8rem; color: #fff;">
+                        <div style="font-weight: 800; color: var(--accent-gold); margin-bottom: 4px;">🏆 REGLAS DE PUNTUACIÓN:</div>
+                        <div>• <strong>1 pt</strong> por Título correcto</div>
+                        <div>• <strong>1 pt</strong> por Artista o banda correcto</div>
+                        <div>• <strong>1 pt</strong> por Año correcto (margen ±2 años)</div>
+                        <div style="margin-top: 4px; color: var(--accent-neon-blue); font-weight: 800;">• Máximo por canción: 3 pts | Meta total: 7/9 pts</div>
+                    </div>
+                    <button class="btn btn-headliner" onclick="iniciarNuevoHeadliner()" style="font-size: 1rem; padding: 16px; margin-bottom: 10px;">
+                        🚀 COMENZAR HEADLINER
+                    </button>
+                    <button class="btn btn-secondary" onclick="intentarCerrarHeadliner()">VOLVER AL JUEGO</button>
+                `;
+                return;
+            }
+
+            if (headlinerState.status === "won" || headlinerState.status === "lost") {
+                const isWon = headlinerState.status === "won";
+                container.innerHTML = `
+                    <div style="font-size: 3.5rem; margin-bottom: 5px; animation: bounce 0.6s infinite alternate;">
+                        ${isWon ? '👑✨' : '💔'}
+                    </div>
+                    <div class="modal-title" style="font-size: 1.5rem; color: ${isWon ? 'var(--accent-gold)' : 'var(--accent-orange)'};">
+                        ${isWon ? '¡SON LOS HEADLINERS DE LA GIRA!' : 'ESTUVIERON CERCA'}
+                    </div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff; margin: 12px 0;">
+                        PUNTAJE FINAL: <span style="color: var(--accent-gold);">${headlinerState.totalScore}</span> / 9 PTS
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 20px;">
+                        ${isWon 
+                            ? '¡Han conquistado el escenario principal, dominado la carretera y consagrado como leyenda de La Gira! 🎸🌟' 
+                            : 'NECESITABAN 7 PUNTOS PARA SER HEADLINERS. ¡Sigan afinando su repertorio para el próximo tour! 🚌🎶'}
+                    </p>
+                    <button class="btn ${isWon ? 'btn-headliner' : 'btn-secondary'}" onclick="reiniciarEstadoHeadlinerYVolver()">
+                        VOLVER AL JUEGO
+                    </button>
+                `;
+                return;
+            }
+
+            const currIdx = headlinerState.currentSongIndex;
+            const currentItem = headlinerState.songs[currIdx];
+            if (!currentItem) return;
+
+            const songTrack = currentItem.track;
+            const targetUrl = window.location.href.split('?')[0].split('#')[0] + "?id=" + songTrack.id;
+            const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=" + encodeURIComponent(targetUrl);
+
+            let progressHtml = `<div style="display: flex; gap: 6px; justify-content: center; margin-bottom: 14px;">`;
+            headlinerState.songs.forEach((item, idx) => {
+                let label = `CANCIÓN ${idx + 1}: `;
+                let style = `background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: var(--text-muted);`;
+                
+                if (item.confirmed) {
+                    label += `${item.confirmedScore} PTS`;
+                    style = `background: rgba(0,245,212,0.15); border: 1px solid var(--accent-green); color: var(--accent-green); font-weight: 800;`;
+                } else if (idx === currIdx) {
+                    label += `EN JUEGO`;
+                    style = `background: rgba(255,183,3,0.15); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 900;`;
+                } else {
+                    label += `PENDIENTE`;
+                }
+                progressHtml += `<div style="flex: 1; padding: 6px 4px; border-radius: 10px; font-size: 0.68rem; text-align: center; ${style}">${label}</div>`;
+            });
+            progressHtml += `</div>`;
+
+            let songContentHtml = "";
+            if (!currentItem.revealed) {
+                songContentHtml = `
+                    <div class="qr-image-container" style="margin: 10px auto;">
+                        <img src="${qrSrc}" alt="QR Headliner" style="width: 170px; height: 170px;">
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">
+                        Apunta con el lector QR para reproducir en Spotify
+                    </p>
+                    <button class="btn" style="background: rgba(255,183,3,0.15); color: var(--accent-gold); border: 1px solid var(--accent-gold); margin-top: 15px;" onclick="revelarRespuestaHeadliner()">
+                        👁️ VER RESPUESTA
+                    </button>
+                `;
+            } else {
+                const imgHtml = songTrack.image_url 
+                    ? `<img src="${songTrack.image_url}" style="width: 110px; height: 110px; border-radius: 12px; margin-bottom: 8px; border: 2px solid var(--accent-gold); box-shadow: 0 4px 15px rgba(255,183,3,0.3);">`
+                    : '';
+
+                const selectedScore = currentItem.confirmed ? currentItem.confirmedScore : headlinerState.tempSelectedScore;
+
+                let scoreButtonsHtml = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0;">`;
+                [0, 1, 2, 3].forEach(pts => {
+                    const isSelected = (selectedScore === pts);
+                    const btnStyle = isSelected
+                        ? `background: var(--accent-gold); color: #000; border: 2px solid #ffffff; font-weight: 900; transform: scale(1.02); box-shadow: 0 0 12px rgba(255,183,3,0.6);`
+                        : `background: rgba(255,255,255,0.06); color: #ffffff; border: 1px solid var(--card-border); font-weight: 700;`;
+                    
+                    const disabledAttr = currentItem.confirmed ? 'disabled' : '';
+                    scoreButtonsHtml += `
+                        <button class="btn" style="${btnStyle}" onclick="seleccionarPuntajeHeadliner(${pts})" ${disabledAttr}>
+                            ${pts} ${pts === 1 ? 'PUNTO' : 'PUNTOS'}
+                        </button>
+                    `;
+                });
+                scoreButtonsHtml += `</div>`;
+
+                let actionButtonHtml = "";
+                if (!currentItem.confirmed) {
+                    const canConfirm = (headlinerState.tempSelectedScore !== null);
+                    actionButtonHtml = `
+                        <button class="btn" style="${canConfirm ? 'background: linear-gradient(135deg, var(--accent-green) 0%, #00b396 100%); color: #000; font-weight: 900;' : 'background: rgba(255,255,255,0.1); color: var(--text-muted); cursor: not-allowed;'}" 
+                            onclick="confirmarPuntajeHeadliner()" ${canConfirm ? '' : 'disabled'}>
+                            ✅ CONFIRMAR PUNTAJE
+                        </button>
+                    `;
+                } else {
+                    if (currIdx < 2) {
+                        actionButtonHtml = `
+                            <button class="btn btn-headliner" onclick="pasaraSiguienteCancionHeadliner()">
+                                ➡️ SIGUIENTE CANCIÓN (CANCIÓN ${currIdx + 2} DE 3)
+                            </button>
+                        `;
+                    } else {
+                        actionButtonHtml = `
+                            <button class="btn btn-headliner" style="background: linear-gradient(135deg, var(--accent-gold) 0%, #ff6b00 100%); color: #000;" onclick="verResultadoFinalHeadliner()">
+                                🏆 VER RESULTADO FINAL
+                            </button>
+                        `;
+                    }
+                }
+
+                songContentHtml = `
+                    <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--accent-gold); border-radius: 16px; padding: 12px; text-align: center; margin-bottom: 12px; animation: fadeIn 0.3s ease;">
+                        ${imgHtml}
+                        <div style="font-size: 1.1rem; font-weight: 900; color: var(--accent-gold); margin-bottom: 3px;">${songTrack.name}</div>
+                        <div style="font-size: 0.88rem; color: #ffffff; font-weight: 700; margin-bottom: 3px;">${songTrack.artist}</div>
+                        <div style="font-size: 0.82rem; color: var(--accent-neon-blue); font-weight: 800;">Año: ${songTrack.year}</div>
+                    </div>
+
+                    <div style="font-size: 0.82rem; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; margin-top: 10px;">
+                        ¿CUÁNTOS DATOS ACERTARON?
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">
+                        (Título + Artista + Año ±2y)
+                    </div>
+
+                    ${scoreButtonsHtml}
+                    ${actionButtonHtml}
+                `;
+            }
+
+            container.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="font-size: 0.85rem; font-weight: 900; color: var(--accent-gold);">👑 HEADLINER</div>
+                    <div style="font-size: 0.85rem; font-weight: 900; color: var(--accent-neon-blue);">CANCIÓN ${currIdx + 1} DE 3</div>
+                </div>
+
+                <div style="background: rgba(255,183,3,0.1); border: 1px solid var(--accent-gold); padding: 8px 12px; border-radius: 12px; margin-bottom: 12px; font-weight: 900; color: var(--accent-gold); font-size: 0.95rem;">
+                    PUNTAJE TOTAL: ${headlinerState.totalScore} / 9 PTS
+                </div>
+
+                ${progressHtml}
+
+                <div class="card-display active-song" style="min-height: auto; padding: 16px; margin-bottom: 12px;">
+                    <div class="card-type-badge badge-cancion" style="margin-bottom: 8px;">💽 CANCIÓN ${currIdx + 1} DE 3</div>
+                    ${songContentHtml}
+                </div>
+
+                <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 8px;" onclick="intentarCerrarHeadliner()">
+                    VOLVER AL JUEGO
+                </button>
+            `;
+        }
+
+        function revelarRespuestaHeadliner() {
+            const currIdx = headlinerState.currentSongIndex;
+            if (headlinerState.songs[currIdx]) {
+                headlinerState.songs[currIdx].revealed = true;
+                headlinerState.tempSelectedScore = null;
+                guardarHeadlinerState();
+                renderHeadliner();
+            }
+        }
+
+        function seleccionarPuntajeHeadliner(pts) {
+            const currIdx = headlinerState.currentSongIndex;
+            if (headlinerState.songs[currIdx] && !headlinerState.songs[currIdx].confirmed) {
+                headlinerState.tempSelectedScore = pts;
+                renderHeadliner();
+            }
+        }
+
+        function confirmarPuntajeHeadliner() {
+            const currIdx = headlinerState.currentSongIndex;
+            const currentItem = headlinerState.songs[currIdx];
+            if (!currentItem || currentItem.confirmed || headlinerState.tempSelectedScore === null) return;
+
+            const pts = headlinerState.tempSelectedScore;
+            currentItem.confirmed = true;
+            currentItem.confirmedScore = pts;
+            headlinerState.totalScore += pts;
+            headlinerState.tempSelectedScore = null;
+
+            guardarHeadlinerState();
+            renderHeadliner();
+        }
+
+        function pasaraSiguienteCancionHeadliner() {
+            if (headlinerState.currentSongIndex < 2) {
+                headlinerState.currentSongIndex++;
+                
+                const newSongTrack = headlinerState.songs[headlinerState.currentSongIndex].track;
+                if (newSongTrack) {
+                    const exists = playedHistory.some(h => h.data && h.data.id === newSongTrack.id);
+                    if (!exists) {
+                        playedHistory.push({ type: "song", subtype: "normal", data: newSongTrack });
+                        guardarPartida();
+                    }
+                }
+
+                guardarHeadlinerState();
+                renderHeadliner();
+            }
+        }
+
+        function verResultadoFinalHeadliner() {
+            if (headlinerState.totalScore >= 7) {
+                headlinerState.status = "won";
+            } else {
+                headlinerState.status = "lost";
+            }
+            guardarHeadlinerState();
+            renderHeadliner();
+        }
+
+        function reiniciarEstadoHeadlinerYVolver() {
+            headlinerState = {
+                status: "not_started",
+                songs: [],
+                currentSongIndex: 0,
+                totalScore: 0,
+                tempSelectedScore: null
+            };
+            guardarHeadlinerState();
+            cerrarModalHeadliner();
+        }</script>
 </body>
 </html>
