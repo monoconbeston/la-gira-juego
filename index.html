@@ -5316,7 +5316,7 @@
             }, 1200);
         }
 
-        function actualizarInterfazMazo()unction actualizarInterfazMazo() {
+        function actualizarInterfazMazo() {
             document.getElementById('cartas-count').innerText = activeDeck.length;
             const mainCard = document.getElementById('main-card');
             const badge = document.getElementById('card-type-badge');
@@ -5907,6 +5907,22 @@
             } catch (e) {
                 console.warn("Error cargando headlinerState:", e);
             }
+        }
+
+        
+        function iniciarConteo(segs) {
+            if (timerInterval) clearInterval(timerInterval);
+            let left = segs;
+            const el = document.getElementById('timer-num');
+            if (el) el.innerText = left;
+            timerInterval = setInterval(() => {
+                left--;
+                if (el) el.innerText = left;
+                if (left <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏰ ¡TIEMPO AGOTADO!");
+                }
+            }, 1000);
         }
 
         function abrirModalHeadliner() {
