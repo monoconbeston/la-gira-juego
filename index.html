@@ -692,6 +692,9 @@
                     </div>
 
                     <div class="answer-box" id="answer-box">
+                        <div style="text-align: center; margin-bottom: 8px;">
+                            <img id="ans-cover" src="" alt="Carátula" style="width: 110px; height: 110px; border-radius: 14px; border: 2px solid var(--accent-gold); box-shadow: 0 4px 15px rgba(0,0,0,0.5); object-fit: cover; display: none;">
+                        </div>
                         <div class="answer-song-title" id="ans-title">--</div>
                         <div class="answer-song-artist" id="ans-artist">--</div>
                         <div class="answer-song-year" id="ans-year">--</div>
@@ -5339,6 +5342,14 @@
                 document.getElementById('ans-title').innerText = currentItem.data.name;
                 document.getElementById('ans-artist').innerText = currentItem.data.artist;
                 document.getElementById('ans-year').innerText = "Año: " + currentItem.data.year;
+
+                const ansCover = document.getElementById('ans-cover');
+                if (currentItem.data.image_url) {
+                    ansCover.src = currentItem.data.image_url;
+                    ansCover.style.display = 'inline-block';
+                } else {
+                    ansCover.style.display = 'none';
+                }
             } else if (currentItem.subtype === "reversa") {
                 mainCard.classList.add("active-reversa");
                 badge.className = "card-type-badge badge-reversa";
@@ -5521,6 +5532,7 @@
                     </button>
 
                     <div id="resp-continua" style="display: none; background: rgba(0,245,212,0.1); border: 1px solid var(--accent-green); padding: 10px; border-radius: 12px; margin-top: 6px; text-align: center;">
+                        ${track && track.image_url ? `<img src="${track.image_url}" style="width: 90px; height: 90px; border-radius: 10px; border: 2px solid var(--accent-green); margin-bottom: 6px; object-fit: cover; display: inline-block;">` : ''}
                         <div style="font-size: 0.95rem; font-weight: 900; color: #ffffff;">${track ? track.name : ''}</div>
                         <div style="font-size: 0.85rem; color: var(--accent-green); font-weight: 800;">${track ? track.artist : ''} (${track ? track.year : ''})</div>
                     </div>
@@ -5552,6 +5564,7 @@
                     </button>
 
                     <div id="resp-tararea" style="display: none; background: rgba(255,183,3,0.1); border: 1px solid var(--accent-gold); padding: 10px; border-radius: 12px; margin-top: 6px; text-align: center;">
+                        ${track && track.image_url ? `<img src="${track.image_url}" style="width: 90px; height: 90px; border-radius: 10px; border: 2px solid var(--accent-gold); margin-bottom: 6px; object-fit: cover; display: inline-block;">` : ''}
                         <div style="font-size: 0.95rem; font-weight: 900; color: #ffffff;">${track ? track.name : ''}</div>
                         <div style="font-size: 0.85rem; color: var(--accent-gold); font-weight: 800;">${track ? track.artist : ''} (${track ? track.year : ''})</div>
                     </div>
