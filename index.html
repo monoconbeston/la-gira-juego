@@ -1524,7 +1524,7 @@
         "name": "Epic",
         "artist": "Faith No More",
         "year": "1989",
-        "image_url": "https://i.scdn.co/image/ab67616d0000b273e081ef6de656ee714788ea0d"
+        "image_url": "https://i.scdn.co/image/ab67616d0000b273e1a41002936068fc845d3518"
     },
     {
         "id": "6tsojOQ5wHaIjKqIryLZK6",
@@ -4856,7 +4856,7 @@
         "name": "La Bamba - Single Version",
         "artist": "Ritchie Valens",
         "year": "1959",
-        "image_url": "https://i.scdn.co/image/ab67616d0000b2737723fdc89d8e25e65aa6730d"
+        "image_url": "https://i.scdn.co/image/ab67616d0000b273027a47865c8c6215aa72b9df"
     },
     {
         "id": "7aSxNjoVoAwNL7HDAKwGtC",
@@ -5190,23 +5190,13 @@
             }
 
             shuffledTracks.forEach((track) => {
-                const rand = Math.random();
-                if (rand < 0.85) {
-                    // Canción con QR (85% del mazo total)
-                    const isQRPlus = Math.random() < 0.12; // EXACTAMENTE 12% de probabilidad QR+
-                    tempDeck.push({
-                        type: "song",
-                        subtype: isQRPlus ? "qrplus" : "normal",
-                        data: track
-                    });
-                } else {
-                    // Carta Desafío rutinario (15% del mazo total)
-                    tempDeck.push({
-                        type: "challenge_pure",
-                        subtype: "desafio_rutinario",
-                        data: track
-                    });
-                }
+                // Todas las cartas del mazo son Canciones (12% QR+ Bono)
+                const isQRPlus = Math.random() < 0.12; // 12% de probabilidad QR+
+                tempDeck.push({
+                    type: "song",
+                    subtype: isQRPlus ? "qrplus" : "normal",
+                    data: track
+                });
             });
 
             // Agregar EXACTAMENTE UNA Carta Reversa (Desperfecto en Ruta) por partida
@@ -5283,7 +5273,7 @@
             ruletaBox.style.display = 'flex';
 
             const ruletaTitle = document.getElementById('ruleta-title');
-            const animOptions = ["💽 CANCIÓN", "🔥 DESAFÍO", "✨ QR+ BONO", "🔄 REVERSA"];
+            const animOptions = ["💽 CANCIÓN", "✨ QR+ BONO", "🔄 REVERSA"];
             let step = 0;
             
             const interval = setInterval(() => {
